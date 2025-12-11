@@ -1,0 +1,66 @@
+doctype html
+html
+  head
+    title INYMO | Workspace
+    // Fuente Poppins
+    link(rel='stylesheet', href='https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap')
+    // Iconos Profesionales (Boxicons)
+    link(rel='stylesheet', href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css')
+    // Estilos
+    link(rel='stylesheet', href='/stylesheets/style.css')
+  body
+    div.dashboard-container
+      
+      // --- BARRA LATERAL (SIDEBAR) ---
+      aside.sidebar
+        div.sidebar-header
+          // Aquí iría tu logo pequeño
+          h2 INYMO
+            span .App
+        
+        nav.sidebar-menu
+          p.menu-label Principal
+          ul
+            li: a.active(href="/dashboard") 
+              i.bx.bxs-dashboard 
+              |  Dashboard
+            li: a(href="/proyectos") 
+              i.bx.bxs-building-house 
+              |  Proyectos
+            li: a(href="/bitacora") 
+              i.bx.bx-book-content 
+              |  Bitácora Digital
+
+          p.menu-label Admin & Finanzas
+          ul
+            li: a(href="/cotizaciones") 
+              i.bx.bx-file 
+              |  Cotizaciones
+            li: a(href="/facturas") 
+              i.bx.bx-money 
+              |  Facturación
+            li: a(href="/personal") 
+              i.bx.bxs-user-detail 
+              |  Personal (RH)
+            li: a(href="/clientes") 
+              i.bx.bxs-briefcase 
+              |  Clientes
+
+        div.sidebar-footer
+          a.btn-logout-sidebar(href="/logout") 
+            i.bx.bx-log-out
+            |  Cerrar Sesión
+
+      // --- ÁREA DE TRABAJO (MAIN CONTENT) ---
+      main.main-content
+        // Barra Superior (Header)
+        header.topbar
+          div.toggle-menu
+            i.bx.bx-menu
+          div.user-profile
+            span.user-name Ing. Ángel Velasco
+            div.user-avatar AV
+
+        // Aquí se inyectan las vistas hijas
+        div.content-wrapper
+          block content

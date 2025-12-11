@@ -1,0 +1,51 @@
+extends layout_app
+
+block content
+  // 1. TARJETA DE BIENVENIDA
+  div.welcome-card
+    div.welcome-text
+      h1 ¡Hola de nuevo, Ángel! 👋
+      p Aquí tienes el resumen de operaciones de INYMO al día de hoy.
+    div
+      // Botón de acción rápida (verde)
+      a.btn-primary(href="/app/proyectos") + Nuevo Proyecto
+
+  // 2. GRID DE RESUMEN
+  div.stats-grid
+    // Tarjeta 1
+    div.stat-card
+      div.stat-icon.blue: i.bx.bx-building-house
+      div.stat-info
+        h3 8
+        p Proyectos Activos
+    
+    // Tarjeta 2
+    div.stat-card.orange: i.bx.bx-error-circle
+      div.stat-info
+        h3 2
+        p Alertas de Bitácora
+    
+    // Tarjeta 3
+    div.stat-card.green: i.bx.bx-dollar-circle
+      div.stat-info
+        h3 $120k
+        p Facturado este mes
+
+  // 3. ACCESO RÁPIDO A COPILOT
+  div(style="margin-top: 30px;")
+    h3 Acciones Rápidas
+    div(style="display: flex; gap: 20px; margin-top: 15px;")
+      
+      // Card pequeña de Copilot
+      div.card-panel(style="flex: 1; padding: 20px; display: flex; align-items: center; gap: 15px; border-left: 4px solid #8cc63f;")
+        i.bx.bxs-bot(style="font-size: 2rem; color: #8cc63f;")
+        div
+          h4 Consultar a Copilot
+          p.text-muted "Genera una cotización rápida..."
+      
+      // Card pequeña de Inventario
+      div.card-panel(style="flex: 1; padding: 20px; display: flex; align-items: center; gap: 15px; border-left: 4px solid #0f172a;")
+        i.bx.bx-box(style="font-size: 2rem; color: #0f172a;")
+        div
+          h4 Revisar Inventario
+          p.text-muted "Ver stock de material..."

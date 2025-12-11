@@ -1,0 +1,410 @@
+/* --- RESET & BASICS --- */
+:root {
+  --primary-blue: #1e3c72;
+  --secondary-blue: #2a5298;
+  --accent-orange: #ff7e5f;
+  --accent-orange-dark: #e67e22;
+  --text-dark: #2c3e50;
+  --text-light: #ecf0f1;
+  --bg-light: #f8f9fa;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+  overflow-x: hidden; /* Evita scroll horizontal por las animaciones */
+}
+
+h1, h2, h3 { font-weight: 700; }
+a { text-decoration: none; }
+
+/* --- NAVBAR --- */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 5%;
+  position: absolute; /* Flota sobre el hero */
+  width: 90%;
+  z-index: 10;
+}
+
+.logo-text {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: 1px;
+}
+
+.btn-login-nav {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  padding: 10px 25px;
+  border-radius: 50px;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  transition: 0.3s;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.btn-login-nav:hover { background: white; color: var(--primary-blue); }
+
+/* --- HERO SECTION --- */
+.hero {
+  min-height: 90vh; /* Ocupa casi toda la pantalla */
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+  display: flex;
+  align-items: center;
+  color: white;
+  padding: 100px 5% 50px; /* Padding superior para la navbar */
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Dos columnas */
+  gap: 50px;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hero-text h1 {
+  font-size: 3.5rem;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin-bottom: 40px;
+  max-width: 500px;
+}
+
+.cta-group { display: flex; gap: 15px; }
+
+.btn-cta-primary {
+  background-color: var(--accent-orange);
+  color: white;
+  padding: 15px 40px;
+  border-radius: 50px;
+  font-weight: bold;
+  box-shadow: 0 10px 20px -10px rgba(255, 126, 95, 0.5);
+  transition: 0.3s;
+}
+.btn-cta-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 30px -10px rgba(255, 126, 95, 0.7); }
+
+.btn-cta-secondary {
+  color: white;
+  padding: 15px 30px;
+  border-radius: 50px;
+  font-weight: 600;
+  border: 2px solid rgba(255,255,255,0.3);
+  transition: 0.3s;
+}
+.btn-cta-secondary:hover { background: white; color: var(--primary-blue); }
+
+.hero-img { width: 100%; max-width: 600px; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.2)); }
+
+/* --- SECCIONES COMUNES --- */
+section { padding: 100px 5%; }
+.container-center { text-align: center; max-width: 800px; margin: 0 auto 60px; }
+.section-title { font-size: 2.5rem; color: var(--primary-blue); margin-bottom: 15px; }
+.section-subtitle { font-size: 1.1rem; color: #666; }
+
+/* --- VIDEO SECTION --- */
+.video-showcase { background: white; }
+.video-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+  border: 10px solid white;
+}
+.main-video { width: 100%; display: block; }
+
+/* --- FEATURES SECTION --- */
+.features-section { background: var(--bg-light); }
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  text-align: center;
+  transition: 0.3s;
+  border-bottom: 5px solid transparent;
+}
+
+.feature-card:hover { transform: translateY(-10px); border-bottom-color: var(--accent-orange); }
+
+.icon-box {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  background: rgba(30, 60, 114, 0.1);
+  width: 80px;
+  height: 80px;
+  line-height: 80px;
+  border-radius: 50%;
+  margin: 0 auto 25px;
+}
+
+/* --- FOOTER --- */
+.main-footer {
+  background: var(--primary-blue);
+  color: white;
+  text-align: center;
+  padding: 30px;
+  margin-top: 50px;
+}
+
+
+/* =========================================
+   1. ESTILOS INTRO (VIDEO CINEMATOGRÁFICO)
+   ========================================= */
+.intro-body { 
+  margin: 0; overflow: hidden; background: #000; color: white; font-family: 'Poppins'; 
+}
+.video-background { 
+  position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%; z-index: -1; 
+}
+video { 
+  width: 100%; height: 100vh; object-fit: cover; 
+}
+.overlay { 
+  position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); 
+}
+
+.intro-content { 
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+  text-align: center; z-index: 2; width: 100%;
+}
+.intro-content h1 { 
+  font-size: 4rem; letter-spacing: 5px; margin: 0;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+}
+.intro-content .subtitle {
+  font-size: 1.2rem; margin-top: 10px; opacity: 0.9; font-weight: 300;
+}
+
+.btn-skip {
+  display: inline-block; padding: 10px 25px; border: 1px solid white; color: white; 
+  text-decoration: none; border-radius: 30px; margin-top: 30px; 
+  opacity: 0; transition: opacity 1s, background 0.3s; backdrop-filter: blur(5px);
+  font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;
+}
+.btn-skip:hover { background: white; color: black; }
+
+
+/* =========================================
+   2. ESTILOS LOBBY (RECEPCIÓN)
+   ========================================= */
+.lobby-body { 
+  background: #f0f2f5; font-family: 'Poppins'; display: flex; 
+  align-items: center; justify-content: center; height: 100vh; margin: 0; 
+}
+.lobby-container { 
+  background: white; padding: 60px; border-radius: 20px; 
+  box-shadow: 0 20px 40px rgba(0,0,0,0.05); text-align: center; 
+  max-width: 500px; width: 90%; 
+}
+
+.lobby-header .logo { 
+  font-size: 2.2rem; font-weight: 800; color: #1e3c72; letter-spacing: 2px; margin-bottom: 5px;
+}
+.lobby-header .date { 
+  color: #94a3b8; font-size: 0.95rem; margin-bottom: 40px; font-weight: 500;
+}
+
+.welcome-msg { 
+  font-size: 1.1rem; color: #64748b; margin-bottom: 30px; 
+}
+
+.notification-badge { 
+  background: #fffbeb; border: 1px solid #fef3c7; color: #92400e; 
+  padding: 15px; border-radius: 12px; margin-bottom: 40px; 
+  font-size: 0.9rem; display: flex; align-items: center; gap: 15px; text-align: left; 
+}
+.bell-icon { font-size: 1.5rem; color: #f59e0b; }
+
+.btn-workspace { 
+  display: block; background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%); color: white; 
+  padding: 18px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 1.1rem;
+  box-shadow: 0 10px 20px rgba(30, 60, 114, 0.2); transition: transform 0.2s;
+}
+.btn-workspace:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(30, 60, 114, 0.3); }
+
+
+/* =========================================
+   3. ESTILOS WORKSPACE (EL NUEVO APP LAYOUT)
+   ========================================= */
+.app-grid { 
+  display: grid; grid-template-columns: 260px 1fr; height: 100vh; overflow: hidden;
+}
+
+/* Sidebar Oscuro */
+.app-sidebar { 
+  background: #0f172a; color: #94a3b8; display: flex; flex-direction: column;
+  border-right: 1px solid #1e293b;
+}
+
+.sidebar-brand { 
+  padding: 25px; color: white; font-size: 1.2rem; border-bottom: 1px solid #1e293b;
+}
+.sidebar-brand h3 { margin: 0; letter-spacing: 1px; }
+.sidebar-brand .dot { color: #ff7e5f; }
+
+.sidebar-nav { flex: 1; padding: 20px; overflow-y: auto; }
+
+.nav-label { 
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.2px; 
+  margin-top: 25px; margin-bottom: 10px; color: #475569; font-weight: 700; 
+}
+
+.sidebar-nav ul { list-style: none; padding: 0; margin: 0; }
+.sidebar-nav li { margin-bottom: 4px; }
+
+.sidebar-nav a { 
+  display: flex; align-items: center; padding: 10px 12px; color: #cbd5e1; 
+  text-decoration: none; border-radius: 6px; transition: 0.2s; gap: 12px; font-size: 0.95rem;
+}
+.sidebar-nav a:hover { background: rgba(255,255,255,0.08); color: white; }
+.sidebar-nav i { font-size: 1.25rem; opacity: 0.8; }
+
+.sidebar-bottom { padding: 20px; border-top: 1px solid #1e293b; }
+.sidebar-bottom a { color: #ef4444; text-decoration: none; display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem; }
+
+/* Contenido Principal */
+.app-content { background: #f8fafc; display: flex; flex-direction: column; overflow-y: auto; }
+
+.app-header { 
+  background: white; padding: 15px 40px; display: flex; justify-content: space-between; 
+  align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10;
+}
+.header-left h2 { margin: 0; font-size: 1.2rem; color: #1e293b; }
+.breadcrumbs { margin: 0; font-size: 0.8rem; color: #64748b; }
+
+.content-area { padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+
+.user-badge { 
+  background: #ff7e5f; color: white; width: 35px; height: 35px; border-radius: 50%; 
+  display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem;
+}
+
+/* =========================================
+   ESTILOS DEL LOGIN (RECUPERADOS)
+   ========================================= */
+
+.login-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Fondo elegante con gradiente oscuro */
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  padding: 20px;
+}
+
+.login-card {
+  background: white;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.login-card h2 {
+  color: #1e293b;
+  margin-bottom: 5px;
+  font-size: 1.8rem;
+}
+
+.subtitle {
+  color: #64748b;
+  margin-bottom: 30px;
+  font-size: 0.9rem;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #334155;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  transition: 0.3s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #ff7e5f;
+  box-shadow: 0 0 0 3px rgba(255, 126, 95, 0.2);
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 12px;
+  background-color: #ff7e5f; /* Naranja INYMO */
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.3s;
+  margin-top: 10px;
+}
+
+.btn-submit:hover {
+  background-color: #e67e22;
+  transform: translateY(-2px);
+}
+
+.error-msg {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  border: 1px solid #fecaca;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 25px;
+  color: #64748b;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: 0.3s;
+}
+
+.back-link:hover {
+  color: #ff7e5f;
+}

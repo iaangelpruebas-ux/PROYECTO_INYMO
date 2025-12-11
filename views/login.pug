@@ -1,0 +1,105 @@
+doctype html
+html
+  head
+    title INYMO | Iniciar Sesión
+    link(rel='icon', href='/images/icono.png', type='image/png')
+    
+    // Fuentes e Iconos
+    link(rel='stylesheet', href='https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap')
+    link(rel='stylesheet', href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css')
+
+    // Estilos
+    link(rel='stylesheet', href='/stylesheets/base.css')
+    link(rel='stylesheet', href='/stylesheets/login.css')
+
+  body.login-body
+    
+    // 1. VIDEO DE FONDO
+    div.video-wrap
+      video#loginVideo(autoplay muted loop playsinline)
+        source(src="/videos/login-loop.mp4" type="video/mp4")
+      div.video-overlay
+
+    // 2. CONTENEDOR PRINCIPAL
+    div.login-container
+      
+      div.login-card
+        img.logo-img(src="/images/logo-inymo-white.png" alt="INYMO Logo")
+        h2 Bienvenido
+        p.subtitle Ingresa tus credenciales para acceder al Workspace.
+
+        // Mensaje de Error
+        if error
+          div.error-msg
+            i.bx.bx-error-circle
+            span= error
+
+        // FORMULARIO CON ID "loginForm"
+        form#loginForm(action="/login" method="POST")
+          
+          div.input-group
+            label(for="username") Usuario
+            div.input-wrapper
+              i.bx.bx-user.icon
+              input(type="text" id="username" name="username" placeholder="Ej. admin" required)
+          
+          div.input-group
+            label(for="password") Contraseña
+            div.input-wrapper
+              i.bx.bx-lock-alt.icon
+              input(type="password" id="password" name="password" placeholder="••••••••" required)
+          
+          button.btn-submit(type="submit") 
+            | Iniciar Sesión 
+            i.bx.bx-right-arrow-alt
+
+        div.login-footer
+          a.forgot-link(href="#") ¿Olvidaste tu contraseña?
+          div.separator
+          // Botón Volver con clase "back-btn"
+          a.back-link.back-btn(href="/lobby") 
+            i.bx.bx-left-arrow-alt
+            | Volver al Lobby
+
+    // --- SCRIPT DE TRANSICIÓN ---
+    script.
+      // 1. Manejo del Formulario (Login)
+      const loginForm = document.getElementById('loginForm');
+      
+      if(loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+          // Detenemos el envío inmediato
+          e.preventDefault();
+          
+          // Apagamos la luz
+          document.body.classList.add('fade-out');
+          
+          // Esperamos 800ms y luego ENVIAMOS el formulario manualmente
+          setTimeout(() => {
+            this.submit();
+          }, 800);
+        });
+      }
+
+      // 2. Manejo del Botón "Volver"
+      const backBtn = document.querySelector('.back-btn');
+      
+      if(backBtn) {
+        backBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const target = this.href;
+          
+          document.body.classList.add('fade-out');
+          
+          setTimeout(() => {
+            window.location.href = target;
+          }, 800);
+        });
+      }
+
+      // 3. Fix para el botón "Atrás" del navegador (Anti-Congelamiento)
+      window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+          document.body.classList.remove('fade-out');
+        }
+      });

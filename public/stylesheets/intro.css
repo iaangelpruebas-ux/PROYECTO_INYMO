@@ -1,0 +1,77 @@
+.intro-body { 
+  margin: 0; overflow: hidden; background: #000; color: white; 
+}
+.video-background { 
+  position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%; z-index: -1; 
+}
+video { width: 100%; height: 100vh; object-fit: cover; }
+.overlay { 
+  position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); 
+}
+.intro-content { 
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+  text-align: center; z-index: 2; width: 100%;
+}
+.intro-content h1 { 
+  font-size: 4rem; letter-spacing: 5px; margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+}
+.btn-skip {
+  display: inline-block; padding: 10px 25px; border: 1px solid white; color: white; 
+  border-radius: 30px; margin-top: 30px; opacity: 0; transition: opacity 1s; 
+  backdrop-filter: blur(5px); text-transform: uppercase; letter-spacing: 1px;
+}
+.btn-skip:hover { background: white; color: black; }
+
+
+/* =========================================
+   ANIMACIÓN DEL LOGO
+   ========================================= */
+
+/* 1. Definimos cómo se ve el logo */
+.intro-logo {
+  width: 250px; /* Tamaño inicial (ajústalo si queda muy grande o chico) */
+  height: auto;
+  margin-bottom: 30px; /* Espacio antes del título h1 */
+  
+  /* ESTADO INICIAL: Invisible y un poco más chico */
+  opacity: 0;
+  transform: scale(0.9) translateY(20px);
+  /* Aplicamos la animación */
+  /* nombre | duración | suavizado | retraso | estado final */
+  animation: logoReveal 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards 0.5s;
+}
+
+/* 2. Creamos la secuencia de animación */
+@keyframes logoReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px); /* Empieza abajo y chico */
+    filter: blur(10px) brightness(0.5); /* Empieza borroso y apagado */
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0); /* Termina en su lugar y tamaño real */
+    filter: blur(0px) brightness(1); /* Termina nítido y brillante */
+  }
+}
+
+/* Ajuste para el título para que no pelee con el logo */
+.intro-content h1 {
+  font-size: 3rem; /* Un poco más chico para dar espacio al logo */
+  margin-top: 0;
+}
+
+
+/* --- TRANSICIÓN DE SALIDA --- */
+
+/* 1. Preparamos el cuerpo para ser animado */
+body.intro-body {
+  transition: opacity 1.0s ease-in-out; /* Tardará 1 segundo en apagarse */
+  opacity: 1; /* Empieza visible */
+}
+
+/* 2. Esta clase se la pondremos con JS cuando termine el video */
+body.fade-out {
+  opacity: 0; /* Se vuelve invisible */
+  pointer-events: none; /* Evita que el usuario de clics a lo loco mientras se va */
+}

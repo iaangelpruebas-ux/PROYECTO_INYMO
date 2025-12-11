@@ -1,0 +1,69 @@
+extends layout
+
+block content
+  // --- NAV ---
+  // Animación: Cae desde arriba (fade-down)
+  nav.navbar(data-aos="fade-down" data-aos-duration="1000")
+    div.logo-container
+      // Reemplaza el texto con tu imagen de logo si la tienes
+      // img.logo-img(src="/images/logo-white.png" alt="INYMO Logo")
+      span.logo-text INYMO
+    div.menu
+      a.btn-login-nav(href="/login") Entrar al Tracker →
+
+  // --- HERO SECTION ---
+  header.hero
+    div.hero-grid
+      // Texto a la izquierda (aparece desde la izquierda)
+      div.hero-text(data-aos="fade-right")
+        h1 El Control Total de tus Proyectos de Construcción.
+        p.hero-subtitle Centraliza el seguimiento de obra, historiales y la gestión en tiempo real. Diseñado para la velocidad que INYMO necesita.
+        div.cta-group
+          a.btn-cta-primary(href="/login") Comenzar Ahora
+          a.btn-cta-secondary(href="#video-section") Ver Demo
+
+      // Imagen a la derecha (aparece desde la derecha con retraso)
+      div.hero-image-container(data-aos="fade-left" data-aos-delay="300")
+        // Usa una imagen de placeholder si no tienes la tuya
+        img.hero-img(src="https://ouch-cdn2.icons8.com/fR9bW-A7Zz0v7Y7Y0v7Y7Y0v7Y7Y0v7Y7Y0v7Y7Y0v7Y.png", alt="Project Management Illustration")
+
+  // --- VIDEO SECTION ---
+  section#video-section.video-showcase
+    div.container-center(data-aos="fade-up")
+      h2.section-title Mira la Plataforma en Acción
+      p.section-subtitle Una interfaz diseñada para ingenieros, no para contadores.
+    
+    // Contenedor del video (aparece subiendo)
+    div.video-wrapper(data-aos="zoom-in-up" data-aos-delay="200")
+      // Usa un video de placeholder si no tienes el tuyo en public/videos/demo.mp4
+      video.main-video(controlsposter="/images/video-poster.jpg")
+        source(src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4")
+        Your browser does not support the video tag.
+
+  // --- FEATURES SECTION (Estilo GoHighLevel) ---
+  section.features-section
+    div.container-center(data-aos="fade-up")
+      h2.section-title Todo lo que necesitas en un solo lugar
+    
+    div.features-grid
+      // Feature 1
+      div.feature-card(data-aos="fade-up" data-aos-delay="100")
+        div.icon-box 📂
+        h3 Historiales Ilimitados
+        p Accede a la documentación de cualquier proyecto pasado en segundos.
+      
+      // Feature 2
+      div.feature-card(data-aos="fade-up" data-aos-delay="300")
+        div.icon-box 🚀
+        h3 Seguimiento en Tiempo Real
+        p Monitorea el avance de Aceros, Techos y Estructuras al instante.
+      
+      // Feature 3
+      div.feature-card(data-aos="fade-up" data-aos-delay="500")
+        div.icon-box 🛡️
+        h3 Seguridad Bancaria
+        p Tus datos y los de tus clientes protegidos con sesiones encriptadas.
+
+  // --- FOOTER SIMPLE ---
+  footer.main-footer
+    p © 2025 INYMO. Desarrollado con tecnología IA Orange.

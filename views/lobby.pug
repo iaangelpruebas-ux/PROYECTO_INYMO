@@ -1,0 +1,74 @@
+doctype html
+html
+  head
+    title INYMO | Lobby
+    link(rel='icon', href='/images/icono.png', type='image/png')
+    // Importamos estilos y fuente
+    // Conectamos los estilos base y los ESPECÍFICOS del lobby
+    link(rel='stylesheet', href='/stylesheets/base.css')
+    link(rel='stylesheet', href='/stylesheets/lobby.css')
+    link(rel='stylesheet', href='https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap')
+    // Iconos para la campanita
+    link(rel='stylesheet', href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css')
+
+  body.lobby-body
+    
+    div.lobby-container
+      // --- 1. CABECERA (Logo y Fecha) ---
+      header.lobby-header
+        // 👇 Esta es la línea nueva
+        img.logo-img(src="/images/logo-inymo-white.png" alt="INYMO Logo")
+        // Aquí insertaremos la fecha con JS
+        div.date#currentDate Cargando fecha...
+
+      // --- 2. CONTENIDO CENTRAL ---
+      main.lobby-main
+        h2 Construyendo el futuro, hoy.
+        p.welcome-msg Bienvenido al Portal Corporativo
+
+        // --- 3. NOTIFICACIONES (Urgent Box) ---
+        div.notification-badge
+          i.bx.bxs-bell-ring.bell-icon
+          div
+            strong Reunión General
+            span  hoy a las 4:00 PM en Sala de Juntas.
+
+        // --- 4. ACCIÓN PRINCIPAL ---
+        // Apunta a /app/dashboard. 
+        // Si no está logueado, el "Guardia" lo mandará al Login automáticamente.
+        a.btn-workspace(href="/app/dashboard") 
+          span Acceder al Workspace 🚀
+
+    // --- 5. SCRIPT PARA LA FECHA ---
+    // Script de Fecha y Transiciones (Versión Final Corregida)
+    script.
+      // 1. Poner la fecha bonita
+      const dateElement = document.getElementById('currentDate');
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      dateElement.innerText = new Date().toLocaleDateString('es-ES', options).toUpperCase();
+
+      // 2. Lógica de Transición de Salida
+      const btn = document.querySelector('.btn-workspace');
+      
+      if(btn) {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault(); 
+          const targetUrl = this.closest('a').href;
+          
+          document.body.classList.add('fade-out');
+          
+          setTimeout(() => {
+            window.location.href = targetUrl;
+          }, 800);
+        });
+      }
+
+      // 👇👇 AQUÍ ESTÁ LA SOLUCIÓN AL "TRABADO" 👇👇
+      // Detectamos si el usuario usó el botón "Atrás" del navegador
+      window.addEventListener('pageshow', function(event) {
+        // Si la página se cargó desde la memoria caché (el botón atrás)...
+        if (event.persisted) {
+          // ... le quitamos la invisibilidad a la fuerza.
+          document.body.classList.remove('fade-out');
+        }
+      });

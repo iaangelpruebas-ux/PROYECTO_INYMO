@@ -1,0 +1,37 @@
+/* --- VARIABLES Y RESET GLOBAL (PALETA INYMO) --- */
+:root {
+  /* 1. Azul Marino Profundo (Base corporativa, serio) */
+  --inymo-navy: #0f172a; 
+  --inymo-navy-light: #1e293b; /* Para paneles o sidebars */
+  
+  /* 2. Verde INYMO (El color del Logo - "Safety Green") */
+  --inymo-green: #8cc63f; 
+  --inymo-green-hover: #7ab32e; /* Un poco más oscuro para cuando das click */
+  
+  /* 3. Textos */
+  --text-dark: #334155;
+  --text-light: #f8fafc;
+  
+  /* 4. Fondos */
+  --bg-light: #f1f5f9;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0; padding: 0;
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+}
+
+a { text-decoration: none; }
+h1, h2, h3 { font-weight: 700; margin: 0; }
+
+/* Utilidad: Botón estándar */
+.btn-primary {
+  background: var(--inymo-navy); color: white; padding: 10px 20px;
+  border-radius: 6px; font-weight: 500; display: inline-block;
+  transition: 0.3s;
+}
+.btn-primary:hover {
+  background: var(--inymo-green); /* Efecto hover con el verde de la marca */
+}

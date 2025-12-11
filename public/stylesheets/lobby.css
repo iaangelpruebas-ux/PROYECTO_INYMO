@@ -1,0 +1,151 @@
+/* =========================================
+   ANIMACIONES
+   ========================================= */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   CUERPO (FONDO)
+   ========================================= */
+.lobby-body { 
+  background: url('https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Poppins', sans-serif; 
+  display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;
+  position: relative; z-index: 0;
+  animation: fadeIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* FILTRO NAVY ELEGANTE */
+.lobby-body::before {
+  content: '';
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 60, 114, 0.7));
+  backdrop-filter: blur(4px);
+  z-index: -1;
+}
+
+/* =========================================
+   EFECTO CRISTAL OSCURO (GLASSMORPHISM)
+   ========================================= */
+.lobby-container, .login-card { 
+  background: rgba(15, 23, 42, 0.85); /* Fondo Azul Oscuro Transparente */
+  
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Borde sutil */
+  padding: 60px; border-radius: 24px; 
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+  text-align: center; max-width: 500px; width: 90%;
+  position: relative;
+}
+
+/* =========================================
+   ELEMENTOS INTERNOS
+   ========================================= */
+.logo-img {
+  height: 80px; /* Ajusté un poco el tamaño para que no empuje tanto el contenido */
+  width: auto; margin-bottom: 15px;
+  filter: drop-shadow(0 6px 9px rgba(0,0,0,0.3)); /* Sombra más oscura para resaltar */
+  animation: fadeIn 1.5s ease-out;
+}
+
+.date { 
+  color: #cbd5e1; /* Gris claro para leerse en fondo oscuro */
+  margin-bottom: 30px; font-weight: 500; font-size: 0.9rem;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+
+/* TÍTULOS (Corrección Importante: Color Blanco) */
+.lobby-main h2 {
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+.welcome-msg {
+  color: #94a3b8; /* Gris azulado claro */
+  margin-bottom: 30px;
+}
+
+/* NOTIFICACIÓN (Corrección de Contraste) */
+.notification-badge { 
+  background: rgba(140, 198, 63, 0.15); 
+  border: 1px solid rgba(140, 198, 63, 0.4); 
+  color: #dcfce7; /* Texto CLARO para que se lea en lo oscuro */
+  padding: 15px; border-radius: 12px; margin-bottom: 40px; 
+  display: flex; gap: 15px; align-items: center; text-align: left;
+  transition: all 0.3s;
+  cursor: default;
+}
+
+.bell-icon { 
+  color: #8cc63f; /* Verde INYMO vibrante */
+  font-size: 1.4rem;
+}
+
+/* Al pasar el mouse, se pone blanca y el texto oscuro */
+.notification-badge:hover {
+  transform: translateY(-3px);
+  background: white;
+  color: #1a3300; /* Ahora sí texto oscuro porque el fondo es blanco */
+  box-shadow: 0 10px 20px -5px rgba(140, 198, 63, 0.2);
+}
+
+/* BOTÓN PRINCIPAL */
+.btn-workspace { 
+  display: block; 
+  background: linear-gradient(135deg, #8cc63f 0%, #7ab32e 100%);
+  color: white; 
+  padding: 18px; border-radius: 50px; 
+  font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px;
+  box-shadow: 0 10px 20px rgba(140, 198, 63, 0.3);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.btn-workspace:hover { 
+  transform: translateY(-4px) scale(1.02); 
+  box-shadow: 0 20px 30px -10px rgba(140, 198, 63, 0.5);
+  background: linear-gradient(135deg, #7ab32e 0%, #8cc63f 100%);
+}
+
+/* LOGIN INPUTS (Para cuando uses este CSS en el login) */
+.form-group input {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    color: #0f172a;
+}
+.form-group input:focus {
+  border: 2px solid #8cc63f;
+  box-shadow: 0 0 0 4px rgba(140, 198, 63, 0.15);
+  background: white;
+}
+/* =========================================
+   CORRECCIÓN FINAL: TRANSICIÓN SUAVE (ANTI-FLASH)
+   ========================================= */
+
+/* 1. EL TRUCO: Pintamos la base del navegador de Navy Oscuro */
+/* Esto evita que se vea blanco cuando el cuerpo se hace invisible */
+html {
+  background-color: #0f172a; 
+}
+
+/* 2. Preparamos el cuerpo para animarse */
+.lobby-body {
+  /* Aseguramos que ocupe todo el alto y ancho */
+  min-height: 100vh;
+  width: 100%;
+  
+  /* Aquí definimos que la opacidad tardará 0.8s en cambiar (coincide con tu script) */
+  transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out, filter 0.8s;
+  opacity: 1; /* Empieza visible */
+}
+
+/* 3. La clase que tu Javascript agrega al dar clic */
+body.fade-out {
+  opacity: 0 !important;       /* Se vuelve invisible */
+  transform: scale(1.05);      /* Pequeño zoom hacia el frente (efecto inmersivo) */
+  filter: blur(10px);          /* Se desenfoca como sueño */
+  pointer-events: none;        /* Bloquea clics extra */
+}

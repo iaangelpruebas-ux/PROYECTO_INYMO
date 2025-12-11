@@ -1,0 +1,121 @@
+doctype html
+html
+  head
+    title INYMO | Workspace
+    link(rel='icon', href='/images/icono.png', type='image/png')
+    
+    // Fuentes e Iconos
+    link(rel='stylesheet', href='https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap')
+    link(rel='stylesheet', href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css')
+    
+    // Estilos
+    link(rel='stylesheet', href='/stylesheets/base.css')
+    link(rel='stylesheet', href='/stylesheets/dashboard.css')
+  
+  body
+    div.app-grid
+      
+      // --- BARRA LATERAL (NAVY OSCURO) ---
+      aside.app-sidebar
+        div.sidebar-brand
+          // Logo Blanco
+          img.sidebar-logo(src="/images/logo-inymo-white.png" alt="INYMO")
+        
+        nav.sidebar-nav
+          // 1. PRINCIPAL
+          p.nav-label Principal
+          ul
+            li: a(href="/app/dashboard") 
+              i.bx.bxs-dashboard
+              |  Panel General
+            li: a.copilot-link(href="/app/copilot") 
+              i.bx.bxs-bot
+              |  INYMO Copilot AI ✨
+
+          // 2. OPERATIVO (Ingeniería)
+          p.nav-label Operativo
+          ul
+            li: a(href="/app/proyectos") 
+              i.bx.bx-hard-hat
+              |  Gestión de Proyectos
+            li: a(href="/app/bitacora") 
+              i.bx.bx-notepad
+              |  Bitácora Digital
+            li: a(href="/app/planos") 
+              i.bx.bx-map-alt
+              |  Repositorio Planos
+            li: a(href="/app/inventario") 
+              i.bx.bx-box
+              |  Inventario y Almacén
+
+          // 3. ADMINISTRATIVO
+          p.nav-label Administrativo
+          ul
+            li: a(href="/app/finanzas") 
+              i.bx.bx-dollar-circle
+              |  Cotizaciones
+            li: a(href="/app/facturas") 
+              i.bx.bx-receipt
+              |  Facturas
+
+          // 4. TALENTO Y CLIENTES
+          p.nav-label RRHH & CRM
+          ul
+            li: a(href="/app/personal") 
+              i.bx.bx-group
+              |  Directorio y Carpetas
+            li: a(href="/app/desempeno") 
+              i.bx.bx-trophy
+              |  Desempeño
+            li: a(href="/app/clientes") 
+              i.bx.bx-briefcase
+              |  Clientes
+
+          // 5. DATA
+          p.nav-label Estrategia
+          ul
+            li: a(href="/app/analytics") 
+              i.bx.bx-line-chart
+              |  Inteligencia (BI)
+
+        // BOTÓN SALIR
+        div.sidebar-bottom
+           a.btn-logout-action(href="/logout") 
+             i.bx.bx-log-out 
+             | Cerrar Sesión
+
+      // --- CONTENIDO PRINCIPAL ---
+      main.app-content
+        header.app-header
+          div.header-left
+            h2 Workspace
+            p.breadcrumbs INYMO / Panel de Control
+          
+          div.user-profile
+            div.user-info
+              span.user-name Ing. Ángel Velasco
+              span.user-role Socio Director
+            div.user-badge AV
+        
+        div.content-area
+          block content
+
+    // 👇👇 ESTO ES LO QUE TE FALTABA AL FINAL 👇👇
+    // Script para la animación suave al cerrar sesión
+    script.
+      const logoutBtn = document.querySelector('.btn-logout-action');
+      
+      if(logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+          e.preventDefault(); // 1. Alto ahí
+          
+          // 2. Apagamos la luz (Fade Out)
+          document.body.style.transition = 'opacity 0.6s ease';
+          document.body.style.opacity = '0';
+          
+          // 3. Esperamos 0.6s y nos vamos
+          setTimeout(() => {
+            window.location.href = '/logout';
+          }, 600);
+        });
+      }

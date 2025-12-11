@@ -1,0 +1,70 @@
+doctype html
+html
+  head
+    title INYMO | Innovando
+    // 1. FUENTES
+    link(rel='icon', href='/images/icono.png', type='image/png')
+    link(rel='stylesheet', href='https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap')
+    
+    // 2. ESTILOS MODULARES (Lo nuevo)
+    // Cargamos la base (reset y variables) y solo los estilos de esta página
+    link(rel='stylesheet', href='/stylesheets/base.css')
+    link(rel='stylesheet', href='/stylesheets/intro.css')
+  
+  body.intro-body
+    
+    // A. VIDEO DE FONDO
+    div.video-background
+      // 'muted' es obligatorio para el autoplay en navegadores modernos
+      video#introVideo(autoplay muted playsinline)
+        // Video de stock de construcción (puedes cambiar esta URL por el tuyo propio luego)
+        source(src="/videos/Intro_video.mp4" type="video/mp4")    
+    // B. CAPA OSCURA (Para leer el texto)
+    div.overlay
+
+    // C. CONTENIDO CENTRAL
+    div.intro-content
+      img.intro-logo(src="/images/logo-inymo-white.png" alt="INYMO Logo")
+      h1 INNOVANDO EN LA INGENIERÍA
+      p.subtitle Solidez • Precisión • Futuro
+      
+      // El botón inicia invisible (se anima con CSS y JS)
+      a#skipBtn.btn-skip(href="/lobby") 
+        | Saltar Intro ⏭
+
+    // D. LÓGICA (Script Mejorado)
+    script.
+      document.addEventListener('DOMContentLoaded', () => {
+        const video = document.getElementById('introVideo');
+        const btn = document.getElementById('skipBtn');
+
+        // --- FUNCIÓN DE TRANSICIÓN SUAVE ---
+        function irAlLobby() {
+          // 1. Apagamos la luz (agregamos la clase CSS)
+          document.body.classList.add('fade-out');
+          
+          // 2. Esperamos 1 segundo (1000ms) a que termine la animación
+          setTimeout(() => {
+            localStorage.setItem('inymo_intro_seen', 'true');
+            window.location.href = '/lobby';
+          }, 1000); 
+        }
+
+        // --- EVENTOS ---
+        
+        // A. Cuando el video termina
+        video.onended = function() {
+          irAlLobby();
+        };
+
+        // B. Cuando le dan click al botón (Interceptamos el click normal)
+        btn.addEventListener('click', (e) => {
+          e.preventDefault(); // Evita el salto brusco inmediato
+          irAlLobby(); // Ejecuta nuestra transición suave
+        });
+
+        // C. Aparecer el botón "Saltar" a los 3 segundos
+        setTimeout(() => {
+          btn.style.opacity = '1';
+        }, 3000);
+      });

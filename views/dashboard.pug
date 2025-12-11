@@ -1,0 +1,61 @@
+extends layout_dashboard
+
+block content
+  // Título de la Sección
+  div.page-header
+    div
+      h1 Panel General
+      p.text-muted Resumen de operaciones y alertas activas.
+    div
+      a.btn-primary(href="/proyectos/nuevo") + Nuevo Proyecto
+
+  // Tarjetas de Resumen (Stats)
+  div.stats-grid
+    div.stat-card
+      div.stat-icon.blue
+        i.bx.bx-building
+      div.stat-info
+        h3 12
+        p Proyectos Activos
+    
+    div.stat-card.orange
+      div.stat-icon
+        i.bx.bx-time-five
+      div.stat-info
+        h3 3
+        p Entregas esta semana
+    
+    div.stat-card.green
+      div.stat-icon
+        i.bx.bx-dollar-circle
+      div.stat-info
+        h3 $450k
+        p Facturado este mes
+    
+    div.stat-card.red
+      div.stat-icon
+        i.bx.bx-error-circle
+      div.stat-info
+        h3 2
+        p Alertas de Seguridad
+
+  // Sección dividida
+  div.dashboard-sections
+    div.section-left
+      h3 📅 Cronograma Reciente
+      div.card-panel
+        ul.activity-list
+          li 
+            span.dot.blue 
+            | Se finalizó la estructura en "Nave Industrial B" - Hace 2h
+          li 
+            span.dot.orange 
+            | Cotización pendiente para "Grupo Modelo" - Hace 5h
+          li 
+            span.dot.green 
+            | Pago recibido de "Cliente X" - Ayer
+
+    div.section-right
+      h3 📊 Rendimiento
+      div.card-panel.chart-placeholder
+        p [Aquí irá tu gráfica de rendimiento]

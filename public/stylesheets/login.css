@@ -1,0 +1,126 @@
+/* =========================================
+   1. FONDO DE VIDEO (EN BUCLE)
+   ========================================= */
+.login-body {
+  margin: 0; height: 100vh; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background-color: var(--inymo-navy); /* Color base por si falla el video */
+  font-family: 'Poppins', sans-serif;
+}
+
+.video-wrap {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+}
+video { 
+  width: 100%; height: 100%; object-fit: cover; 
+}
+.video-overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  /* Filtro Navy oscuro para que el video sea sutil */
+  background: rgba(15, 23, 42, 0.85); 
+}
+
+/* =========================================
+   2. TARJETA DE CRISTAL (GLASSMORPHISM)
+   ========================================= */
+.login-container { padding: 20px; width: 100%; display: flex; justify-content: center; z-index: 1; }
+
+.login-card {
+  /* Usamos el mismo estilo oscuro que en el Lobby para consistencia */
+  background: rgba(15, 23, 42, 0.75); 
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 50px 40px; border-radius: 24px; text-align: center;
+  width: 100%; max-width: 420px;
+  box-shadow: 0 30px 60px -12px rgba(0,0,0,0.5);
+  color: white;
+}
+
+/* Animación de entrada suave */
+.login-card { animation: fadeInUp 1s ease-out; }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Elementos internos */
+.logo-img { height: 50px; width: auto; margin-bottom: 15px; }
+h2 { margin-bottom: 10px; font-size: 1.8rem; }
+.subtitle { color: #94a3b8; margin-bottom: 30px; font-size: 0.95rem; }
+
+/* =========================================
+   3. FORMULARIO E INPUTS
+   ========================================= */
+.input-group { text-align: left; margin-bottom: 20px; }
+.input-group label { display: block; color: #cbd5e1; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem; }
+
+.input-wrapper { position: relative; }
+.input-wrapper .icon {
+  position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+  color: #64748b; font-size: 1.2rem; transition: 0.3s;
+}
+
+.input-wrapper input {
+  width: 100%; padding: 14px 14px 14px 45px; /* Espacio a la izquierda para el icono */
+  background: rgba(255, 255, 255, 0.05); /* Muy transparente */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px; color: white; font-family: 'Poppins'; transition: 0.3s; box-sizing: border-box;
+}
+/* Al hacer foco, se ilumina con el Verde INYMO */
+.input-wrapper input:focus {
+  outline: none; border-color: var(--inymo-green); background: rgba(255, 255, 255, 0.1);
+}
+.input-wrapper input:focus + .icon { color: var(--inymo-green); } /* El icono también se pinta verde */
+
+/* Botón de Submit */
+.btn-submit {
+  width: 100%; padding: 14px; 
+  background: var(--inymo-navy-light); /* Base Navy */
+  color: white; border: none; border-radius: 50px; 
+  font-weight: 600; font-size: 1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: 0.3s; border: 1px solid rgba(255,255,255,0.1);
+}
+.btn-submit:hover {
+  background: var(--inymo-green); /* Hover Verde INYMO */
+  transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(140, 198, 63, 0.4);
+}
+
+
+/* =========================================
+   TRANSICIÓN DE SALIDA (FADE OUT)
+   ========================================= */
+
+/* 1. Evitamos el flashazo blanco poniendo fondo oscuro base */
+html { background-color: #0f172a; }
+
+/* 2. Preparamos el cuerpo para animarse */
+.login-body {
+  transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out, filter 0.8s;
+  opacity: 1;
+}
+
+/* 3. La clase invisible */
+body.fade-out {
+  opacity: 0 !important;
+  transform: scale(0.95); /* Un leve zoom out para que se vea que entra al sistema */
+  filter: blur(5px);
+  pointer-events: none;
+}
+
+
+
+/* =========================================
+   4. ERROR Y FOOTER
+   ========================================= */
+.error-msg {
+  background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5; padding: 12px; border-radius: 10px; margin-bottom: 25px;
+  display: flex; align-items: center; gap: 10px; font-size: 0.9rem; text-align: left;
+}
+
+.login-footer { margin-top: 30px; color: #94a3b8; font-size: 0.9rem; }
+.login-footer a { color: #cbd5e1; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px; }
+.login-footer a:hover { color: var(--inymo-green); }
+.separator { height: 1px; background: rgba(255,255,255,0.1); margin: 20px auto; width: 80%; }
+
