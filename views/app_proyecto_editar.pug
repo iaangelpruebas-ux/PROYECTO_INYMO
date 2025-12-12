@@ -1,0 +1,125 @@
+extends layout_app
+
+block content
+  link(rel='stylesheet', href='/stylesheets/proyectos.css')
+
+  div.module-header
+    div.header-title
+      a.back-link(href=`/app/proyectos/${p.id}`) 
+        i.bx.bx-left-arrow-alt
+        | Volver al Detalle
+      h1 Editar Proyecto: #{p.nombre}
+      p.subtitle Modifica los parámetros clave del proyecto.
+
+  div.form-container
+    // El formulario apunta a la nueva ruta POST
+    form.new-project-form(action=`/app/proyectos/actualizar/${p.id}` method="POST")
+      
+      // --- SECCIÓN 1: IDENTIFICACIÓN Y ESTRATEGIA ---
+      h3.form-section-title Información Básica y Progreso
+      div.form-grid
+        
+        // Campo NO editable: El código es la llave
+        div.input-group
+          label(for="codigo") Código Único
+          input#codigo(type="text" name="codigo" value=p.codigo readonly)
+          
+        div.input-group
+          label(for="nombre") Nombre del Proyecto *
+          input#nombre(type="text" name="nombre" value=p.nombre required)
+          
+        div.input-group
+          label(for="cliente") Cliente *
+          input#cliente(type="text" name="cliente" value=p.cliente required)
+          
+        div.input-group
+          label(for="lider") Líder del Proyecto (PM) *
+          input#lider(type="text" name="lider" value=p.lider required)
+
+        div.input-group
+          label(for="progreso") Progreso (%)
+          input#progreso(type="number" name="progreso" value=p.progreso min="0" max="100" required)
+          
+        div.input-group
+          label(for="fase") Fase Actual
+          select#fase(name="fase" required)
+            option(value="Inicio" selected=p.fase === 'Inicio') 1. Inicio
+            option(value="Planificación" selected=p.fase === 'Planificación') 2. Planificación
+            option(value="Ejecución" selected=p.fase === 'Ejecución') 3. Ejecución
+            option(value="Cierre" selected=p.fase === 'Cierre') 4. Cierre
+            option(value="Finalizado" selected=p.fase === 'Finalizado') 5. Finalizado
+            
+        // 👇 AÑADIDO: Tipo de Entrega
+        div.input-group
+          label(for="tipo_entrega") Tipo de Entrega (PMBOK)
+          select#tipo_entrega(name="tipo_entrega" required)
+            option(value="Predictivo" selected=p.tipo_entrega === 'Predictivo') Predictivo (Cascada)
+            option(value="Híbrido" selected=p.tipo_entrega === 'Híbrido') Híbrido (Mezcla)
+            option(value="Ágil" selected=p.tipo_entrega === 'Ágil') Ágil (Iterativo/Scrum)
+
+
+      // --- NUEVA SECCIÓN: NARRATIVA Y METAS (SUPER DETALLE) ---
+      h3.form-section-title Resumen Ejecutivo
+      div.form-grid.grid-full-width
+        
+        div.input-group.full-span
+          label(for="narrativa") Resumen de Estatus y Problemas Clave *
+          // Usamos p.narrativa para precargar el texto existente
+          textarea#narrativa(name="narrativa" rows="5" required)= p.narrativa
+        
+        div.input-group.full-span
+          label(for="metas_proximos_pasos") Metas y Próximos Pasos (Próximos 30 días) *
+          textarea#metas_proximos_pasos(name="metas_proximos_pasos" rows="4" required)= p.metas_proximos_pasos
+
+
+
+
+
+      // --- SECCIÓN 2: FINANZAS Y TIEMPO ---
+      h3.form-section-title Finanzas, Valor y Plazos
+      div.form-grid
+
+        div.input-group
+          label(for="presupuesto") Presupuesto Total (USD) *
+          input#presupuesto(type="number" name="presupuesto" value=p.presupuesto required)
+        
+        div.input-group
+          label(for="valor_negocio") Valor de Negocio Estimado (USD) *
+          input#valor_negocio(type="number" name="valor_negocio" value=p.valor_negocio required)
+          
+        div.input-group
+          label(for="fecha_fin") Fecha de Finalización Estimada *
+          // 👇 LA LÓGICA DE FECHA (Alineada correctamente)
+          -
+            let fechaFin;
+            if (p.fecha_fin) {
+                // Si ya es un objeto Date, lo usa; si es una string, lo convierte
+                const dateObj = (p.fecha_fin instanceof Date) ? p.fecha_fin : new Date(p.fecha_fin);
+                // Formatea a la cadena requerida por el input HTML (YYYY-MM-DD)
+                fechaFin = dateObj.toISOString().substring(0, 10);
+            } else {
+                fechaFin = '';
+            }
+          
+          input#fecha_fin(type="date" name="fecha_fin" value=fechaFin required)
+        
+        div.input-group
+          label(for="riesgo") Nivel de Riesgo Actual
+          select#riesgo(name="riesgo" required)
+            option(value="Bajo" selected=p.riesgo === 'Bajo') Bajo
+            option(value="Medio" selected=p.riesgo === 'Medio') Medio
+            option(value="Alto" selected=p.riesgo === 'Alto') Alto
+      
+      // --- BOTONES ---
+      div.buttons-footer 
+        button.btn-submit.btn-save(type="submit") 
+          i.bx.bx-revision
+          |  Guardar Cambios
+        
+        // Botón de Cancelar
+        a.btn-cancel(href=`/app/proyectos/${p.id}`) Cancelar Edición
+
+
+  // Mensaje de éxito/error
+  if mensaje
+    div.alert-message(class=mensaje.tipo)= mensaje.texto

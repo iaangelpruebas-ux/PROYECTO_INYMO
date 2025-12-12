@@ -1,4 +1,3 @@
-
 // 1. CARGAR VARIABLES DE ENTORNO (Debe ser la primera línea)
 require('dotenv').config();
 var createError = require('http-errors');
@@ -7,9 +6,11 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var session = require('express-session'); // ✅ Importado bien
+var session = require('express-session');
 
+// 👇 1. IMPORTAR EL NUEVO MÓDULO DE PROYECTOS
 var indexRouter = require('./routes/index');
+var proyectosRouter = require('./routes/proyectos'); // <-- Nuevo import
 var usersRouter = require('./routes/users');
 
 var app = express();
@@ -24,35 +25,37 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 👇👇👇 AQUÍ ES EL CAMBIO 👇👇👇
-// La sesión debe ir ANTES de las rutas para que 'req.session' exista cuando entres a ellas.
+// Configuración de Sesión
 app.use(session({
-  // 👇 AQUÍ ESTÁ EL CAMBIO: Usamos process.env
-  secret: process.env.SESSION_SECRET || 'palabra_secreta_respaldo',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false } // false por ahora porque estamos en localhost (http)
+  secret: process.env.SESSION_SECRET || 'palabra_secreta_respaldo',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }
 }));
-// 👆👆👆 ----------------------- 👆👆👆
 
 // Rutas (Ahora sí, ya traen el brazalete puesto)
-app.use('/', indexRouter);
+app.use('/', indexRouter); // Maneja /, /login, /app/dashboard, /app/bitacora, /app/eventos, etc.
+
+// 👇 2. MONTAR EL NUEVO ROUTER DE PROYECTOS
+// Todas las peticiones que empiecen por /app/proyectos se irán a proyectosRouter
+app.use('/app/proyectos', proyectosRouter); 
+
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  next(createError(404));
+  next(createError(404));
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
 });
 
 module.exports = app;

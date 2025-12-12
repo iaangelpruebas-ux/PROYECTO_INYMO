@@ -14,9 +14,9 @@ html
 
   body.login-body
     
-    // 1. VIDEO DE FONDO
+    // 1. VIDEO DE FONDO (Atributos: autoplay, loop, muted, playsinline)
     div.video-wrap
-      video#loginVideo(autoplay muted loop playsinline)
+      video#loginVideo(autoplay muted loop playsinline) // <-- 'loop' asegura el bucle
         source(src="/videos/login-loop.mp4" type="video/mp4")
       div.video-overlay
 
@@ -71,7 +71,7 @@ html
           // Detenemos el envío inmediato
           e.preventDefault();
           
-          // Apagamos la luz
+          // Apagamos la luz (Efecto fade-out)
           document.body.classList.add('fade-out');
           
           // Esperamos 800ms y luego ENVIAMOS el formulario manualmente

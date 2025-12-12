@@ -1,0 +1,37 @@
+extends layout_app
+
+block content
+  link(rel='stylesheet', href='/stylesheets/eventos.css')
+
+  h1.module-title Calendario y Timeline de Proyectos 🗓️
+  p.module-subtitle Vista unificada de Hitos, Eventos de Bitácora y Fechas Clave.
+
+  div.timeline-container
+    
+    // Si no hay eventos, muestra un mensaje
+    if eventos.length === 0
+      div.no-events
+        p No hay eventos o hitos registrados para el periodo.
+    else
+      // Usaremos un loop para iterar sobre la lista de eventos que vendrá del servidor
+      each e in eventos
+        // La clase del item se define según el tipo de evento: hito, incidente, avance, etc.
+        div.timeline-item(class=e.tipo.toLowerCase().replace(' ', '-'))
+          div.timeline-date
+            span.day= e.fecha.getDate()
+            span.month= e.fecha.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase()
+            span.year= e.fecha.getFullYear()
+            
+          div.timeline-dot
+          
+          div.timeline-content
+            // Nombre del proyecto asociado
+            span.project-link(title="Proyecto Asociado")= e.proyecto_codigo
+            
+            h3= e.titulo
+            p= e.descripcion
+            
+            div.timeline-footer
+              span.event-type= e.tipo
+              if e.autor
+                span.author= 'Reportado por: ' + e.autor

@@ -1,0 +1,164 @@
+extends layout_app
+
+block content
+  link(rel='stylesheet', href='/stylesheets/proyecto_detalle.css')
+
+  // --- ENCABEZADO DEL PROYECTO ---
+  div.detail-header
+    div
+      a.back-link(href="/app/proyectos") 
+        i.bx.bx-left-arrow-alt
+        | Volver al Portafolio
+      h1= p.nombre
+      div.meta-tags
+        span.tag.navy= p.codigo
+        span.tag.green= p.salud
+        span.tag.outline= p.lider
+
+    div.header-actions
+      a.btn-action.secondary(href=`/app/proyectos/reporte/${p.id}`) 
+        | Reporte PDF
+      a.btn-action.primary(href=`/app/proyectos/editar/${p.id}`) 
+        | Editar Proyecto
+      a.btn-action.delete-btn(href=`/app/proyectos/eliminar/${p.id}`) 
+        i.bx.bx-archive
+        |  Archivar Proyecto
+
+  // --- GRID PRINCIPAL (KPIs, Historial) ---
+  div.detail-grid
+    
+    // COLUMNA IZQUIERDA: Finanzas, Estado y EVM
+    div.left-panel
+      div.detail-card
+        h3 KPIs Financieros (EVM)
+        div.finance-circle
+          div.circle-graph(style=`--pct: ${p.progreso_financiero}`)
+            span #{p.progreso_financiero}%
+          div.finance-info
+            p Presupuesto (BAC): 
+              strong $#{p.presupuesto ? p.presupuesto.toLocaleString() : 'N/A'}
+            p Costo Real (AC): 
+              // Usamos la variable formateada
+              strong(class=p.progreso_financiero > 70 ? 'red-text' : '')= p.ac
+
+            hr.separator
+            div.metric-item(data-tooltip="Índice de Desempeño de Costo")
+              span.label CPI (Costo)
+              strong(class=p.cpi < 1.0 ? 'red-text' : 'green-text')= p.cpi
+            div.metric-item(data-tooltip="Índice de Desempeño del Cronograma")
+              span.label SPI (Cronograma)
+              strong(class=p.spi < 1.0 ? 'red-text' : 'green-text')= p.spi
+
+            hr.separator.small
+            div.metric-item.forecast
+              span.label Estimación Final (EAC)
+              strong(class=p.cpi < 1.0 ? 'red-text' : 'green-text')= p.eac
+            div.metric-item
+              span.label Variación Costo (CV)
+              // Usamos la variable formateada
+              strong(class=p.cv && p.cv.startsWith('-') ? 'red-text' : 'green-text')= p.cv
+      
+      div.detail-card
+        h3 Matriz de Riesgos
+        ul.risk-list
+          each r in p.riesgos
+            li.risk-item
+              div
+                strong= r.descripcion
+              div.risk-badge(class=r.impacto.toLowerCase()) #{r.impacto}
+
+    // COLUMNA DERECHA: CALENDARIO
+    div.right-panel
+      div.detail-card
+        h3 Historial de Progreso Diario (30 Días)
+        
+        div.calendar-grid-container
+          div.calendar-grid
+            each dia in p.historialDiario
+              div.calendar-day(style=`background-color: ${dia.color};` title=`${dia.displayFecha}: ${dia.estado}`)
+                // CORRECCIÓN: Sin comentarios en línea
+                span.day-name= dia.displayFecha.split(' ')[0] 
+                span.day-num= dia.displayFecha.split(' ')[1] 
+          
+          div.calendar-legend
+            span.legend-item(style="background-color: #dcfce7;") Avance
+            span.legend-item(style="background-color: #f1f5f9;") Normal
+            span.legend-item(style="background-color: #a855f7;") Fin de Semana
+            span.legend-item(style="background-color: #ef4444;") Parado
+
+      div.detail-card
+        h3 Hitos Programados
+        div.timeline
+          each h in p.hitos
+            div.timeline-item(class=h.estado)
+              div.timeline-dot
+              div.timeline-content
+                strong= h.nombre
+                span= h.fecha
+                span.status-label= h.estado.replace('-', ' ')
+
+
+  // --- SECCIONES: CONTROL OPERATIVO ---
+  div.control-operativo-grid
+    div.detail-card.wbs-card
+      h3 Matriz de Alcance y Entregables
+      table.wbs-table
+        thead
+          tr
+            th Entregable
+            th Avance
+            th Responsable
+            th Estado
+        tbody
+          tr
+            td 1.1 Diseño Conceptual
+            td 100%
+            td Arq. Sofia
+            td.status.completed Completado
+          tr
+            td 1.2 Procura de Equipos
+            td 70%
+            td Ing. Roberto
+            td.status.in-progress En Curso
+          tr
+            td 2.1 Instalación y Pruebas
+            td 0%
+            td Ing. David
+            td.status.pending Pendiente
+          tr
+            td 3.0 Cierre
+            td 0%
+            td Líder
+            td.status.pending Pendiente
+
+    div.detail-card.changes-card
+      h3 Control de Cambios
+      ul.changes-list
+        li.change-item.approved
+          strong CC-001: Reducción Alcance
+          span.impact.time Ahorro 5 días
+        li.change-item.rejected
+          strong CC-002: Cambio Marca
+          span.impact.cost +$5,000
+      
+  
+  // --- SECCIÓN: REPORTE EJECUTIVO ---
+  div.report-sections-row
+    div.detail-card.full-width
+      h3 Reporte de Estatus Ejecutivo
+      div.narrative-content
+        p= p.narrativa || 'Sin resumen ejecutivo.'
+
+    div.sections-container
+      div.detail-card.half-width
+        h3 Prioridades Estratégicas (30 Días)
+        p= p.metas_proximos_pasos || 'Pendiente definir metas.'
+
+      div.detail-card.half-width
+        h3 Lecciones Aprendidas
+        ul.lessons-list
+          if p.leccionesAprendidas && p.leccionesAprendidas.length > 0
+            each l in p.leccionesAprendidas
+              li.lesson-item= l.titulo
+          else
+            li.lesson-item.empty No se han registrado lecciones.

@@ -1,0 +1,91 @@
+extends layout_app
+
+block content
+  // Conectamos el CSS específico de este módulo
+  link(rel='stylesheet', href='/stylesheets/proyectos.css')
+
+  // --- CABECERA DEL MÓDULO ---
+  div.module-header
+    div.header-title
+      h1 Gestión de Proyectos
+      p.subtitle Portafolio Activo y Generación de Valor
+    
+    // Botón de Acción Principal
+    a.btn-new-project(href="/app/proyectos/nuevo") 
+      i.bx.bx-plus 
+      | Nuevo Proyecto
+
+  // --- FILTROS Y KPI RÁPIDOS (Concepto PMBOK: Monitoreo) ---
+  div.filters-bar
+    // Filtros por Estado/Tipo (Usando el parámetro 'filter')
+    a.filter-btn(href="/app/proyectos?filter=todos" class=activeFilter === 'todos' ? 'active' : '') Todos
+    a.filter-btn(href="/app/proyectos?filter=en-tiempo" class=activeFilter === 'en-tiempo' ? 'active' : '') En Tiempo
+    a.filter-btn(href="/app/proyectos?filter=retrasados" class=activeFilter === 'retrasados' ? 'active' : '') Retrasados
+    a.filter-btn(href="/app/proyectos?filter=en-riesgo" class=activeFilter === 'en-riesgo' ? 'active' : '') En Riesgo
+    a.filter-btn(href="/app/proyectos?filter=predictivos" class=activeFilter === 'predictivos' ? 'active' : '') Predictivos
+    // 👇 AGREGAMOS EL FILTRO HÍBRIDO AQUÍ
+    a.filter-btn(href="/app/proyectos?filter=hibrido" class=activeFilter === 'hibrido' ? 'active' : '') Híbrido
+    a.filter-btn(href="/app/proyectos?filter=agiles" class=activeFilter === 'agiles' ? 'active' : '') Ágiles
+    
+    // Botón de Archivados
+    a.filter-btn.archive-link(href="/app/proyectos/archivados")
+      i.bx.bx-archive
+      |  Ver Archivados
+
+    div.kpi-mini Total Valor Negocio: 
+      strong $#{totalValorNegocio || '0.00M'}
+
+  // 👇 NUEVO BUSCADOR
+  form.search-form(action="/app/proyectos" method="GET")
+    input.search-input(type="text" name="q" placeholder="Buscar por Nombre o Código...")
+    button.search-btn(type="submit") 
+      i.bx.bx-search
+
+  // --- GRID DE PROYECTOS (PORTAFOLIO) ---
+  div.projects-grid
+    // Iteramos sobre la lista de proyectos que mandó la ruta
+    each p in proyectos
+      // La clase de la tarjeta depende del riesgo (para poner borde rojo si es alto)
+      // 👇 IMPORTANTE: Fíjate que 'a' está indentado DENTRO de 'each'
+      a.project-card(href=`/app/proyectos/${p.id}` class=p.riesgo === 'Alto' ? 'risk-alert' : '')
+        
+        div.card-header
+          span.project-code= p.codigo
+          // Badge según el tipo de entrega (Adaptación PMBOK)
+          span.badge-type(class=p.tipo_entrega.toLowerCase())= p.tipo_entrega
+        
+        div.card-body
+          h3= p.nombre
+          p.client-name
+            i.bx.bx-building 
+            |  #{p.cliente}
+          
+          div.meta-info
+            div.meta-item
+              span.label Fase
+              span.value= p.fase
+            div.meta-item
+              span.label Líder
+              span.value= p.lider
+
+          // BARRA DE PROGRESO
+          div.progress-container
+            div.progress-labels
+              span Progreso
+              span #{p.progreso}%
+            div.progress-bar-bg
+              // El ancho depende del % real
+              div.progress-bar-fill(style=`width: ${p.progreso}%`)
+
+        div.card-footer
+          div.finance-data
+            div
+              span.label Inversión
+              strong $#{p.presupuesto.toLocaleString()}
+            div
+              span.label(title="Valor de Negocio") Valor
+              strong.value-green $#{p.valor_negocio.toLocaleString()}
+          
+          div.status-pill(class=p.salud.toLowerCase().replace(' ', '-'))
+            i.bx.bxs-circle
+            |  #{p.salud}

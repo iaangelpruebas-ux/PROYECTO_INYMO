@@ -1,0 +1,97 @@
+/* =========================================
+   ESTILOS: TIMELINE DE EVENTOS (CALENDARIO)
+   ========================================= */
+
+.timeline-container {
+  padding: 40px 0;
+  position: relative;
+}
+
+/* Línea Central */
+.timeline-container::before {
+  content: '';
+  position: absolute;
+  left: 140px; /* Coloca la línea después de la fecha */
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #e2e8f0;
+}
+
+.timeline-item {
+  display: flex;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+/* Fecha a la Izquierda */
+.timeline-date {
+  width: 100px;
+  text-align: right;
+  padding-right: 40px;
+  font-weight: 600;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.timeline-date .day {
+  font-size: 2rem;
+  color: var(--inymo-navy);
+}
+.timeline-date .year {
+  font-size: 0.9rem;
+  margin-top: -5px;
+}
+
+/* Puntos en la Línea */
+.timeline-dot {
+  position: absolute;
+  left: 139px; /* Alineado con la línea */
+  top: 10px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #cbd5e1;
+  z-index: 1;
+}
+
+/* Contenido del Evento */
+.timeline-content {
+  padding-left: 50px;
+  max-width: 600px;
+}
+.timeline-content h3 {
+  margin: 0 0 5px 0;
+  font-size: 1.2rem;
+  color: var(--inymo-navy);
+}
+.timeline-content p {
+  margin: 5px 0 10px 0;
+  color: #475569;
+}
+.project-link {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #3b82f6; /* Azul para el proyecto */
+  display: block;
+  margin-bottom: 5px;
+}
+.timeline-footer {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+.event-type {
+    font-weight: 700;
+    margin-right: 15px;
+}
+
+/* Colores por Tipo de Evento (PMBOK/Bitácora) */
+.hito .timeline-dot { background: var(--inymo-green); border-color: var(--inymo-green); box-shadow: 0 0 0 3px #dcfce7; }
+.incidente .timeline-dot { background: #ef4444; border-color: #ef4444; box-shadow: 0 0 0 3px #fee2e2; }
+.incidente h3 { color: #b91c1c; }
+.avance .timeline-dot { background: #3b82f6; border-color: #3b82f6; }
+.lección-aprendida .timeline-dot { background: #facc15; border-color: #facc15; }
+.festivo .timeline-dot, .reunión .timeline-dot { background: #a855f7; border-color: #a855f7; }
+.festivo h3 { color: #7f1d1d; }

@@ -1,0 +1,87 @@
+extends layout_app
+
+block content
+  // La línea link debe empezar pegada al borde izquierdo de la pestaña
+  link(rel='stylesheet', href='/stylesheets/proyectos.css') 
+
+  // --- ENCABEZADO DEL PROYECTO ---
+  div.module-header
+    div.header-title
+      a.back-link(href="/app/proyectos") 
+        i.bx.bx-left-arrow-alt
+        | Volver al Portafolio
+      h1 Crear Nuevo Proyecto
+      p.subtitle Define los parámetros estratégicos para empezar a operar.
+
+  div.form-container
+    // El formulario apunta a la ruta POST que crearemos en index.js
+    form.new-project-form(action="/app/proyectos/crear" method="POST")
+      
+      // --- SECCIÓN 1: IDENTIFICACIÓN Y ESTRATEGIA (PMBOK) ---
+      h3.form-section-title Información Básica y Valor
+      div.form-grid
+        
+        div.input-group
+          label(for="nombre") Nombre del Proyecto *
+          input#nombre(type="text" name="nombre" placeholder="Ej: Nave Industrial Colibrí" required)
+        
+        div.input-group
+          label(for="cliente") Cliente *
+          input#cliente(type="text" name="cliente" placeholder="Ej: Grupo Aceros de Occidente" required)
+          
+        div.input-group
+          label(for="lider") Líder del Proyecto (PM) *
+          input#lider(type="text" name="lider" placeholder="Ej: Ing. Ángel Velasco" required)
+          
+        div.input-group
+          label(for="codigo") Código Único (INY-25-00X)
+          input#codigo(type="text" name="codigo" placeholder="Ej: INY-25-015" required)
+
+        div.input-group
+          label(for="tipo_entrega") Tipo de Entrega (PMBOK)
+          select#tipo_entrega(name="tipo_entrega" required)
+            option(value="Predictivo") Predictivo (Cascada)
+            option(value="Híbrido") Híbrido (Mezcla)
+            option(value="Ágil") Ágil (Iterativo/Scrum)
+
+        div.input-group
+          label(for="valor_negocio") Valor de Negocio Estimado (USD) *
+          input#valor_negocio(type="number" name="valor_negocio" placeholder="Ej: 5200000" required)
+
+      // --- SECCIÓN 2: FINANZAS Y TIEMPO ---
+      h3.form-section-title Finanzas y Plazos
+      div.form-grid
+        div.input-group
+          label(for="presupuesto") Presupuesto Total (USD) *
+          input#presupuesto(type="number" name="presupuesto" placeholder="Ej: 4500000" required)
+        
+        div.input-group
+          label(for="fecha_fin") Fecha de Finalización Estimada *
+          input#fecha_fin(type="date" name="fecha_fin" required)
+
+      // --- SECCIÓN 3: ESTADO INICIAL ---
+      h3.form-section-title Estado Inicial
+      div.form-grid
+        div.input-group
+          label(for="riesgo") Nivel de Riesgo Inicial
+          select#riesgo(name="riesgo" required)
+            option(value="Bajo") Bajo
+            option(value="Medio") Medio
+            option(value="Alto") Alto
+        
+        div.input-group
+          label(for="fase") Fase Inicial
+          select#fase(name="fase" required)
+            option(value="Inicio") 1. Inicio
+            option(value="Planificación") 2. Planificación
+            option(value="Ejecución") 3. Ejecución
+            option(value="Cierre") 4. Cierre
+
+      // --- BOTÓN FINAL ---
+      button.btn-submit.btn-save(type="submit") 
+        i.bx.bx-save
+        |  Guardar Proyecto y Empezar 🚀
+
+  // Mensaje de éxito/error (Lo insertaremos si viene del servidor)
+  if mensaje
+    div.alert-message(class=mensaje.tipo)= mensaje.texto

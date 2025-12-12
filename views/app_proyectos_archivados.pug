@@ -1,0 +1,62 @@
+extends layout_app
+
+block content
+  link(rel='stylesheet', href='/stylesheets/proyectos.css')
+
+  div.module-header
+    div.header-title
+      a.back-link(href="/app/proyectos") 
+        i.bx.bx-left-arrow-alt
+        | Volver al Portafolio Activo
+      h1 Proyectos Archivados
+      p.subtitle Historial de proyectos completados o pausados.
+
+  // --- NUEVO BUSCADOR PARA ARCHIVADOS ---
+  form.search-form(action="/app/proyectos/archivados" method="GET")
+    input.search-input(type="text" name="q" placeholder="Buscar por Nombre o Código..." value=searchTerm || '')
+    button.search-btn(type="submit") 
+      i.bx.bx-search
+
+  // --- GRID DE PROYECTOS (PORTAFOLIO) ---
+  div.projects-grid
+    if proyectosArchivados.length === 0
+      div.no-projects
+        h3 No hay proyectos en el archivo que coincidan con la búsqueda.
+    else
+      each p in proyectosArchivados
+        div.project-card.archivado-card
+          
+          div.card-header
+            span.project-code= p.codigo
+            span.badge-type.outline ARCHIVADO
+
+          div.card-body
+            h3= p.nombre
+            p.client-name
+              i.bx.bx-building 
+              |  #{p.cliente}
+            
+            div.meta-info
+              div.meta-item
+                span.label Fase
+                span.value= p.fase
+              div.meta-item
+                span.label Líder
+                span.value= p.lider
+
+            div.progress-container
+              div.progress-labels
+                span Progreso
+                span 100%
+              div.progress-bar-bg
+                div.progress-bar-fill(style="width: 100%; background: #94a3b8;")
+
+          div.card-footer
+            // 👇 BOTÓN PARA RECUPERAR PROYECTO
+            a.btn-action.secondary(href=`/app/proyectos/recuperar/${p.id}`) 
+              i.bx.bx-undo
+              |  Recuperar
+            
+            div.status-pill.finalizado
+              i.bx.bxs-lock-alt
+              |  Archivado

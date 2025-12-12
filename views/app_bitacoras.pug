@@ -1,0 +1,64 @@
+extends layout_app
+
+block content
+  link(rel='stylesheet', href='/stylesheets/bitacora.css')
+
+  h1.module-title Bitácora Digital de Proyectos 📝
+  p.module-subtitle Registro de Eventos, Incidentes y Lecciones Aprendidas
+
+  div.bitacora-grid
+    
+    // --- COLUMNA 1: FORMULARIO DE REGISTRO (INPUT) ---
+    div.bitacora-form-container
+      div.form-card
+        h3.form-title Nuevo Registro
+        form(action="/app/bitacora/registrar" method="POST")
+          
+          div.input-group
+            label(for="proyecto") Proyecto Asociado
+            select#proyecto(name="proyecto_id" required)
+              option(value="") Selecciona un proyecto...
+              // Llenamos el SELECT con los proyectos reales de la DB
+              each p in proyectosLista
+                option(value=p.id)= p.nombre + ' (' + p.codigo + ')'
+
+          div.input-group
+            label(for="titulo") Título del Evento
+            input#titulo(type="text" name="titulo" required)
+
+          div.input-group
+            label(for="descripcion") Descripción/Detalle
+            textarea#descripcion(name="descripcion" rows="4" required)
+
+          div.input-group
+            label(for="tipo_registro") Tipo de Registro
+            select#tipo_registro(name="tipo_registro" required)
+              option(value="Avance") Avance
+              option(value="Incidente") Incidente
+              option(value="Lección Aprendida") Lección Aprendida
+              option(value="Riesgo") Nuevo Riesgo
+
+          div.input-group
+            label(for="autor") Autor (Quién reporta)
+            input#autor(type="text" name="autor" value=session.nombreUsuario || 'Usuario Desconocido' readonly)
+          
+          button.btn-submit(type="submit") 
+            | Registrar Bitácora 💾
+
+    // --- COLUMNA 2: FEED CRONOLÓGICO (OUTPUT) ---
+    div.bitacora-feed-container
+      h3.feed-title Feed de Actividad
+      
+      div.timeline-feed
+        each reg in registros
+          // La clase del item cambia por el tipo de registro (rojo, verde, azul)
+          div.feed-item(class=reg.tipo_registro.toLowerCase().replace(' ', '-'))
+            div.feed-dot
+            div.feed-content
+              span.feed-type= reg.tipo_registro
+              strong.feed-title= reg.titulo
+              p.feed-description= reg.descripcion
+              div.feed-meta
+                span.author= reg.autor
+                span.date= reg.fecha_registro.toLocaleString()
+                span.project-link(title="Proyecto Asociado") (P-#{reg.proyecto_id})

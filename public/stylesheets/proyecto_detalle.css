@@ -1,0 +1,608 @@
+/* =========================================
+   ESTILOS: FICHA TÉCNICA DE PROYECTO (BASE)
+   ========================================= */
+
+/* Header del Detalle */
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+}
+
+.detail-header h1 {
+  color: var(--inymo-navy);
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 5px;
+  margin-top: 5px;
+}
+
+/* Enlace de Volver */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: var(--inymo-navy);
+}
+
+/* Meta Tags (Código, Salud, Líder) */
+.meta-tags {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.tag {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.tag.navy {
+  background: var(--inymo-navy);
+  color: white;
+}
+
+.tag.green {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.tag.outline {
+  border: 1px solid #cbd5e1;
+  color: #475569;
+}
+
+/* Botones de acción Header */
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.btn-action {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  margin-left: 10px;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.btn-action.primary {
+  background: var(--inymo-green);
+  color: white;
+}
+
+.btn-action.primary:hover {
+  background: #65a30d;
+}
+
+.btn-action.secondary {
+  background: white;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+}
+
+.btn-action.secondary:hover {
+  background: #f1f5f9;
+}
+
+/* Grid de Contenido (2 Columnas) */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  margin-bottom: 25px;
+}
+
+/* Tarjetas Internas */
+.detail-card {
+  background: white;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.detail-card h3 {
+  margin-top: 0;
+  color: var(--inymo-navy);
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+/* Estado Financiero (Gráfica Circular) */
+.finance-circle {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 10px 0;
+}
+
+.circle-graph {
+  --pct: 50;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: conic-gradient(var(--inymo-green) calc(var(--pct) * 1%), #f1f5f9 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.circle-graph::before {
+  content: '';
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 50%;
+}
+
+.circle-graph span {
+  position: relative;
+  z-index: 1;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--inymo-navy);
+}
+
+.finance-info p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.finance-info strong {
+  color: var(--inymo-navy);
+  display: block;
+  font-size: 1.1rem;
+}
+
+.finance-info strong.red {
+  color: #ef4444;
+}
+
+
+/* =========================================
+   --- ESTILOS: MÉTRICAS AVANZADAS (EVM, SPI/CPI) y TOOLTIPS ---
+   ========================================= */
+
+.finance-info .separator {
+  border: none;
+  border-top: 1px dashed #e2e8f0;
+  margin: 15px 0 10px 0;
+}
+
+.finance-info .separator.small {
+  margin: 10px 0 5px 0;
+}
+
+.metric-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.metric-item strong {
+  font-weight: 700;
+}
+
+.red-text {
+  color: #ef4444 !important;
+}
+
+.green-text {
+  color: var(--inymo-green) !important;
+}
+
+/* Tooltip Styles (Para SPI/CPI) */
+[data-tooltip] {
+  position: relative;
+  cursor: help;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.9);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  z-index: 100;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  bottom: 120%;
+}
+
+
+/* =========================================
+   Lista de Riesgos 
+   ========================================= */
+.risk-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.risk-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.risk-item:last-child {
+  border-bottom: none;
+}
+
+.risk-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.risk-badge.alto {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.risk-badge.medio {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.risk-badge.bajo {
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* Cronograma (Timeline) */
+.timeline {
+  position: relative;
+  padding-left: 20px;
+  border-left: 2px solid #e2e8f0;
+  margin-top: 15px;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -26px;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border: 2px solid #cbd5e1;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+/* Estados de la Timeline */
+.timeline-item.completado .timeline-dot {
+  background: var(--inymo-green);
+  border-color: var(--inymo-green);
+}
+
+.timeline-item.en-curso .timeline-dot {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px #dbeafe;
+}
+
+.timeline-item.pendiente .timeline-dot {
+  background: white;
+  border-color: #cbd5e1;
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-content strong {
+  color: #334155;
+  font-size: 1rem;
+}
+
+.timeline-content span {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.status-label {
+  display: inline-block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-top: 5px;
+  color: var(--inymo-green);
+  letter-spacing: 0.5px;
+}
+
+
+/* =========================================
+   --- ESTILOS: CALENDARIO DE HISTORIAL DIARIO (FIX: Diseño vertical) ---
+   ========================================= */
+.subtitle-calendar {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+.calendar-grid-container {
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  margin-bottom: 25px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  /* 7 días a la semana */
+  gap: 5px;
+  margin-bottom: 15px;
+}
+
+.calendar-day {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.1;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: 0.2s;
+  border: 1px solid transparent;
+}
+
+/* Estilos específicos para el texto dentro de la celda */
+.calendar-day .day-name {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.calendar-day .day-num {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--inymo-navy);
+}
+
+/* Ajuste de color para días no laborales (morado) */
+.calendar-day[style*="#a855f7"] .day-name,
+.calendar-day[style*="#a855f7"] .day-num {
+  color: white;
+}
+
+.calendar-day:hover {
+  border: 1px solid var(--inymo-navy);
+  transform: scale(1.05);
+}
+
+.calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  font-size: 0.8rem;
+  padding-top: 10px;
+}
+
+.legend-item {
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #334155;
+  font-weight: 500;
+}
+
+
+/* =========================================
+   --- ESTILOS: CONTROL OPERATIVO (WBS Y CAMBIOS) ---
+   ========================================= */
+
+.control-operativo-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 25px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 30px;
+}
+
+/* WBS Table (Matriz de Alcance) */
+.wbs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.wbs-table th,
+.wbs-table td {
+  padding: 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.wbs-table th {
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+.wbs-table td {
+  color: #334155;
+}
+
+/* Status en la WBS */
+.wbs-table td.status {
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 5px 10px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.wbs-table td.status.completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.wbs-table td.status.in-progress {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.wbs-table td.status.pending {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+
+/* Control de Cambios */
+.changes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.change-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f8fafc;
+  font-size: 0.95rem;
+}
+
+.change-item:last-child {
+  border-bottom: none;
+}
+
+.change-item strong {
+  color: var(--inymo-navy);
+}
+
+.change-item .impact {
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.change-item.approved .impact {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.change-item.rejected .impact {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.change-item.pending .impact {
+  background: #fef08a;
+  color: #a16207;
+}
+
+
+/* =========================================
+   --- ESTILOS: SECCIÓN EJECUTIVA Y BITÁCORA ---
+   ========================================= */
+
+/* Estilos para el reporte ejecutivo (La parte de abajo) */
+.report-sections-row {
+  margin-top: 40px;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 30px;
+}
+
+/* Tarjeta para la Narrativa (debe ocupar todo el ancho) */
+.detail-card.full-width {
+  margin-bottom: 25px;
+}
+
+.narrative-content p {
+  white-space: pre-wrap;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #334155;
+}
+
+/* Contenedor para Metas y Lecciones (Se dividen en dos columnas) */
+.sections-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.sections-container h3 {
+  font-size: 1.1rem;
+  color: var(--inymo-navy);
+}
+
+.lesson-item {
+  margin-bottom: 10px;
+  padding-left: 15px;
+  position: relative;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #475569;
+}
+
+/* Icono de check para Lecciones Aprendidas */
+.lesson-item::before {
+  content: '\2022';
+  color: var(--inymo-green);
+  font-weight: bold;
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
+}
+
+.lesson-item.empty::before {
+  content: none;
+}
