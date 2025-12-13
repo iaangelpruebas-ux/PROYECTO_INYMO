@@ -11,14 +11,17 @@ var session = require('express-session');
 // 2. IMPORTACIÓN DE ROUTERS
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+
 var proyectosRouter = require('./routes/proyectos');
 var proyectosDetalleRouter = require('./routes/proyectos_detalles');
+
 var bitacoraRouter = require('./routes/bitacora');
 var repositorioRouter = require('./routes/repositorio');
 
-// Módulos de Inventario y Logística (Separados)
-var inventarioRouter = require('./routes/inventario'); // Logística y Distribución en Obras
-var logisticaRouter = require('./routes/logistica');   // Transferencias específicas
+var finanzasRouter = require('./routes/finanzas');
+
+var inventarioRouter = require('./routes/inventario');
+var logisticaRouter = require('./routes/logistica');
 
 var app = express();
 
@@ -37,34 +40,38 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
   secret: process.env.SESSION_SECRET || 'inymo_secret_key_2025',
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false } // Cambiar a true si usas HTTPS en producción
+  saveUninitialized: false, // ✅ mejor práctica (no crea sesión vacía)
+  cookie: {
+    secure: false,          // true solo con HTTPS
+    httpOnly: true,         // ✅ más seguro
+    sameSite: 'lax'         // ✅ recomendado
+  }
 }));
 
 // 6. DEFINICIÓN DE RUTAS (MONTADO)
 
-// Rutas base y de autenticación
-app.use('/', indexRouter); 
+// Base / auth
+app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-// Operativo: Gestión de Proyectos
+// ✅ Módulos /app (específicos)
 app.use('/app/proyectos', proyectosRouter);
-app.use('/app/proyectos', proyectosDetalleRouter); 
+app.use('/app/proyectos', proyectosDetalleRouter);
 
-// Operativo: Bitácora y Planos
 app.use('/app/bitacora', bitacoraRouter);
 app.use('/app/repositorio', repositorioRouter);
 
-// Logística y Almacén (Ordenados por jerarquía)
-app.use('/app/inventario', inventarioRouter); // Dashboard de Distribución/Obras
-app.use('/app/logistica', logisticaRouter);   // Centro de Transferencias
+app.use('/app/finanzas', finanzasRouter);
 
-// 7. MANEJO DE ERRORES (404)
+app.use('/app/inventario', inventarioRouter);
+app.use('/app/logistica', logisticaRouter);
+
+// 7. 404
 app.use(function(req, res, next) {
   next(createError(404));
 });
 
-// 8. MANEJO DE ERRORES GENERALES
+// 8. ERRORES GENERALES
 app.use(function(err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
