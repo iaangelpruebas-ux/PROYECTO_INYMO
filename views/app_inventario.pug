@@ -1,0 +1,273 @@
+extends layout_app
+
+block content
+  script(src="https://cdn.jsdelivr.net/npm/chart.js")
+
+  .container-fluid.py-4.bg-light
+    //- HEADER OPERATIVO
+    .d-flex.justify-content-between.align-items-center.mb-4
+      div
+        h2.fw-bold.text-dark.mb-0 🚚 Operación y Logística
+        p.text-muted.mb-0 Distribución de materiales por proyecto, transferencias y control de rendimiento.
+      div.d-flex.gap-2
+        a.btn.btn-white.border.shadow-sm.text-dark(href="/app/logistica") 
+           i.bx.bx-cog.me-2
+           | Configuración y Compras
+        button.btn.shadow.px-4.text-white(onclick="document.getElementById('tabAsignar-tab').click()" style="background-color: #67d826ff;") 
+          i.bx.bx-transfer.me-1
+          | Asignar Material a Obra
+
+    //- DASHBOARD DE INTELIGENCIA (GRÁFICAS DETALLADAS)
+    .row.g-4.mb-4
+      //- KPI: VALOR TOTAL GLOBAL
+      .col-xl-3.col-md-6
+        .card.border-0.shadow-sm.bg-dark.text-white.h-100(style="background: linear-gradient(145deg, #1e293b, #0f172a);")
+          .card-body.d-flex.flex-column.justify-content-between.p-4
+            div
+              div.d-flex.justify-content-between.align-items-start.mb-3
+                div.bg-white.bg-opacity-10.p-2.rounded-3
+                   i.bx.bx-line-chart.fs-3(style="color: #67d826ff;")
+                span.badge.bg-opacity-25.border(style="background-color: #67d826ff; color: #67d826ff; border-color: #67d826ff !important;") Activo Total
+              h6.text-uppercase.small.text-white-50.fw-bold Inversión Total en Stock
+              h2.fw-bold.mb-0.text-white= "$" + kpis.total.toLocaleString('es-MX', {maximumFractionDigits: 2})
+            div.mt-3
+              small.text-white-50 *Suma de Almacén + Obras.
+
+      //- GRÁFICA 1: DONA (DISTRIBUCIÓN POR CATEGORÍA)
+      .col-xl-4.col-md-6
+        .card.border-0.shadow-sm.h-100
+          .card-header.bg-white.border-0.pt-4.pb-0.d-flex.justify-content-between
+             h6.fw-bold.text-dark.text-uppercase.small 📦 Volumen por Categoría
+             i.bx.bx-pie-chart-alt-2.text-muted
+          .card-body.d-flex.flex-column.justify-content-center.align-items-center
+             div(style="width: 210px; height: 210px;")
+               canvas#chartStock
+             div.mt-3.text-center
+               small.text-muted Proporción de materiales registrados.
+
+      //- GRÁFICA 2: BARRAS (TOP INVERSIÓN - VERDE INYMO)
+      .col-xl-5.col-md-12
+        .card.border-0.shadow-sm.h-100
+          .card-header.bg-white.border-0.pt-4.pb-0.d-flex.justify-content-between
+             h6.fw-bold.text-dark.text-uppercase.small 💰 Mayor Inversión (Top 5)
+             i.bx.bx-bar-chart-alt-2.text-muted
+          .card-body
+             div(style="height: 230px; width: 100%;")
+                canvas#chartInversion
+
+    //- PESTAÑAS DE NAVEGACIÓN
+    ul.nav.nav-tabs.mb-4#logTabs(role="tablist")
+      li.nav-item
+        button.nav-link.active.fw-bold#tabObras-tab(data-bs-toggle="tab" data-bs-target="#tabObras") 🏗️ Materiales en Obra (En Uso)
+      li.nav-item
+        button.nav-link.fw-bold#tabAsignar-tab(data-bs-toggle="tab" data-bs-target="#tabAsignar") 🏭 Disponible en Bodega
+
+    .tab-content
+      //- CONTENIDO 1: TARJETAS DE PROYECTOS (DISTRIBUCIÓN)
+      .tab-pane.fade.show.active#tabObras
+         if obras && obras.length > 0
+            .row.g-4
+               each proy in obras
+                  .col-md-6.col-xl-4
+                     //- CORRECCIÓN DE RECORTE: Se añade overflow visible a la tarjeta y al body
+                     .card.h-100.shadow-sm.border-0(style="overflow: visible !important;")
+                        .card-header.bg-white.py-3.border-bottom.d-flex.justify-content-between.align-items-center
+                           div
+                              h6.fw-bold.mb-0.text-dark
+                                 i.bx.bx-building-house.me-2(style="color: #67d826ff;")
+                                 | #{proy.proyecto_nombre}
+                              small.text-muted Valor Asignado: 
+                              span.fw-bold(style="color: #67d826ff;")= "$" + proy.valor_total_proyecto.toLocaleString('es-MX', {maximumFractionDigits: 0})
+                           div.p-2.rounded(style="background-color: rgba(103, 216, 38, 0.1);")
+                              i.bx.bx-map-pin(style="color: #67d826ff;")
+                        .card-body.p-0(style="overflow: visible !important;")
+                           //- CORRECCIÓN DE RECORTE: List-group con overflow visible
+                           ul.list-group.list-group-flush(style="max-height: none; overflow: visible !important;")
+                              each mat in proy.materiales
+                                 li.list-group-item.d-flex.justify-content-between.align-items-center.px-3.py-3(style="overflow: visible !important;")
+                                    div
+                                       div.fw-bold.text-dark= mat.nombre
+                                       small.text-muted
+                                          | Cantidad: 
+                                          span.fw-bold.text-dark #{mat.cantidad} #{mat.unidad}
+                                    div.dropdown(style="position: static;")
+                                       button.btn.btn-sm.btn-light.border(data-bs-toggle="dropdown" aria-expanded="false")
+                                          i.bx.bx-dots-vertical-rounded
+                                       ul.dropdown-menu.dropdown-menu-end.shadow(style="z-index: 1060;")
+                                          li: h6.dropdown-header Acciones de Logística
+                                          li: a.dropdown-item(href="#" onclick=`abrirModalUniv('${mat.stock_id}', '${mat.nombre}', ${mat.cantidad}, '${mat.unidad}', 'PROYECTO')`) 
+                                             i.bx.bx-transfer-alt.me-2.text-primary
+                                             | Transferir a otra Obra
+                                          li: a.dropdown-item(href="#" onclick=`abrirModalUniv('${mat.stock_id}', '${mat.nombre}', ${mat.cantidad}, '${mat.unidad}', 'BODEGA')`) 
+                                             i.bx.bx-undo.me-2.text-success
+                                             | Devolver a Bodega Central
+                                          li: hr.dropdown-divider
+                                          li: a.dropdown-item.text-danger(href="#" onclick=`abrirModalUniv('${mat.stock_id}', '${mat.nombre}', ${mat.cantidad}, '${mat.unidad}', 'BAJA')`) 
+                                             i.bx.bx-trash.me-2
+                                             | Reportar Baja/Consumo
+         else
+            .text-center.py-5.bg-white.rounded.border
+               i.bx.bx-info-circle.fs-1.text-muted.mb-3
+               h5.text-muted No hay materiales asignados a proyectos.
+
+      //- CONTENIDO 2: TABLA PARA ASIGNAR (JALAR DE BODEGA)
+      .tab-pane.fade#tabAsignar
+         .card.shadow-sm.border-0
+            .card-header.bg-white.py-3
+               .d-flex.justify-content-between.align-items-center
+                  h6.fw-bold.mb-0 📋 Material Libre para Asignación
+                  div.input-group.input-group-sm(style="max-width: 300px;")
+                     span.input-group-text.bg-white: i.bx.bx-search
+                     input.form-control(placeholder="Buscar material..." onkeyup="filtrarTablaOperativa(this.value)")
+            .card-body.p-0
+               .table-responsive
+                  table#tablaOperativa.table.table-hover.align-middle.mb-0
+                     thead.bg-light: tr
+                        th.ps-4 Material / Categoría
+                        th.text-center Stock Libre
+                        th.text-end.pe-4 Acción Rápida
+                     tbody
+                        if disponibles && disponibles.length > 0
+                           each item in disponibles
+                              tr
+                                 td.ps-4
+                                    div.fw-bold.text-dark= item.nombre
+                                    small.badge.bg-light.text-dark.border= item.categoria
+                                 td.text-center
+                                    span.fw-bold.fs-5(style="color: #67d826ff;")= item.libre
+                                    small.text-muted.ms-1= item.unidad_medida
+                                 td.text-end.pe-4
+                                    button.btn.btn-sm.text-white.px-3(onclick=`abrirModalUniv('${item.stock_ids[0]}', '${item.nombre}', ${item.libre}, '${item.unidad_medida}', 'PROYECTO')` style="background-color: #67d826ff;")
+                                       | Asignar a Obra
+                                       i.bx.bx-right-arrow-alt.ms-1
+                        else
+                           tr: td.text-center.py-5(colspan="3") No hay material libre en bodega central.
+
+    //- ================= MODAL UNIVERSAL (EL MOTOR DE MOVIMIENTOS) =================
+    #modalUniversal.modal.fade(tabindex="-1")
+      .modal-dialog.modal-dialog-centered
+        .modal-content.border-0.shadow-lg
+          form(action="/app/inventario/transferencia" method="POST")
+            .modal-header.bg-dark.text-white
+              h5.modal-title#modalTitulo 🔄 Movimiento de Material
+              button.btn-close.btn-close-white(type="button" data-bs-dismiss="modal")
+            .modal-body.p-4
+              input#univStockId(type="hidden" name="stock_origen_id")
+              input#univDestinoTipo(type="hidden" name="destino_tipo")
+              
+              .d-flex.align-items-center.mb-4.p-3.rounded.bg-light.border
+                 div.p-3.bg-white.rounded-circle.shadow-sm.me-3
+                    i.bx.bx-package.fs-2(style="color: #67d826ff;")
+                 div
+                    small.text-muted.text-uppercase.fw-bold Selección:
+                    h5.fw-bold.mb-0.text-dark#univNombre --
+                    small.text-muted Disponible: <span id="univMax" class="fw-bold text-dark"></span>
+
+              .mb-3#divDestino
+                 label.form-label.fw-bold Proyecto Destino
+                 select.form-select.form-select-lg(name="destino_id_proyecto")
+                    option(value="" disabled selected) -- Selecciona la Obra --
+                    if proyectos
+                       each p in proyectos
+                          option(value=p.id)= p.nombre
+              
+              .mb-3.d-none#divMensajeFijo
+                 label.form-label.fw-bold Acción Destino
+                 input.form-control.bg-light(readonly id="inputDestinoFijo")
+
+              .mb-3
+                 label.form-label.fw-bold Cantidad a Mover
+                 div.input-group.input-group-lg
+                    input#univCant.form-control(type="number" name="cantidad" step="0.01" required placeholder="0.00")
+                    span.input-group-text.bg-white#univUnidadLabel --
+
+            .modal-footer.bg-light
+               button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Cancelar
+               button.btn.btn-dark.px-5(type="submit") Confirmar Movimiento
+
+  script.
+    // CONFIGURACIÓN DE GRÁFICAS (DATOS REALES DEL SERVIDOR)
+    const chartData = !{JSON.stringify(chartData)};
+    
+    // 1. Dona de Distribución
+    new Chart(document.getElementById('chartStock'), {
+        type: 'doughnut',
+        data: {
+            labels: chartData.catNombres,
+            datasets: [{
+                data: chartData.catVolumen,
+                backgroundColor: ['#0f172a', '#67d826ff', '#10b981', '#f59e0b', '#3b82f6', '#64748b'],
+                borderWidth: 0,
+                hoverOffset: 15
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '75%',
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // 2. Barras de Inversión (Verde INYMO)
+    new Chart(document.getElementById('chartInversion'), {
+        type: 'bar',
+        data: {
+            labels: chartData.topNombres,
+            datasets: [{
+                label: 'Valor en MXN',
+                data: chartData.topValores,
+                backgroundColor: '#67d826ff',
+                borderRadius: 5,
+                barThickness: 25
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { callback: v => '$' + v.toLocaleString() } },
+                y: { grid: { display: false } }
+            }
+        }
+    });
+
+    // LÓGICA DEL MODAL UNIVERSAL
+    function abrirModalUniv(id, nombre, max, unidad, tipo) {
+        document.getElementById('univStockId').value = id;
+        document.getElementById('univNombre').innerText = nombre;
+        document.getElementById('univMax').innerText = max + " " + unidad;
+        document.getElementById('univUnidadLabel').innerText = unidad;
+        document.getElementById('univCant').max = max;
+        document.getElementById('univCant').value = "";
+        document.getElementById('univDestinoTipo').value = tipo;
+
+        const divDestino = document.getElementById('divDestino');
+        const divFijo = document.getElementById('divMensajeFijo');
+        const inpFijo = document.getElementById('inputDestinoFijo');
+        const titulo = document.getElementById('modalTitulo');
+
+        if(tipo === 'PROYECTO') {
+            divDestino.classList.remove('d-none');
+            divFijo.classList.add('d-none');
+            titulo.innerText = "🏗️ Transferencia a Obra";
+        } else if(tipo === 'BODEGA') {
+            divDestino.classList.add('d-none');
+            divFijo.classList.remove('d-none');
+            inpFijo.value = "🏭 Almacén Central (Retorno)";
+            titulo.innerText = "♻️ Devolución de Material";
+        } else {
+            divDestino.classList.add('d-none');
+            divFijo.classList.remove('d-none');
+            inpFijo.value = "⚠️ Baja Definitiva (Consumo/Merma)";
+            titulo.innerText = "🗑️ Reportar Baja";
+        }
+        new bootstrap.Modal(document.getElementById('modalUniversal')).show();
+    }
+
+    function filtrarTablaOperativa(t) {
+        const rows = document.querySelectorAll('#tablaOperativa tbody tr');
+        rows.forEach(r => r.style.display = r.innerText.toLowerCase().includes(t.toLowerCase()) ? '' : 'none');
+    }

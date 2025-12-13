@@ -3,7 +3,7 @@ var router = express.Router();
 
 // 1. IMPORTAMOS EL MÓDULO DE REPOSITORIO
 var repositorioRouter = require('./repositorio');
-
+var inventarioRouter = require('./inventario');
 // 🔌 CONFIGURACIÓN DE BASE DE DATOS (NEON)
 const { Pool } = require('pg');
 const pool = new Pool({
@@ -64,7 +64,7 @@ router.get('/app/dashboard', verificarSesion, function(req, res, next) {
 // --- RUTA DEL REPOSITORIO CONECTADA ---
 // Al entrar a /app/repositorio, se usa la lógica de routes/repositorio.js
 router.use('/app/repositorio', verificarSesion, repositorioRouter);
-
+router.use('/app/inventario', verificarSesion, inventarioRouter);
 
 // ¡IMPORTANTE! 
 // Las rutas /app/proyectos/* están en routes/proyectos.js

@@ -1,0 +1,290 @@
+extends layout_app
+
+block content
+  script(src="https://cdn.jsdelivr.net/npm/chart.js")
+
+  .container-fluid.py-4.bg-light
+    //- HEADER ADMINISTRATIVO
+    .d-flex.justify-content-between.align-items-center.mb-4
+      div
+        h2.fw-bold.text-dark.mb-0 ⚙️ Administración de Suministros
+        p.text-muted.mb-0 Control de compras, proveedores y catálogo maestro de materiales.
+      div.d-flex.gap-2
+        a.btn.btn-outline-primary.shadow-sm(href="/app/inventario") 
+           i.bx.bx-map-alt.me-2
+           | Ir a Distribución Operativa
+        
+        button.btn.btn-white.border.shadow-sm.text-dark(data-bs-toggle="modal" data-bs-target="#modalGestionCategorias") 
+           i.bx.bx-category.me-1
+           | Categorías
+        button.btn.btn-white.border.shadow-sm.text-dark(data-bs-toggle="modal" data-bs-target="#modalGestionProveedores") 
+           i.bx.bx-user.me-1
+           | Proveedores
+        button.btn.btn-white.border.shadow-sm.text-dark(data-bs-toggle="modal" data-bs-target="#modalGestionCatalogo") 
+           i.bx.bx-list-ul.me-1
+           | Catálogo
+        
+        button.btn.btn-dark.shadow.px-4(data-bs-toggle="modal" data-bs-target="#modalRegistro") 
+          i.bx.bx-cart-add.me-2
+          | Registrar Compra
+
+    //- KPI: VALOR LIBRE EN BODEGA
+    .row.mb-4
+      .col-xl-4.col-md-6
+        .card.border-0.shadow-sm.bg-white.h-100
+          .card-body.d-flex.align-items-center.p-4
+             div.p-3.rounded-circle.bg-success.bg-opacity-10.me-4(style="color: #67d826ff;")
+                i.bx.bx-money.fs-1
+             div
+                h6.text-uppercase.text-muted.fw-bold.mb-1 Valor Libre en Bodega
+                h2.mb-0.fw-bold.text-dark= "$" + kpis.total.toLocaleString('es-MX', {maximumFractionDigits: 2})
+                small.text-success(style="color: #67d826ff !important;") *Material disponible para asignar a obras
+
+    //- TABLA DE EXISTENCIAS EN BODEGA
+    .card.shadow.border-0.mb-5
+      .card-header.bg-white.py-3.border-bottom
+         .row.align-items-center
+            .col-md-6: h5.fw-bold.mb-0 📦 Almacén Central (Inventario Disponible)
+            .col-md-6.text-end
+               div.input-group.shadow-sm.w-auto.d-inline-flex
+                  span.input-group-text.bg-white.border-end-0: i.bx.bx-search
+                  input#buscadorBodega.form-control.border-start-0(type="text" placeholder="Filtrar almacén..." onkeyup="filtrarTablaAdmin(this.value)")
+      
+      .card-body.p-0
+         .table-responsive(style="max-height: 550px; overflow-y: auto;")
+            table#tablaBodega.table.table-hover.align-middle.mb-0
+               thead.bg-light.sticky-top
+                 tr
+                   th.ps-4 Material / Categoría
+                   th.text-center Cantidad Libre
+                   th.text-end Valor Unit.
+                   th.text-end Valor Total
+                   th.text-end.pe-4 Acción
+               tbody
+                 if stock && stock.length > 0
+                   each item in stock
+                     tr
+                       td.ps-4
+                          div.fw-bold.text-dark= item.nombre
+                          span.badge.bg-light.text-dark.border.small= item.categoria
+                       td.text-center
+                          span.fw-bold.fs-5(style="color: #67d826ff;")= item.cantidad_libre
+                          small.text-muted.ms-1= item.unidad_medida
+                       td.text-end.text-muted= "$" + parseFloat(item.precio_promedio_mxn).toLocaleString('es-MX', {maximumFractionDigits:2})
+                       td.text-end.fw-bold= "$" + (parseFloat(item.cantidad_libre) * parseFloat(item.precio_promedio_mxn)).toLocaleString('es-MX', {maximumFractionDigits:2})
+                       td.text-end.pe-4
+                          button.btn.btn-sm.btn-outline-primary(onclick="window.location.href='/app/inventario'") Enviar a Obra
+                 else
+                   tr: td.text-center.py-5(colspan="5")
+                      i.bx.bx-box.fs-1.text-muted.mb-3
+                      p.text-muted No hay stock registrado en bodega.
+
+    //- ================= MODALES DE GESTIÓN (INTEGRADOS) =================
+
+    //- 1. MODAL CATEGORÍAS
+    #modalGestionCategorias.modal.fade(tabindex="-1")
+      .modal-dialog.modal-dialog-centered
+        .modal-content.border-0.shadow-lg
+          .modal-header.bg-light
+            h5.modal-title Gestión de Categorías
+            button.btn-close(data-bs-dismiss="modal")
+          .modal-body.p-4
+            form.mb-4(action="/app/logistica/nueva-categoria" method="POST")
+               label.form-label.small.text-muted.fw-bold AGREGAR NUEVA
+               .input-group
+                  input.form-control(name="nombre" placeholder="Ej. Plomería" required)
+                  button.btn.btn-success(type="submit") + Crear
+            hr
+            label.form-label.small.text-muted.fw-bold EDITAR O ARCHIVAR
+            input#buscarCat.form-control.mb-3(type="text" placeholder="🔍 Buscar categoría..." onkeyup="filtrarListaModales('buscarCat', 'listaCategorias')")
+            ul#listaCategorias.list-group.list-group-flush.border.rounded(style="max-height: 250px; overflow-y: auto;")
+               li.list-group-item.text-center.text-muted.small.py-4(id="msgVacioCat") Escribe para buscar resultados.
+               if listaCategorias
+                 each cat in listaCategorias
+                   li.list-group-item.item-lista.d-none.px-3
+                     span.d-none= cat.nombre.toLowerCase()
+                     div.view-mode.d-flex.justify-content-between.align-items-center
+                        span.fw-bold= cat.nombre
+                        div
+                           button.btn.btn-sm.btn-light.text-secondary.me-1(onclick="toggleEdicion(this)"): i.bx.bx-pencil
+                           a.btn.btn-sm.btn-light.text-danger(href=`/app/logistica/eliminar-categoria/${cat.id}` onclick="return confirm('¿Archivar categoría?')"): i.bx.bx-trash
+                     form.edit-mode.d-none.d-flex.align-items-center.gap-2(action=`/app/logistica/editar-categoria/${cat.id}` method="POST")
+                        input.form-control.form-control-sm(name="nuevo_nombre" value=cat.nombre)
+                        button.btn.btn-sm.btn-success(type="submit"): i.bx.bx-check
+                        button.btn.btn-sm.btn-secondary(type="button" onclick="toggleEdicion(this)"): i.bx.bx-x
+
+    //- 2. MODAL PROVEEDORES
+    #modalGestionProveedores.modal.fade(tabindex="-1")
+      .modal-dialog.modal-dialog-centered
+        .modal-content.border-0.shadow-lg
+          .modal-header.bg-light
+            h5.modal-title Directorio de Proveedores
+            button.btn-close(data-bs-dismiss="modal")
+          .modal-body.p-4
+             form.mb-4.p-3.bg-light.rounded.border(action="/app/logistica/nuevo-proveedor" method="POST")
+               h6.small.fw-bold.text-primary.mb-3 + REGISTRAR NUEVO PROVEEDOR
+               .mb-2: input.form-control(name="nombre_empresa" placeholder="Razón Social / Empresa" required)
+               .row.g-2
+                  .col-6: input.form-control.form-control-sm(name="contacto" placeholder="Nombre Contacto")
+                  .col-6: input.form-control.form-control-sm(name="telefono" placeholder="Teléfono")
+               .mt-3.text-end: button.btn.btn-sm.btn-primary(type="submit") Guardar Registro
+             hr
+             label.form-label.small.fw-bold BUSCAR PARA EDITAR O ARCHIVAR
+             input#buscarProv.form-control.form-control-sm.mb-3(type="text" placeholder="🔍 Escribe nombre de empresa..." onkeyup="filtrarListaModales('buscarProv', 'listaProv')")
+             ul#listaProv.list-group.list-group-flush.border.rounded(style="max-height: 250px; overflow-y: auto;")
+                li.list-group-item.text-center.text-muted.small.py-4(id="msgVacioProv") Usa el buscador para gestionar proveedores.
+                if proveedores
+                  each p in proveedores
+                    li.list-group-item.item-lista.d-none.px-3
+                      span.d-none= p.nombre_empresa.toLowerCase()
+                      div.view-mode.d-flex.justify-content-between.align-items-center
+                         div
+                            strong.text-dark= p.nombre_empresa
+                            div.small.text-muted= p.telefono || 'Sin Teléfono'
+                         div
+                            button.btn.btn-sm.btn-light.text-secondary.me-1(onclick="toggleEdicion(this)"): i.bx.bx-pencil
+                            a.btn.btn-sm.btn-light.text-danger(href=`/app/logistica/eliminar-proveedor/${p.id}` onclick="return confirm('¿Archivar?')"): i.bx.bx-archive-in
+                      form.edit-mode.d-none.w-100(action=`/app/logistica/editar-proveedor/${p.id}` method="POST")
+                        .input-group.input-group-sm.mb-1
+                           input.form-control.fw-bold(name="nombre_empresa" value=p.nombre_empresa)
+                           button.btn.btn-success(type="submit"): i.bx.bx-check
+                        .d-flex.gap-1
+                           input.form-control.form-control-sm(name="contacto" value=p.contacto_nombre placeholder="Contacto")
+                           input.form-control.form-control-sm(name="telefono" value=p.telefono placeholder="Tel")
+                           button.btn.btn-sm.btn-secondary(type="button" onclick="toggleEdicion(this)"): i.bx.bx-x
+
+    //- 3. MODAL CATÁLOGO
+    #modalGestionCatalogo.modal.fade(tabindex="-1")
+      .modal-dialog.modal-lg.modal-dialog-centered
+        .modal-content.border-0.shadow-lg
+          .modal-header.bg-light
+            h5.modal-title Catálogo Maestro de Materiales
+            button.btn-close(data-bs-dismiss="modal")
+          .modal-body.p-4
+            form.row.g-2.mb-4.p-3.bg-light.rounded.border(action="/app/logistica/nuevo-articulo" method="POST")
+              .col-12: h6.small.fw-bold.text-primary + AGREGAR NUEVO MATERIAL
+              .col-md-5: input.form-control(name="nombre" placeholder="Nombre (Ej. Cemento Gris)" required)
+              .col-md-3: select.form-select(name="categoria")
+                   if listaCategorias
+                      each c in listaCategorias
+                         option(value=c.nombre)= c.nombre
+              .col-md-2: select.form-select(name="unidad")
+                   option(value="pza") Pza
+                   option(value="kg") Kg
+                   option(value="m") m
+                   option(value="ton") Ton
+              .col-md-2: button.btn.btn-primary.w-100(type="submit") Guardar
+            hr
+            input#buscarMat.form-control.mb-3(type="text" placeholder="🔍 Buscar material..." onkeyup="filtrarListaModales('buscarMat', 'listaMat')")
+            ul#listaMat.list-group.list-group-flush.border.rounded(style="max-height: 250px; overflow-y: auto;")
+               li.list-group-item.text-center.text-muted.small.py-4(id="msgVacioMat") Escribe para buscar resultados.
+               if catalogo
+                 each c in catalogo
+                   li.list-group-item.item-lista.d-none.px-3.py-2
+                     span.d-none= c.nombre.toLowerCase()
+                     div.d-flex.justify-content-between.align-items-center
+                        div
+                           span.fw-bold.text-dark= c.nombre
+                           small.badge.bg-light.text-dark.ms-2.border #{c.categoria}
+                           small.text-muted.ms-1 (#{c.unidad_medida})
+                        a.btn.btn-sm.btn-light.text-danger(href=`/app/logistica/eliminar-articulo/${c.id}` onclick="return confirm('¿Archivar material?')"): i.bx.bx-archive-in
+
+    //- MODAL REGISTRO ENTRADA (COMPRA)
+    #modalRegistro.modal.fade(tabindex="-1")
+        .modal-dialog.modal-lg.modal-dialog-centered
+          .modal-content.border-0.shadow-lg
+            form(action="/app/logistica/registrar-entrada" method="POST")
+              .modal-header.bg-dark.text-white
+                h5.modal-title 🛒 Registro de Compra / Entrada
+                button.btn-close.btn-close-white(data-bs-dismiss="modal")
+              .modal-body.p-4
+                .mb-3
+                   label.form-label.fw-bold Seleccionar Material
+                   select.form-select.form-select-lg(name="articulo_id" required)
+                      option(value="" disabled selected) -- Buscar material... --
+                      if catalogo
+                        each c in catalogo
+                           option(value=c.id)= c.nombre + " (" + c.unidad_medida + ")"
+                
+                .row.mb-3
+                   .col-md-6
+                      label.form-label.fw-bold Tipo de Entrada
+                      select.form-select#tipoEntrada(name="tipo_movimiento")
+                         option(value="COMPRA") 💰 Compra Nueva
+                         option(value="SOBRANTE") ♻️ Devolución / Recuperación
+                   .col-md-6
+                      label.form-label.fw-bold Cantidad Recibida
+                      input.form-control.form-control-lg(name="cantidad" type="number" step="0.01" required placeholder="0.00")
+                
+                .p-3.bg-light.rounded.border.mb-3#rowCompra
+                   .row
+                     .col-md-6.mb-2
+                        label.form-label.small.fw-bold Proveedor
+                        select.form-select.form-select-sm(name="proveedor_id")
+                           option(value="") -- Opcional --
+                           if proveedores
+                              each p in proveedores
+                                 option(value=p.id)= p.nombre_empresa
+                     .col-md-6.mb-2
+                        label.form-label.small.fw-bold Costo Total del Lote ($)
+                        input.form-control.form-control-sm(name="monto_mxn" type="number" step="0.01" placeholder="$0.00")
+                
+                .mb-1
+                   label.form-label.small.fw-bold Destino Final
+                   select.form-select.form-select-sm(name="proyecto_id")
+                      option(value="") 🏭 Almacén Central (Stock)
+                      if proyectos
+                         each p in proyectos
+                            option(value=p.id)= "🏗️ Obra: " + p.nombre
+
+              .modal-footer.bg-light
+                 button.btn.btn-secondary(data-bs-dismiss="modal") Cancelar
+                 button.btn.btn-success.px-5(type="submit") Guardar Registro en Sistema
+
+  script.
+    // LÓGICA DE FILTRADO Y EDICIÓN
+    function toggleEdicion(btn) {
+        const li = btn.closest('li');
+        const view = li.querySelector('.view-mode');
+        const edit = li.querySelector('.edit-mode');
+        if(view.classList.contains('d-flex')) {
+            view.classList.replace('d-flex', 'd-none');
+            edit.classList.replace('d-none', 'd-block');
+        } else {
+            edit.classList.replace('d-block', 'd-none');
+            view.classList.replace('d-none', 'd-flex');
+        }
+    }
+
+    function normalizar(t) { return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+
+    function filtrarListaModales(inputId, listaId) {
+        const input = document.getElementById(inputId);
+        const filtro = normalizar(input.value);
+        const lista = document.getElementById(listaId);
+        const items = lista.getElementsByClassName('item-lista');
+        const msg = lista.querySelector('li[id^="msgVacio"]');
+
+        if (filtro.length === 0) {
+            if(msg) msg.classList.remove('d-none');
+            for (let i = 0; i < items.length; i++) items[i].classList.add('d-none');
+            return;
+        }
+        if(msg) msg.classList.add('d-none');
+        for (let i = 0; i < items.length; i++) {
+            const texto = normalizar(items[i].getElementsByTagName("span")[0].textContent);
+            items[i].classList.toggle('d-none', texto.indexOf(filtro) === -1);
+        }
+    }
+
+    function filtrarTablaAdmin(t) {
+        const rows = document.querySelectorAll('#tablaBodega tbody tr');
+        rows.forEach(r => r.style.display = r.innerText.toLowerCase().includes(t.toLowerCase()) ? '' : 'none');
+    }
+
+    const tipoE = document.getElementById('tipoEntrada');
+    if(tipoE) {
+        tipoE.addEventListener('change', function(){
+            document.getElementById('rowCompra').style.display = (this.value === 'SOBRANTE') ? 'none' : 'block';
+        });
+    }
