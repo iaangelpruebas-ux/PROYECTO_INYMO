@@ -1,129 +1,84 @@
 var express = require('express');
 var router = express.Router();
 
+// 1. IMPORTAMOS EL MÓDULO DE REPOSITORIO
+var repositorioRouter = require('./repositorio');
+
 // 🔌 CONFIGURACIÓN DE BASE DE DATOS (NEON)
 const { Pool } = require('pg');
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 /* --- MIDDLEWARE DE SEGURIDAD (El Guardia) --- */
 const verificarSesion = (req, res, next) => {
-  if (req.session.usuarioLogueado) {
-    next();
-  } else {
-    res.redirect('/login');
-  }
+  if (req.session.usuarioLogueado) {
+    next();
+  } else {
+    res.redirect('/login');
+  }
 };
 
 /* ==========================================
-   1. MUNDO PÚBLICO (Sin seguridad)
-   ========================================== */
+   1. MUNDO PÚBLICO (Sin seguridad)
+   ========================================== */
 
 router.get('/', function(req, res, next) {
-  res.render('intro'); 
+  res.render('intro'); 
 });
 
 router.get('/lobby', function(req, res, next) {
-  res.render('lobby'); 
+  res.render('lobby'); 
 });
 
 router.get('/login', function(req, res, next) {
-  if (req.session.usuarioLogueado) {
-    res.redirect('/app/dashboard');
-  } else {
-    res.render('login');
-  }
+  if (req.session.usuarioLogueado) {
+    res.redirect('/app/dashboard');
+  } else {
+    res.render('login');
+  }
 });
 
 router.post('/login', function(req, res, next) {
-  const { username, password } = req.body;
-  if (username === 'admin' && password === 'inymo123') {
-    req.session.usuarioLogueado = true;
-    req.session.nombreUsuario = 'Ángel Velasco';
-    res.redirect('/app/dashboard');
-  } else {
-    res.render('login', { error: 'Datos incorrectos 🚫' });
-  }
+  const { username, password } = req.body;
+  if (username === 'admin' && password === 'inymo123') {
+    req.session.usuarioLogueado = true;
+    req.session.nombreUsuario = 'Ángel Velasco';
+    res.redirect('/app/dashboard');
+  } else {
+    res.render('login', { error: 'Datos incorrectos 🚫' });
+  }
 });
 
 /* ==========================================
-   2. MUNDO PRIVADO / WORKSPACE (Protegido)
-   ========================================== */
+   2. MUNDO PRIVADO / WORKSPACE (Protegido)
+   ========================================== */
 
 router.get('/app/dashboard', verificarSesion, function(req, res, next) {
-  res.render('app_dashboard'); 
+  res.render('app_dashboard'); 
 });
 
-// ❌ ATENCIÓN: Todas las rutas /app/proyectos/* (B, C, D, E, F, G, I, J, K) 
-// han sido movidas a routes/proyectos.js
+// --- RUTA DEL REPOSITORIO CONECTADA ---
+// Al entrar a /app/repositorio, se usa la lógica de routes/repositorio.js
+router.use('/app/repositorio', verificarSesion, repositorioRouter);
 
 
-/* H. MÓDULO BITÁCORA (Conectado a Neon DB) */
-router.get('/app/bitacora', verificarSesion, async (req, res, next) => {
-  try {
-    const client = await pool.connect();
-    
-    const resultBitacora = await client.query('SELECT * FROM bitacora ORDER BY fecha_registro DESC');
-    const registros = resultBitacora.rows;
-    
-    const resultProyectos = await client.query('SELECT id, nombre, codigo FROM proyectos ORDER BY nombre ASC');
-    const proyectosLista = resultProyectos.rows;
+// ¡IMPORTANTE! 
+// Las rutas /app/proyectos/* están en routes/proyectos.js
+// Las rutas /app/bitacora/* están en routes/bitacora.js
+// Las rutas /app/proyectos/:id/* (detalle) están en routes/proyectos_detalle.js
 
-    client.release();
-
-    res.render('app_bitacora', {
-      title: 'Bitácora Digital | INYMO',
-      registros: registros,
-      proyectosLista: proyectosLista
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.send("Error al cargar la Bitácora: " + err);
-  }
-});
-
-/* H2. REGISTRAR BITÁCORA (Acción POST) */
-router.post('/app/bitacora/registrar', verificarSesion, async function(req, res, next) {
-  const data = req.body;
-  
-  const insertQuery = `
-    INSERT INTO bitacora (proyecto_id, titulo, descripcion, tipo_registro, autor)
-    VALUES ($1, $2, $3, $4, $5);
-  `;
-  
-  const values = [
-    parseInt(data.proyecto_id),
-    data.titulo, 
-    data.descripcion, 
-    data.tipo_registro, 
-    data.autor
-  ];
-
-  try {
-    const client = await pool.connect();
-    await client.query(insertQuery, values);
-    client.release();
-
-    res.redirect('/app/bitacora'); 
-
-  } catch (err) {
-    console.error("Error al registrar bitácora:", err);
-    res.send("Error al registrar la bitácora: " + err);
-  }
-});
-
+// --- OTRAS RUTAS PENDIENTES DE MOVER ---
 
 /* L. VISTA DE CALENDARIO/EVENTOS (Timeline Unificado) */
 router.get('/app/eventos', verificarSesion, async function(req, res, next) {
     try {
         const client = await pool.connect();
         
-        // 1. OBTENER REGISTROS DE BITÁCORA (Eventos reales)
+        // 1. OBTENER REGISTROS DE BITÁCORA
         const resultBitacora = await client.query('SELECT proyecto_id, titulo, descripcion, tipo_registro AS tipo, fecha_registro AS fecha, autor FROM bitacora');
         const eventosBitacora = resultBitacora.rows.map(e => ({
             ...e,
@@ -132,7 +87,7 @@ router.get('/app/eventos', verificarSesion, async function(req, res, next) {
             isHito: false
         }));
 
-        // 2. OBTENER HITOS DE PROYECTOS (Eventos programados)
+        // 2. OBTENER HITOS DE PROYECTOS
         const resultProyectos = await client.query(`SELECT id, nombre, codigo, fecha_fin FROM proyectos WHERE salud <> 'Archivado' AND fecha_fin IS NOT NULL`);
         
         const eventosHitos = resultProyectos.rows.map(p => ({
@@ -146,7 +101,7 @@ router.get('/app/eventos', verificarSesion, async function(req, res, next) {
             isHito: true
         }));
         
-        // 3. EVENTOS FIJOS (Simulación de días festivos)
+        // 3. EVENTOS FIJOS
         const hoy = new Date();
         const manana = new Date(hoy);
         manana.setDate(hoy.getDate() + 1);
@@ -174,7 +129,6 @@ router.get('/app/eventos', verificarSesion, async function(req, res, next) {
     }
 });
 
-
 router.get('/app/finanzas', verificarSesion, (req, res) => {
   res.send("<h1>💰 Finanzas y Cotizaciones</h1>");
 });
@@ -191,10 +145,9 @@ router.get('/app/analytics', verificarSesion, (req, res) => {
   res.send("<h1>📊 Inteligencia de Negocios</h1>");
 });
 
-
 /* ==========================================
-   3. SALIDA
-   ========================================== */
+   3. SALIDA
+   ========================================== */
 
 router.get('/logout', function(req, res, next) {
   req.session.destroy();

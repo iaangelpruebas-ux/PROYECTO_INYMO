@@ -1,0 +1,110 @@
+extends layout_app
+
+block content
+  //- Estilos específicos para esta vista
+  style.
+    .bg-navy-header { background-color: #0b1120; color: white; }
+    .btn-action { transition: all 0.2s; }
+    .btn-action:hover { transform: translateY(-2px); }
+
+  .container-fluid
+    //- BREADCRUMB (Navegación)
+    nav(aria-label="breadcrumb")
+      ol.breadcrumb
+        li.breadcrumb-item
+          a.text-decoration-none(href="/app/repositorio") 📂 Repositorio Central
+        li.breadcrumb-item.active(aria-current="page")= proyecto.nombre
+
+    //- ENCABEZADO DEL PROYECTO
+    .d-flex.justify-content-between.align-items-center.mb-4.pb-3.border-bottom
+      div
+        h2.fw-bold.text-dark.mb-1= proyecto.nombre
+        p.text-muted.mb-0 Documentación técnica y planos del proyecto #{proyecto.codigo}
+      div
+        button.btn.btn-primary.shadow-sm(data-bs-toggle="modal" data-bs-target="#modalSubir") 
+          i.fas.fa-cloud-upload-alt.me-2
+          | Subir Nuevo Documento
+
+    //- GRID DE ARCHIVOS
+    .row
+      if planos.length > 0
+        each plano in planos
+          .col-md-6.col-lg-4.col-xl-3.mb-4
+            .card.h-100.shadow-sm.border-0
+              //- Cabecera con Estatus
+              .card-header.bg-white.border-bottom-0.d-flex.justify-content-between.align-items-center.pt-3
+                span.badge.bg-light.text-dark.border= plano.disciplina
+                if plano.estatus == 'aprobado'
+                  span.badge.bg-success.bg-opacity-10.text-success.border.border-success Aprobado
+                else
+                  span.badge.bg-warning.bg-opacity-10.text-warning.border.border-warning En Revisión
+              
+              //- Cuerpo de la tarjeta
+              .card-body.text-center
+                .my-3
+                    //- Icono de PDF
+                    i.fas.fa-file-pdf.text-danger(style="font-size: 3.5rem;")
+                
+                h6.fw-bold.text-dark.text-truncate(title=plano.titulo)= plano.titulo
+                p.small.text-muted.mb-1 Versión: #{plano.version}
+                small.text-muted Por: #{plano.subido_por}
+              
+              //- Pie con Botones de Acción
+              .card-footer.bg-white.border-top-0.pb-3
+                .d-flex.gap-2
+                  a.btn.btn-outline-primary.w-50.btn-sm.btn-action(href=plano.url_archivo target="_blank" title="Ver en navegador") 
+                    i.fas.fa-eye.me-1
+                    | Ver
+                  a.btn.btn-outline-dark.w-50.btn-sm.btn-action(href=plano.url_archivo download title="Descargar archivo") 
+                    i.fas.fa-download.me-1
+                    | Bajar
+      else
+        //- ESTADO VACÍO (Empty State)
+        .col-12.text-center.py-5
+          .p-5.bg-light.rounded-3.border.border-dashed
+            i.bx.bx-cloud-upload.text-muted.mb-3(style="font-size: 4rem;")
+            h4.fw-bold.text-dark Carpeta Vacía
+            p.text-muted Aún no hay documentos en este proyecto.
+            button.btn.btn-outline-primary.mt-2(data-bs-toggle="modal" data-bs-target="#modalSubir") 
+              | Subir el primer plano
+
+  //- MODAL PARA SUBIR ARCHIVO (Oculto)
+  #modalSubir.modal.fade(tabindex="-1")
+    .modal-dialog
+      .modal-content
+        form(action="/app/repositorio/subir" method="POST" enctype="multipart/form-data")
+          .modal-header.bg-navy-header
+            h5.modal-title.text-white Subir Documento
+            button.btn-close.btn-close-white(data-bs-dismiss="modal")
+          
+          .modal-body
+            //- ID DEL PROYECTO (Oculto pero vital)
+            input(type="hidden" name="proyecto_id" value=proyecto.id)
+            input(type="hidden" name="subido_por" value="Ing. Ángel Velasco")
+            
+            .mb-3
+              label.form-label Título del Documento
+              input.form-control(name="titulo" placeholder="Ej: Plano Estructural N3" required)
+            
+            .row
+                .col-6.mb-3
+                  label.form-label Disciplina
+                  select.form-select(name="disciplina")
+                    option(value="Arquitectónico") Arquitectónico
+                    option(value="Estructural") Estructural
+                    option(value="Instalaciones") Instalaciones
+                    option(value="Topografía") Topografía
+                    option(value="Legal") Legal / Contratos
+                .col-6.mb-3
+                  label.form-label Versión
+                  input.form-control(name="version" value="v1.0")
+
+            .mb-3
+              label.form-label Archivo (PDF, DWG, IMG)
+              input.form-control(type="file" name="archivo_plano" required)
+              
+          .modal-footer
+            button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Cancelar
+            button.btn.btn-primary(type="submit") 
+              i.fas.fa-save.me-2
+              | Guardar en Repositorio

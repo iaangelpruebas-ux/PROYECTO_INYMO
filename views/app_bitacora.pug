@@ -1,0 +1,301 @@
+extends layout_app
+
+block content
+  style.
+    /* ESTILOS BASE */
+    .filter-bar { background: white; padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; gap: 15px; align-items: flex-end; border: 1px solid #e2e8f0; flex-wrap: wrap;}
+    .filter-group { display: flex; flex-direction: column; gap: 5px; }
+    .filter-select, .filter-input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; color: #334155; min-width: 150px; }
+    .btn-filter { background: #0f172a; color: white; border: none; padding: 9px 20px; border-radius: 6px; cursor: pointer; height: 38px; }
+    .btn-new-log { background: #2563eb; color: white; border: none; padding: 9px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px; height: 38px;}
+    .btn-new-log:hover { background: #1d4ed8; }
+
+    /* TIMELINE */
+    .timeline-container { position: relative; max-width: 800px; margin: 0 auto; padding: 20px 0; }
+    .timeline-container::after { content: ''; position: absolute; width: 2px; background-color: #e2e8f0; top: 0; bottom: 0; left: 20px; margin-left: -1px; }
+    .timeline-entry { position: relative; margin-bottom: 30px; padding-left: 50px; }
+    .timeline-dot { position: absolute; left: 10px; top: 0; width: 20px; height: 20px; border-radius: 50%; background: white; border: 4px solid #cbd5e1; z-index: 10; }
+    .timeline-dot.incidente { border-color: #ef4444; }
+    .timeline-dot.avance { border-color: #22c55e; }
+    .timeline-dot.nota { border-color: #3b82f6; }
+
+    .entry-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: relative; }
+    .entry-card::before { content: " "; position: absolute; top: 6px; right: 100%; height: 0; width: 0; border: 7px solid transparent; border-right-color: #e2e8f0; pointer-events: none; }
+    .entry-header { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
+    .entry-project { font-size: 0.75em; font-weight: 700; text-transform: uppercase; color: #64748b; }
+    .entry-date { font-size: 0.8em; color: #94a3b8; }
+    .entry-title { margin: 0 0 5px 0; font-size: 1.1em; color: #0f172a; font-weight: 600; }
+    .entry-desc { color: #475569; font-size: 0.95em; line-height: 1.5; white-space: pre-line; }
+    .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.7em; font-weight: 600; text-transform: uppercase; float: right;}
+    .bg-incidente { background: #fee2e2; color: #991b1b; }
+    .bg-avance { background: #dcfce7; color: #166534; }
+    .bg-nota { background: #e0f2fe; color: #075985; }
+
+    /* FILES GRID */
+    .files-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 15px; }
+    .file-item { border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; position: relative; background: #f8fafc; transition: transform 0.2s; text-decoration: none; display: block; }
+    .file-item:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    .file-preview-img { width: 100%; height: 100px; object-fit: cover; display: block; }
+    .file-preview-icon { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 2.5em; color: #64748b; flex-direction: column; }
+    .file-name { font-size: 0.7em; padding: 4px; text-align: center; background: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-top: 1px solid #f1f5f9; color: #334155; }
+    
+    /* MODAL GRANDE */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(2px); }
+    .modal-content { background-color: #fff; margin: 40px auto; padding: 35px; border-radius: 16px; width: 700px; max-width: 95%; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+    .close { color: #94a3b8; float: right; font-size: 32px; font-weight: bold; cursor: pointer; transition: color 0.2s; }
+    .close:hover { color: #ef4444; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95em; color: #334155; }
+    .form-control { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1em; background: #f8fafc; }
+    .btn-submit { width: 100%; background: #1e293b; color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1em; margin-top: 15px; font-weight: 600; transition: background 0.2s;}
+    .btn-edit { background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2em; transition: color 0.2s; }
+    .btn-edit:hover { color: #3b82f6; }
+    /* BOTONES DE ACCIÓN */
+    .btn-icon { background: transparent; border: none; cursor: pointer; font-size: 1.2em; transition: color 0.2s; margin-left: 5px; }
+    .btn-edit { color: #94a3b8; }
+    .btn-edit:hover { color: #3b82f6; } /* Azul al pasar mouse */
+    .btn-delete { color: #94a3b8; }
+    .btn-delete:hover { color: #ef4444; } /* Rojo al pasar mouse */
+
+    /* ESTILOS PARA LISTA DE ARCHIVOS EN EDICIÓN */
+    .edit-file-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+    .edit-file-chip { 
+        background: #f1f5f9; padding: 5px 10px; border-radius: 20px; font-size: 0.85em; 
+        display: flex; align-items: center; border: 1px solid #e2e8f0; 
+    }
+    .btn-delete-file { 
+        margin-left: 8px; color: #ef4444; cursor: pointer; font-weight: bold; font-size: 1.1em;
+        background: none; border: none; padding: 0;
+    }
+    .btn-delete-file:hover { color: #b91c1c; }
+
+  div.header-section(style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;")
+    div
+      h1(style="margin:0;") Bitácora Global
+      p(style="color:#64748b; margin-top:5px;") Supervisión centralizada con evidencia multimedia.
+    
+    button.btn-new-log(onclick="openModal('modalRegistro')") 
+      i.bx.bx-plus-circle
+      | Nuevo Registro
+
+  // --- FILTROS ---
+  form.filter-bar(action="/app/bitacora" method="GET")
+    div.filter-group
+      label(style="font-size: 0.8em; font-weight: bold;") Proyecto:
+      select.filter-select(name="proyecto")
+        option(value="Todos") Ver Todos
+        each p in listaProyectos
+          option(value=p.id selected=(filtros.proyecto == p.id))= p.nombre
+    
+    div.filter-group
+      label(style="font-size: 0.8em; font-weight: bold;") Tipo:
+      select.filter-select(name="tipo")
+        option(value="Todos") Todos
+        option(value="Avance" selected=(filtros.tipo == 'Avance')) Avance
+        option(value="Incidente" selected=(filtros.tipo == 'Incidente')) Incidente
+        option(value="Nota" selected=(filtros.tipo == 'Nota')) Nota
+    
+    div.filter-group
+      label(style="font-size: 0.8em; font-weight: bold;") Buscar:
+      div(style="position: relative;")
+        input.filter-input(type="text" name="q" value=filtros.q placeholder="Palabra clave..." style="padding-left: 30px;")
+        i.bx.bx-search(style="position: absolute; left: 10px; top: 10px; color: #94a3b8;")
+
+    div(style="margin-top: auto;")
+      button.btn-filter(type="submit") Aplicar
+
+  // --- LÍNEA DE TIEMPO ---
+  div.timeline-container
+    if registros.length > 0
+      each r in registros
+        div.timeline-entry
+          div.timeline-dot(class=(r.tipo_registro || 'nota').toLowerCase().replace(' ', '-'))
+          
+          div.entry-card
+            div.entry-header
+              span.entry-project 
+                i.bx.bx-building(style="margin-right: 5px;")
+                | #{r.proyecto_nombre}
+              
+              div(style="display: flex; gap: 5px; align-items: center;")
+                span.entry-date(style="margin-right: 5px;") #{r.fecha_formato}
+                
+                // BOTÓN EDITAR
+                button.btn-icon.btn-edit(onclick=`editarRegistro('${r.id}', '${r.titulo}', '${r.tipo_registro}', \`${r.descripcion}\`, ${JSON.stringify(r.evidencias || [])})` title="Editar")
+                  i.bx.bx-pencil
+                
+                // BOTÓN ELIMINAR (NUEVO)
+                a.btn-icon.btn-delete(href=`/app/bitacora/eliminar/${r.id}` onclick="return confirm('¿Estás seguro de eliminar este reporte permanentemente? Esta acción no se puede deshacer.')" title="Eliminar")
+                  i.bx.bx-trash
+
+            h3.entry-title= r.titulo
+              span.badge(class=`bg-${(r.tipo_registro || 'nota').toLowerCase().split(' ')[0]}`)= r.tipo_registro
+            
+            p.entry-desc= r.descripcion
+
+            if r.evidencias && r.evidencias.length > 0
+              div.files-grid
+                each archivo in r.evidencias
+                  a.file-item(href=archivo.url target="_blank" title=archivo.nombre_original)
+                    if archivo.tipo === 'imagen'
+                      img.file-preview-img(src=archivo.url)
+                    else if archivo.tipo === 'video'
+                       div.file-preview-icon
+                         i.bx.bx-play-circle(style="color: #ef4444;")
+                         span(style="font-size: 0.3em; margin-top:5px;") VIDEO
+                    else if archivo.tipo === 'pdf'
+                       div.file-preview-icon
+                         i.bx.bxs-file-pdf(style="color: #ef4444;")
+                         span(style="font-size: 0.3em; margin-top:5px;") PDF
+                    else if archivo.tipo === 'excel'
+                       div.file-preview-icon
+                         i.bx.bxs-file-json(style="color: #16a34a;")
+                         span(style="font-size: 0.3em; margin-top:5px;") EXCEL
+                    else if archivo.tipo === 'word'
+                       div.file-preview-icon
+                         i.bx.bxs-file-doc(style="color: #2563eb;")
+                         span(style="font-size: 0.3em; margin-top:5px;") DOC
+                    else
+                       div.file-preview-icon
+                         i.bx.bx-file-blank
+                    div.file-name= archivo.nombre_original
+
+            div(style="margin-top: 10px; text-align: right;")
+              a(href=`/app/proyectos/${r.proyecto_id}` style="font-size: 0.8em; color: #3b82f6; text-decoration: none; font-weight: 500;") 
+                | Ir al proyecto →
+    else
+      div(style="text-align: center; padding: 40px; color: #94a3b8;")
+        i.bx.bx-folder-open(style="font-size: 3em; margin-bottom: 10px; display: block;")
+        p No se encontraron registros.
+
+  // --- MODAL NUEVO REGISTRO ---
+  div#modalRegistro.modal
+    div.modal-content
+      span.close(onclick="closeModal('modalRegistro')") &times;
+      h2(style="margin-top:0; font-size: 1.5em; margin-bottom: 20px;") Nuevo Reporte Multimedia
+      
+      form(action="/app/bitacora/registrar" method="POST" enctype="multipart/form-data")
+        div.form-group
+          label Proyecto
+          select.form-control(name="proyecto_id" required)
+            each p in listaProyectos
+              option(value=p.id)= p.nombre
+        div.form-group(style="display: flex; gap: 20px;")
+          div(style="flex: 1;")
+            label Tipo de Evento
+            select.form-control(name="tipo_registro")
+              option(value="Avance") 🟢 Avance
+              option(value="Incidente") 🔴 Incidente
+              option(value="Nota") 🔵 Nota
+          div(style="flex: 2;")
+            label Título Breve
+            input.form-control(type="text" name="titulo" required placeholder="Ej: Reporte de calidad")
+        div.form-group
+          label Descripción Detallada
+          textarea.form-control(name="descripcion" rows="5" placeholder="Escribe aquí todos los detalles de lo sucedido...")
+        div.form-group
+          label Evidencias (Fotos, Videos, Documentos)
+          div(style="background: #f1f5f9; padding: 15px; border-radius: 8px; border: 2px dashed #cbd5e1; text-align: center;")
+            input.form-control(type="file" name="evidencias" multiple accept=".jpg,.jpeg,.png,.mp4,.pdf,.doc,.docx,.xls,.xlsx" style="border:none; background:transparent;")
+            small(style="color: #64748b; display:block; margin-top:5px;") Arrastra archivos aquí o haz clic para seleccionar (Max 10).
+        button.btn-submit(type="submit") Guardar y Subir Reporte
+
+  // --- MODAL EDITAR (CON ELIMINACIÓN DE ARCHIVOS) ---
+  div#modalEditar.modal
+    div.modal-content
+      span.close(onclick="closeModal('modalEditar')") &times;
+      h2(style="margin-top:0; font-size: 1.5em; margin-bottom: 20px;") Editar Registro
+      
+      form#formEditar(method="POST" enctype="multipart/form-data")
+        div.form-group(style="display: flex; gap: 20px;")
+          div(style="flex: 1;")
+            label Tipo
+            select#editTipo.form-control(name="tipo_registro")
+              option(value="Avance") 🟢 Avance
+              option(value="Incidente") 🔴 Incidente
+              option(value="Nota") 🔵 Nota
+          div(style="flex: 2;")
+            label Título
+            input#editTitulo.form-control(type="text" name="titulo" required)
+        
+        div.form-group
+          label Descripción
+          textarea#editDesc.form-control(name="descripcion" rows="5")
+        
+        // AQUÍ MOSTRAMOS LOS ARCHIVOS EXISTENTES PARA BORRARLOS
+        div.form-group
+          label Archivos Actuales:
+          div#listaArchivosActuales.edit-file-list
+            // Se llena con Javascript
+        
+        div.form-group
+          label Agregar más Archivos (Opcional)
+          div(style="background: #f1f5f9; padding: 15px; border-radius: 8px; border: 2px dashed #cbd5e1; text-align: center;")
+            input.form-control(type="file" name="evidencias" multiple accept=".jpg,.jpeg,.png,.mp4,.pdf,.doc,.docx,.xls,.xlsx" style="border:none; background:transparent;")
+            small(style="color: #64748b;") Los archivos nuevos se sumarán a los existentes.
+
+        button.btn-submit(type="submit" style="background: #f59e0b;") Actualizar Registro
+
+  script.
+    let registroIdActual = null;
+
+    function openModal(id) { document.getElementById(id).style.display = "block"; }
+    function closeModal(id) { document.getElementById(id).style.display = "none"; }
+    
+    // Función para abrir el modal de edición y llenar datos
+    function editarRegistro(id, titulo, tipo, descripcion, archivos) {
+      registroIdActual = id; // Guardamos el ID globalmente
+      
+      document.getElementById('editTitulo').value = titulo;
+      document.getElementById('editTipo').value = tipo;
+      document.getElementById('editDesc').value = descripcion;
+      document.getElementById('formEditar').action = '/app/bitacora/editar/' + id;
+      
+      // Llenar lista de archivos con botoncito de eliminar
+      const container = document.getElementById('listaArchivosActuales');
+      container.innerHTML = ''; // Limpiar previo
+      
+      if(archivos && archivos.length > 0) {
+        archivos.forEach(archivo => {
+          const chip = document.createElement('div');
+          chip.className = 'edit-file-chip';
+          chip.innerHTML = `
+            <i class='bx bx-file' style='margin-right:5px;'></i> 
+            <span style='max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;'>${archivo.nombre_original}</span>
+            <button type="button" class="btn-delete-file" onclick="eliminarArchivo('${id}', '${archivo.nombre_original}')">&times;</button>
+          `;
+          container.appendChild(chip);
+        });
+      } else {
+        container.innerHTML = '<span style="color:#94a3b8; font-size:0.9em; font-style:italic;">Sin archivos adjuntos.</span>';
+      }
+
+      openModal('modalEditar');
+    }
+
+    // Función AJAX para eliminar archivo sin recargar
+    function eliminarArchivo(idRegistro, nombreArchivo) {
+      if(!confirm('¿Seguro que quieres eliminar este archivo?')) return;
+
+      fetch('/app/bitacora/eliminar-archivo/' + idRegistro, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre_archivo: nombreArchivo })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if(data.success) {
+          // Recargar página para ver cambios
+          window.location.reload();
+        } else {
+          alert('Error al eliminar archivo');
+        }
+      })
+      .catch(err => console.error(err));
+    }
+
+    window.onclick = function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.style.display = "none";
+      }
+    }

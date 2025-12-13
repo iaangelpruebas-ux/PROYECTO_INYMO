@@ -1,0 +1,103 @@
+extends layout_app
+
+block content
+  .container-fluid
+    //- ENCABEZADO
+    .d-flex.justify-content-between.align-items-center.mb-4
+      div
+        h2.fw-bold.text-dark 📐 Ingeniería y Planos
+        p.text-muted Documentación técnica centralizada
+      div
+        //- Botón que activa el Modal
+        button.btn.btn-primary(type="button" data-bs-toggle="modal" data-bs-target="#modalSubirPlano") 
+          i.fas.fa-cloud-upload-alt.me-2
+          | Subir Nuevo Plano
+
+    //- FILTROS (Pestañas de Navegación)
+    .card.mb-4.border-0.shadow-sm
+      .card-body.p-2
+        ul.nav.nav-pills.nav-fill
+          li.nav-item
+            a.nav-link(href="/app/repositorio" class=(filtroActivo === 'Todos' ? 'active' : '')) Todos
+          li.nav-item
+            a.nav-link(href="/app/repositorio?disciplina=Arquitectónico" class=(filtroActivo === 'Arquitectónico' ? 'active' : '')) 🏛️ Arquitectónicos
+          li.nav-item
+            a.nav-link(href="/app/repositorio?disciplina=Estructural" class=(filtroActivo === 'Estructural' ? 'active' : '')) 🏗️ Estructurales
+          li.nav-item
+            a.nav-link(href="/app/repositorio?disciplina=Instalaciones" class=(filtroActivo === 'Instalaciones' ? 'active' : '')) ⚡ Instalaciones (MEP)
+
+    //- GRID DE TARJETAS
+    .row
+      if planos.length > 0
+        each plano in planos
+          .col-md-4.col-lg-3.mb-4
+            .card.h-100.shadow-sm.border-0
+              //- Cabecera
+              .card-header.bg-white.border-bottom-0.d-flex.justify-content-between.align-items-center.pt-3
+                span.badge.bg-secondary= plano.disciplina
+                //- Lógica de Estatus
+                case plano.estatus
+                  when 'aprobado'
+                    span.badge.bg-success #[i.fas.fa-check.me-1] Aprobado
+                  when 'revision'
+                    span.badge.bg-warning.text-dark #[i.fas.fa-clock.me-1] En Revisión
+                  default
+                    span.badge.bg-danger #[i.fas.fa-ban.me-1] Obsoleto
+
+              .card-body.text-center
+                .my-3
+                  i.fas.fa-file-pdf.fa-3x.text-danger
+                h5.card-title.fw-bold.text-dark.text-truncate(title=plano.titulo)= plano.titulo
+                p.text-muted.small.mb-1 Versión: #{plano.version}
+                p.card-text.small.text-muted Por: #{plano.subido_por}
+
+              .card-footer.bg-white.border-top-0.pb-3
+                .d-flex.gap-2
+                  //- BOTÓN VER (Abre en nueva pestaña)
+                  a.btn.btn-outline-primary.w-50.btn-sm(href=plano.url_archivo target="_blank" title="Ver Documento") 
+                    i.fas.fa-eye
+                  //- BOTÓN DESCARGAR (Fuerza descarga)
+                  a.btn.btn-outline-dark.w-50.btn-sm(href=plano.url_archivo download title="Descargar") 
+                    i.fas.fa-download
+      else
+        .col-12.text-center.py-5
+          .text-muted
+            i.fas.fa-folder-open.fa-3x.mb-3
+            h4 No hay planos en esta categoría.
+            p Selecciona otra categoría o sube un nuevo documento.
+
+  //- MODAL PARA SUBIR PLANO (Oculto por defecto)
+  #modalSubirPlano.modal.fade(tabindex="-1" aria-hidden="true")
+    .modal-dialog
+      .modal-content
+        form(action="/app/repositorio/subir" method="POST" enctype="multipart/form-data")
+          .modal-header
+            h5.modal-title Subir Documento al Repositorio
+            button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Close")
+          .modal-body
+            .mb-3
+              label.form-label Título del Plano
+              input.form-control(type="text" name="titulo" placeholder="Ej: Planta Baja Torre A" required)
+            
+            .row 
+              .col-6.mb-3
+                label.form-label Disciplina
+                select.form-select(name="disciplina" required)
+                  option(value="Arquitectónico") Arquitectónico
+                  option(value="Estructural") Estructural
+                  option(value="Instalaciones") Instalaciones (MEP)
+                  option(value="Topografía") Topografía
+              .col-6.mb-3
+                label.form-label Versión
+                input.form-control(type="text" name="version" value="v1.0")
+            
+            .mb-3 
+              label.form-label Archivo (PDF/DWG)
+              input.form-control(type="file" name="archivo_plano" required)
+              
+            //- Campo oculto para el autor (podrías tomarlo de la sesión real después)
+            input(type="hidden" name="subido_por" value="Ing. Ángel Velasco")
+
+          .modal-footer
+            button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Cancelar
+            button.btn.btn-primary(type="submit") Guardar y Subir

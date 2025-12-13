@@ -10,7 +10,10 @@ var session = require('express-session');
 
 // 👇 1. IMPORTAR EL NUEVO MÓDULO DE PROYECTOS
 var indexRouter = require('./routes/index');
-var proyectosRouter = require('./routes/proyectos'); // <-- Nuevo import
+var proyectosRouter = require('./routes/proyectos');
+var proyectosDetalleRouter = require('./routes/proyectos_detalles'); // <--- NUEVO
+var bitacoraRouter = require('./routes/bitacora'); // <--- 1. AGREGAR ESTO
+var repositorioRouter = require('./routes/repositorio');
 var usersRouter = require('./routes/users');
 
 var app = express();
@@ -38,7 +41,10 @@ app.use('/', indexRouter); // Maneja /, /login, /app/dashboard, /app/bitacora, /
 
 // 👇 2. MONTAR EL NUEVO ROUTER DE PROYECTOS
 // Todas las peticiones que empiecen por /app/proyectos se irán a proyectosRouter
-app.use('/app/proyectos', proyectosRouter); 
+app.use('/app/proyectos', proyectosRouter);
+app.use('/app/proyectos', proyectosDetalleRouter); // <--- NUEVO
+app.use('/app/bitacora', bitacoraRouter); // <--- 2. AGREGAR ESTO
+app.use('/app/repositorio', repositorioRouter);
 
 app.use('/users', usersRouter);
 

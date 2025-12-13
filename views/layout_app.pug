@@ -1,119 +1,139 @@
 doctype html
-html
+html(lang="es")
   head
     title INYMO | Workspace
+    meta(charset="utf-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1")
     link(rel='icon', href='/images/icono.png', type='image/png')
     
-    // Fuentes e Iconos
-    link(rel='stylesheet', href='https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap')
-    link(rel='stylesheet', href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css')
+    // --- 1. LIBRERÍAS DE ESTILO (CRÍTICO) ---
+    // Bootstrap 5 (Para que las tarjetas del repositorio se acomoden bien)
+    link(href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css", rel="stylesheet")
     
-    // Estilos
+    // --- 2. FUENTES E ICONOS ---
+    // Google Fonts (Poppins)
+    link(href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap", rel="stylesheet")
+    
+    // Boxicons (Para tu MENÚ LATERAL)
+    link(href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css", rel="stylesheet")
+    
+    // FontAwesome (Para los ICONOS DEL REPOSITORIO como el PDF)
+    link(href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css", rel="stylesheet")
+    
+    // --- 3. TUS ESTILOS PERSONALIZADOS ---
     link(rel='stylesheet', href='/stylesheets/base.css')
     link(rel='stylesheet', href='/stylesheets/dashboard.css')
+    
+    // Estilos extra para asegurar compatibilidad
+    style.
+      body { font-family: 'Poppins', sans-serif; background-color: #f3f4f6; }
+      a { text-decoration: none; }
+      /* Corrección para que Bootstrap no rompa tu Grid si usas uno custom */
+      .app-grid { display: flex; min-height: 100vh; }
+      .app-sidebar { min-width: 260px; background: #0b1120; color: white; }
+      .app-content { flex-grow: 1; padding: 20px; overflow-y: auto; }
   
   body
     div.app-grid
       
       // --- BARRA LATERAL (NAVY OSCURO) ---
       aside.app-sidebar
-        div.sidebar-brand
-          // Logo Blanco
-          img.sidebar-logo(src="/images/logo-inymo-white.png" alt="INYMO")
+        div.sidebar-brand(style="padding: 20px; text-align: center;")
+          // Logo (Si no carga la imagen, muestra texto)
+          img.sidebar-logo(src="/images/logo-inymo-white.png" alt="INYMO" style="max-width: 150px;")
         
-        nav.sidebar-nav
+        nav.sidebar-nav(style="padding: 0 15px;")
           // 1. PRINCIPAL
-          p.nav-label Principal
-          ul
-            li: a(href="/app/dashboard") 
-              i.bx.bxs-dashboard
-              |  Panel General
-            li: a.copilot-link(href="/app/copilot") 
-              i.bx.bxs-bot
-              |  INYMO Copilot AI ✨
+          p.nav-label(style="color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 20px; margin-bottom: 10px;") Principal
+          ul.list-unstyled
+            li.mb-2: a.d-flex.align-items-center.text-light.py-2.px-3.rounded(href="/app/dashboard" style="transition: 0.2s;") 
+              i.bx.bxs-dashboard.me-2
+              | Panel General
+            li.mb-2: a.d-flex.align-items-center.text-success.py-2.px-3.rounded.bg-dark.border.border-secondary.copilot-link(href="/app/copilot") 
+              i.bx.bxs-bot.me-2
+              | INYMO Copilot AI ✨
 
           // 2. OPERATIVO (Ingeniería)
-          p.nav-label Operativo
-          ul
-            li: a(href="/app/proyectos") 
-              i.bx.bx-hard-hat
-              |  Gestión de Proyectos
-            li: a(href="/app/bitacora") 
-              i.bx.bx-notepad
-              |  Bitácora Digital
-            li: a(href="/app/planos") 
-              i.bx.bx-map-alt
-              |  Repositorio Planos
-            li: a(href="/app/inventario") 
-              i.bx.bx-box
-              |  Inventario y Almacén
+          p.nav-label(style="color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 20px; margin-bottom: 10px;") Operativo
+          ul.list-unstyled
+            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/proyectos" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
+              i.bx.bx-hard-hat.me-2
+              | Gestión de Proyectos
+            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/bitacora" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
+              i.bx.bx-notepad.me-2
+              | Bitácora Digital
+            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/repositorio" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
+              i.bx.bx-map-alt.me-2
+              | Repositorio Planos
+            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/inventario" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
+              i.bx.bx-box.me-2
+              | Inventario y Almacén
 
           // 3. ADMINISTRATIVO
-          p.nav-label Administrativo
-          ul
-            li: a(href="/app/finanzas") 
-              i.bx.bx-dollar-circle
-              |  Cotizaciones
-            li: a(href="/app/facturas") 
-              i.bx.bx-receipt
-              |  Facturas
+          p.nav-label(style="color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 20px; margin-bottom: 10px;") Administrativo
+          ul.list-unstyled
+            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/finanzas" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
+              i.bx.bx-dollar-circle.me-2
+              | Cotizaciones
+            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/facturas" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
+              i.bx.bx-receipt.me-2
+              | Facturas
 
-          // 4. TALENTO Y CLIENTES
-          p.nav-label RRHH & CRM
-          ul
-            li: a(href="/app/personal") 
-              i.bx.bx-group
-              |  Directorio y Carpetas
-            li: a(href="/app/desempeno") 
-              i.bx.bx-trophy
-              |  Desempeño
-            li: a(href="/app/clientes") 
-              i.bx.bx-briefcase
-              |  Clientes
+          // 4. RRHH & CRM
+          p.nav-label(style="color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 20px; margin-bottom: 10px;") RRHH & CRM
+          ul.list-unstyled
+            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/personal" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
+              i.bx.bx-group.me-2
+              | Directorio y Carpetas
+            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/desempeno" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
+              i.bx.bx-trophy.me-2
+              | Desempeño
+            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/clientes" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
+              i.bx.bx-briefcase.me-2
+              | Clientes
 
-          // 5. DATA
-          p.nav-label Estrategia
-          ul
-            li: a(href="/app/analytics") 
-              i.bx.bx-line-chart
-              |  Inteligencia (BI)
+          // 5. ESTRATEGIA
+          p.nav-label(style="color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 20px; margin-bottom: 10px;") Estrategia
+          ul.list-unstyled
+            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/analytics" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
+              i.bx.bx-line-chart.me-2
+              | Inteligencia (BI)
 
         // BOTÓN SALIR
-        div.sidebar-bottom
-           a.btn-logout-action(href="/logout") 
-             i.bx.bx-log-out 
+        div.sidebar-bottom(style="padding: 20px;")
+           a.btn-logout-action.d-flex.align-items-center.text-danger.py-2.px-3(href="/logout" style="text-decoration:none;") 
+             i.bx.bx-log-out.me-2
              | Cerrar Sesión
 
       // --- CONTENIDO PRINCIPAL ---
       main.app-content
-        header.app-header
+        header.app-header.d-flex.justify-content-between.align-items-center.mb-4
           div.header-left
-            h2 Workspace
-            p.breadcrumbs INYMO / Panel de Control
+            h2.fw-bold.m-0 Workspace
+            p.text-muted.small.m-0 INYMO / Panel de Control
           
-          div.user-profile
-            div.user-info
-              span.user-name Ing. Ángel Velasco
-              span.user-role Socio Director
-            div.user-badge AV
+          div.user-profile.d-flex.align-items-center
+            div.user-info.text-end.me-3.d-none.d-md-block
+              span.d-block.fw-bold Ing. Ángel Velasco
+              span.d-block.small.text-muted Socio Director
+            div.user-badge.bg-primary.text-white.rounded-circle.d-flex.justify-content-center.align-items-center(style="width: 40px; height: 40px;") AV
         
         div.content-area
+          // AQUÍ SE INYECTAN TUS VISTAS (Repositorio, Dashboard, etc.)
           block content
 
-    // 👇👇 ESTO ES LO QUE TE FALTABA AL FINAL 👇👇
-    // Script para la animación suave al cerrar sesión
+    // --- SCRIPTS ---
+    // Bootstrap JS
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js")
+    
+    // Script de animación Logout
     script.
       const logoutBtn = document.querySelector('.btn-logout-action');
-      
       if(logoutBtn) {
         logoutBtn.addEventListener('click', function(e) {
-          e.preventDefault(); // 1. Alto ahí
-          
-          // 2. Apagamos la luz (Fade Out)
+          e.preventDefault();
           document.body.style.transition = 'opacity 0.6s ease';
           document.body.style.opacity = '0';
-          
-          // 3. Esperamos 0.6s y nos vamos
           setTimeout(() => {
             window.location.href = '/logout';
           }, 600);

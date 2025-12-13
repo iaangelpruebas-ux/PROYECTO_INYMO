@@ -1,0 +1,68 @@
+extends layout_app
+
+block content
+  //- ✨ ESTILOS PERSONALIZADOS PARA ESTA VISTA ✨
+  //- (Se aseguran de que coincida con tu marca)
+  style.
+    .bg-inymo-navy { background-color: #0b1120; } /* El mismo azul de tu sidebar */
+    .text-inymo-accent { color: #84cc16; } /* El verde lima de la hoja del logo */
+    /* Pequeña animación al pasar el mouse para que se sienta moderno */
+    .folder-card { transition: transform 0.2s, box-shadow 0.2s; border-radius: 10px; }
+    .folder-card:hover { transform: translateY(-3px); box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15)!important; }
+
+  .container-fluid
+    //- Encabezado de la sección
+    .d-flex.align-items-center.mb-4
+        i.bx.bxs-layer.me-3.text-primary(style="font-size: 2rem;")
+        div
+            h2.fw-bold.mb-0 📂 Repositorio Central
+            p.text-muted.mb-0 Selecciona un proyecto para acceder a su documentación oficial.
+
+    .row.mt-4
+      each p in proyectos
+        .col-md-6.col-xl-4.mb-4
+          //- 🗂️ TARJETA TIPO "DOSSIER FORMAL" 🗂️
+          .card.folder-card.shadow-sm.border-0.h-100.overflow-hidden
+            //- 1. Encabezado estilo INYMO (Azul marino sólido)
+            .card-header.bg-inymo-navy.p-3.d-flex.align-items-start.border-bottom-0
+              //- Icono de carpeta en verde INYMO
+              i.bx.bxs-folder-open.text-inymo-accent.me-3(style="font-size: 1.8rem; margin-top: 2px;")
+              //- Títulos en blanco
+              div.text-white.text-truncate(style="max-width: 85%;")
+                h5.fw-bold.mb-1.text-truncate(title=p.nombre)= p.nombre
+                small.opacity-75.d-block.text-truncate= p.codigo
+
+            //- 2. Cuerpo de la tarjeta (Información limpia)
+            .card-body.p-3.bg-white.d-flex.flex-column
+              //- Detalles adicionales (Cliente)
+              if p.cliente
+                 p.mb-3.small.text-muted.d-flex.align-items-center
+                   i.bx.bx-building.me-2
+                   | Cliente: 
+                   strong.ms-1= p.cliente
+              else
+                 p.mb-3.small.text-muted.d-flex.align-items-center
+                   i.bx.bx-building.me-2
+                   | Cliente: N/A
+
+              //- Sección inferior con contador y botón
+              .mt-auto.d-flex.justify-content-between.align-items-center.pt-3.border-top
+                //- Contador de planos elegante
+                div.d-flex.align-items-center
+                    span.badge.bg-light.text-dark.border.d-flex.align-items-center.px-2.py-1
+                      i.bx.bxs-file-pdf.me-1.text-danger
+                      strong #{p.total_planos}
+                    span.small.text-muted.ms-2 Docs.
+
+                //- Botón discreto
+                a.btn.btn-sm.btn-outline-primary.px-3(href=`/app/repositorio/proyecto/${p.id}`)
+                  | Abrir
+                  i.bx.bx-chevron-right.ms-1
+
+      //- Tarjeta para Archivos Generales (Opcional, estilo "vacio")
+      .col-md-6.col-xl-4.mb-4
+        .card.folder-card.shadow-sm.border-0.h-100.bg-light(style="border: 2px dashed #cbd5e1 !important; background-color: #f8fafc !important;")
+          .card-body.d-flex.flex-column.justify-content-center.align-items-center.p-4.text-muted.text-center
+            i.bx.bx-archive-in.mb-3(style="font-size: 3rem; opacity: 0.4;")
+            h6.fw-bold Archivos sin Asignar
+            small.mb-3 Repositorio general para documentos que no pertenecen a un proyecto específico.

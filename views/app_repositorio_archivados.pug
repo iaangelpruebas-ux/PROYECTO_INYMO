@@ -1,0 +1,72 @@
+extends layout_app
+
+block content
+  .container-fluid
+    //- BREADCRUMB
+    nav(aria-label="breadcrumb")
+      ol.breadcrumb
+        li.breadcrumb-item: a(href="/app/repositorio") Repositorio
+        li.breadcrumb-item.active= proyecto.nombre
+
+    //- ENCABEZADO PROYECTO
+    .d-flex.justify-content-between.align-items-center.mb-4
+      div
+        h2.fw-bold= proyecto.nombre
+        p.text-muted Documentación del proyecto #{proyecto.codigo}
+      div
+        button.btn.btn-primary(data-bs-toggle="modal" data-bs-target="#modalSubir") 
+          i.fas.fa-cloud-upload-alt.me-2
+          | Subir Plano Aquí
+
+    //- GRID DE PLANOS (Igual que antes)
+    .row
+      if planos.length > 0
+        each plano in planos
+          .col-md-3.mb-4
+            .card.h-100.shadow-sm.border-0
+              .card-header.bg-white.d-flex.justify-content-between.pt-3
+                span.badge.bg-secondary= plano.disciplina
+                if plano.estatus == 'aprobado'
+                  span.badge.bg-success ✓
+                else
+                  span.badge.bg-warning.text-dark ⚡
+              
+              .card-body.text-center
+                i.fas.fa-file-pdf.fa-3x.text-danger.my-3
+                h6.fw-bold.text-truncate(title=plano.titulo)= plano.titulo
+                p.small.text-muted v#{plano.version}
+              
+              .card-footer.bg-white.d-flex.gap-2
+                a.btn.btn-outline-primary.btn-sm.w-50(href=plano.url_archivo target="_blank") Ver
+                a.btn.btn-outline-dark.btn-sm.w-50(href=plano.url_archivo download) Bajar
+      else
+        .col-12.text-center.py-5
+          h4.text-muted 📂 Carpeta Vacía
+          p Sube el primer plano para este proyecto.
+
+  //- MODAL PARA SUBIR (Con ID de Proyecto oculto)
+  #modalSubir.modal.fade(tabindex="-1")
+    .modal-dialog
+      .modal-content
+        form(action="/app/repositorio/subir" method="POST" enctype="multipart/form-data")
+          .modal-header
+            h5.modal-title Subir a: #{proyecto.nombre}
+            button.btn-close(data-bs-dismiss="modal")
+          .modal-body
+            input(type="hidden" name="proyecto_id" value=proyecto.id)
+            input(type="hidden" name="subido_por" value="Ing. Ángel Velasco")
+            
+            .mb-3
+              label Título
+              input.form-control(name="titulo" required)
+            .mb-3
+              label Disciplina
+              select.form-select(name="disciplina")
+                option Arquitectónico
+                option Estructural
+                option Instalaciones
+            .mb-3
+              label Archivo
+              input.form-control(type="file" name="archivo_plano" required)
+          .modal-footer
+            button.btn.btn-primary(type="submit") Guardar
