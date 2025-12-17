@@ -37,44 +37,68 @@ html(lang="es")
         flex-direction: column;
       }
 
-      /* ENCABEZADO */
-      .header-bar {
-        background-color: #111;
-        height: 12px;
-        width: 100%;
-        border-bottom: 3px solid #67d826ff;
+      /* 1. BARRA SUPERIOR (NEGRA - SOLO LOGO Y FOLIO) */
+      .top-header-bar {
+        background-color: #111; /* NEGRO PURO */
+        padding: 25px 50px; /* Menos padding vertical para que sea una franja */
+        display: flex;
+        justify-content: space-between;
+        align-items: center; /* Centrado verticalmente */
+        border-bottom: 4px solid #67d826ff; /* LA LÍNEA VERDE DIVISORIA */
+        color: #fff;
       }
-      
-      .brand-section {
-        padding: 40px 50px 20px 50px;
+
+      .logo-img { 
+        max-height: 60px; /* Ajustado para la franja */
+        width: auto; 
+        display: block; 
+      }
+
+      .folio-wrapper { text-align: right; }
+      .folio-label { 
+        font-size: 0.7rem; 
+        text-transform: uppercase; 
+        letter-spacing: 3px; 
+        color: #67d826ff; /* Verde */
+        margin-bottom: 0px; 
+      }
+      .folio-number { 
+        font-size: 1.8rem; 
+        font-weight: 800; 
+        color: #fff; 
+        line-height: 1;
+      }
+
+      /* 2. BARRA DE INFORMACIÓN (BLANCA - DIRECCIÓN Y FECHAS) */
+      .sub-header-info {
+        padding: 20px 50px 0 50px; /* Espacio debajo de la barra negra */
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
       }
 
-      .logo-text { font-weight: 900; font-size: 2.5rem; letter-spacing: -1.5px; line-height: 1; margin-bottom: 10px; }
-      .logo-dot { color: #67d826ff; }
-      .company-details { font-size: 0.7rem; color: #666; line-height: 1.5; border-left: 2px solid #e5e5e5; padding-left: 15px; }
+      .company-details { 
+        font-size: 0.75rem; 
+        color: #555; /* Gris oscuro para fondo blanco */
+        line-height: 1.5; 
+      }
+      .company-details strong { color: #000; font-weight: 700; font-size: 0.85rem; }
 
-      .folio-display { text-align: right; }
-      .folio-number { font-size: 1.5rem; font-weight: 800; color: #111; letter-spacing: -0.5px; }
-      .folio-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: #888; margin-bottom: 5px; }
-      
       .meta-grid { 
         display: grid; 
         grid-template-columns: auto auto; 
-        gap: 5px 20px; 
+        gap: 2px 15px; 
         text-align: right; 
-        margin-top: 15px; 
         font-size: 0.8rem;
       }
-      .meta-label { font-weight: 600; color: #111; }
-      .meta-val { color: #555; }
+      .meta-label { font-weight: 700; color: #111; } /* Etiquetas negras */
+      .meta-val { color: #555; } /* Valores grises */
 
-      /* SECCIÓN CLIENTE (CLEAN & UNIFICADA) */
+
+      /* SECCIÓN CLIENTE */
       .client-section {
         margin: 20px 50px;
-        padding: 25px;
+        padding: 20px 25px;
         background-color: #f8f9fa;
         border-radius: 8px;
         border: 1px solid #edf2f4;
@@ -87,25 +111,12 @@ html(lang="es")
       
       .client-name { font-size: 1.1rem; font-weight: 700; color: #000; margin-bottom: 5px; }
       
-      /* Corrección de tipografía unificada */
       .client-data { 
         font-size: 0.85rem; 
         color: #495057; 
         line-height: 1.6; 
-        font-family: 'Inter', sans-serif; /* Asegurar misma fuente */
       }
       
-      .icon-data { 
-        display: flex; 
-        align-items: center; 
-        gap: 8px; 
-        margin-bottom: 4px;
-        font-family: 'Inter', sans-serif;
-      }
-      
-      /* Asegurar que el icono no rompa la fuente */
-      .icon-data i { font-size: 1.1em; color: #6c757d; }
-
       /* TABLA PRO */
       .table-section { padding: 10px 50px; flex-grow: 1; }
       .pro-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
@@ -128,7 +139,6 @@ html(lang="es")
         color: #333;
       }
       
-      /* Columnas específicas */
       .col-idx { width: 5%; text-align: center; color: #adb5bd; }
       .col-desc { width: 40%; }
       .col-entrega { width: 15%; font-size: 0.75rem; color: #67d826ff; font-weight: 600; } 
@@ -136,9 +146,9 @@ html(lang="es")
       .col-precio { width: 15%; text-align: right; font-family: 'Inter', monospace; }
       .col-total { width: 15%; text-align: right; font-weight: 700; font-family: 'Inter', monospace; }
 
-      /* TOTALES DARK */
+      /* TOTALES */
       .totals-section {
-        background-color: #fff;
+        background-color: #ffffffb7;
         padding: 0 50px 20px 50px;
         display: flex;
         justify-content: space-between;
@@ -164,7 +174,7 @@ html(lang="es")
       }
       
       .grand-total {
-        background-color: #111; /* NEGRO PURO */
+        background-color: #111; 
         color: white;
         padding: 15px 20px;
         border-radius: 6px;
@@ -175,14 +185,10 @@ html(lang="es")
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       }
       .total-tag { font-size: 0.9rem; font-weight: 600; letter-spacing: 1px; }
-      .total-val { font-size: 1.4rem; font-weight: 700; color: #67d826ff; /* VERDE SOLO EN NÚMERO */ }
+      .total-val { font-size: 1.4rem; font-weight: 700; color: #67d826ff; }
 
-      /* PIE DE PÁGINA */
-      .footer-section {
-        margin-top: auto;
-        padding-bottom: 0;
-      }
-      
+      /* FOOTER */
+      .footer-section { margin-top: auto; padding-bottom: 0; }
       .signatures {
         display: flex;
         justify-content: space-between;
@@ -199,7 +205,7 @@ html(lang="es")
       .sign-title { font-size: 0.7rem; color: #868e96; text-transform: uppercase; }
 
       .legal-bar {
-        background-color: #f8f9fa;
+        background-color: #f8f9fab7;
         color: #adb5bd;
         text-align: center;
         font-size: 0.65rem;
@@ -207,7 +213,6 @@ html(lang="es")
         border-top: 1px solid #e9ecef;
       }
 
-      /* WATERMARK */
       .bg-watermark {
         position: absolute;
         top: 45%; left: 50%;
@@ -227,33 +232,41 @@ html(lang="es")
 
     .hoja
       .bg-watermark INYMO
-      .header-bar
-
-      //- 1. HEADER (DISEÑO MANTENIDO)
-      .brand-section
-        .company-block
-          .logo-text INYMO<span class="logo-dot">.</span>
-          .company-details
-            strong Ingeniería y Montajes de Occidente S.A. de C.V.
-            br
-            | RFC: INY250101ABC
-            br
-            | Av. Vallarta 1234, Guadalajara, Jalisco.
-            br
-            | contacto@inymo.com | (33) 1234-5678
-
-        .folio-display
+      
+      //- 1. FRANJA NEGRA SUPERIOR (SOLO LOGO Y FOLIO)
+      .top-header-bar
+        //- Lado Izquierdo: LOGO
+        div.logo-container
+          img.logo-img(src="/images/logo-inymo-white.png" alt="INYMO Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';")
+          div.logo-text(style="display:none; color:white; font-weight:bold; font-size:2rem;") INYMO.
+        
+        //- Lado Derecho: FOLIO
+        div.folio-wrapper
           .folio-label COTIZACIÓN
           .folio-number #{c.folio}
-          .meta-grid
-            .meta-label Emisión:
-            .meta-val #{new Date(c.fecha_creacion).toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric'})}
-            .meta-label Vencimiento:
-            .meta-val #{new Date(c.fecha_creacion.getTime() + (c.validez_dias * 86400000)).toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric'})}
-            .meta-label Elaborado:
-            .meta-val #{usuario || 'Agente INYMO'}
 
-      //- 2. CLIENTE (TIPOGRAFÍA UNIFICADA)
+      //- 2. FRANJA BLANCA INFORMATIVA (DIRECCIÓN Y FECHAS)
+      .sub-header-info
+        //- Lado Izquierdo: Datos Empresa (Texto oscuro)
+        .company-details
+          strong Ingeniería y Montajes de Occidente S.A. de C.V.
+          br
+          | RFC: INY250101ABC
+          br
+          | Av. Vallarta 1234, Guadalajara, Jalisco.
+          br
+          | contacto@inymo.com | (33) 1234-5678
+
+        //- Lado Derecho: Fechas (Texto oscuro)
+        .meta-grid
+          .meta-label Emisión:
+          .meta-val #{new Date(c.fecha_creacion).toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric'})}
+          .meta-label Vencimiento:
+          .meta-val #{new Date(c.fecha_creacion.getTime() + (c.validez_dias * 86400000)).toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric'})}
+          .meta-label Elaborado:
+          .meta-val #{usuario || 'Agente INYMO'}
+
+      //- 3. CLIENTE
       .client-section
         .client-block
           .section-label DATOS FISCALES DEL CLIENTE
@@ -266,7 +279,6 @@ html(lang="es")
         .client-block(style="border-left: 1px solid #e9ecef; padding-left: 25px;")
           .section-label CONTACTO Y ENTREGA
           .client-data
-            //- Uso de divs limpios en lugar de icon-data complejo para asegurar fuente
             div.mb-1
                i.bx.bx-user.me-2
                strong Atn: 
@@ -280,7 +292,7 @@ html(lang="es")
                strong Email: 
                | #{c.correo || '--'}
 
-      //- 3. TABLA DE PARTIDAS
+      //- 4. TABLA
       .table-section
         table.pro-table
           thead
@@ -309,7 +321,7 @@ html(lang="es")
             if items.length < 8
               tr: td(colspan="7" style="height: 60px;")
 
-      //- 4. FINANZAS
+      //- 5. FINANZAS
       .totals-section
         .amount-in-words
           .section-label IMPORTE TOTAL CON LETRA
@@ -338,7 +350,7 @@ html(lang="es")
             span.total-tag Total Neto
             span.total-val= "$" + parseFloat(c.monto_total).toLocaleString('es-MX', {minimumFractionDigits:2})
 
-      //- 5. PIE DE PÁGINA
+      //- 6. PIE DE PÁGINA
       .footer-section
         .signatures
           .sign-block
@@ -352,7 +364,6 @@ html(lang="es")
           div CONFIDENCIALIDAD: La información técnica y económica aquí contenida es propiedad de INYMO S.A. de C.V.
           div www.inymo.com | Documento generado el #{new Date().toLocaleDateString('es-MX')}
 
-  //- SCRIPT NÚMERO A LETRAS
   script.
     function numeroALetras(num) {
         const formatter = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
