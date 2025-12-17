@@ -1,4 +1,6 @@
-// 1. CARGAR VARIABLES DE ENTORNO (Debe ser la primera línea)
+// 1. CARGAR VARIABLES DE ENTORNO Y ZONA HORARIA
+// Forzamos la zona horaria a México desde el inicio para evitar el desfase de 6 horas
+process.env.TZ = 'America/Mexico_City'; 
 require('dotenv').config();
 
 var createError = require('http-errors');
@@ -7,7 +9,6 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var session = require('express-session');
-
 
 // 2. IMPORTACIÓN DE ROUTERS (JERARQUÍA MAESTRA)
 
@@ -22,10 +23,10 @@ var bitacoraRouter = require('./routes/bitacora');
 var repositorioRouter = require('./routes/repositorio');
 var clientesRouter = require('./routes/clientes');
 
-
 // C. Módulos Financieros (Estructura PMBOK - Inteligencia Comercial)
 var finanzasRouter = require('./routes/finanzas');         // Maneja Hub e Historial
-var cotizacionNuevaRouter = require('./routes/cotizacion_nueva'); // Maneja la Creación (del mensaje anterior)
+var cotizacionNuevaRouter = require('./routes/cotizacion_nueva'); // Maneja la Creación
+
 // D. Módulos de Almacén y Suministros (Logística de Materiales)
 var inventarioRouter = require('./routes/inventario'); // Operación/Obras
 var logisticaRouter = require('./routes/logistica');   // Administración/Bodega
@@ -57,6 +58,34 @@ app.use(session({
   }
 }));
 
+// 6.5 MIDDLEWARE GLOBAL DE VARIABLES (CORRECCIÓN DE FECHA Y MONEDA)
+// Esto hace que las funciones estén disponibles en TODOS los archivos .pug automáticamente
+app.use((req, res, next) => {
+  // Función para formatear fechas (Uso: #{formatDate(variable)})
+  res.locals.formatDate = (dateString) => {
+    if (!dateString) return 'Sin fecha';
+    return new Date(dateString).toLocaleString('es-MX', {
+      timeZone: 'America/Mexico_City',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // Función para formatear dinero (Uso: #{formatMoney(variable)})
+  res.locals.formatMoney = (amount) => {
+    return Number(amount).toLocaleString('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 2
+    });
+  };
+
+  next();
+});
+
 // 7. DEFINICIÓN Y MONTAJE DE RUTAS (CONTROL DE TRÁFICO)
 
 // Nivel 0: Rutas Base y Lobby
@@ -69,13 +98,11 @@ app.use('/app/proyectos', proyectosDetalleRouter);
 app.use('/app/bitacora', bitacoraRouter);
 app.use('/app/repositorio', repositorioRouter);
 app.use('/app/clientes', clientesRouter);
+
 // RUTAS FINANCIERAS
 app.use('/app/finanzas', finanzasRouter); 
-// Esto habilita:
-// -> /app/finanzas/ (El Hub)
-// -> /app/finanzas/historial (La Tabla)
-
 app.use('/app/finanzas', cotizacionNuevaRouter);
+
 // Nivel 3: Logística (Control de Inventarios y Suministros)
 app.use('/app/inventario', inventarioRouter);  // Vista Obras
 app.use('/app/logistica', logisticaRouter);    // Vista Bodega Central
