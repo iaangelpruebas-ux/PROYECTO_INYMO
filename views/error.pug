@@ -1,6 +1,17 @@
 extends layout_app
 
 block content
-  h1= message
-  h2= error.status
-  pre #{error.stack}
+  .container.py-5
+    .card.border-danger.shadow
+      .card-header.bg-danger.text-white
+        h4.mb-0 ⚠️ Atención
+      .card-body
+        h5.text-danger= message
+        if error.status
+          h6 Código: #{error.status}
+        
+        //- Esto nos mostrará el detalle técnico real
+        if error.stack
+          pre.bg-light.p-3.mt-3.rounded #{error.stack}
+        
+        a.btn.btn-secondary.mt-3(href="/app/dashboard") Regresar al Inicio

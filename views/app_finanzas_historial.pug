@@ -1,0 +1,146 @@
+extends layout_app
+
+block content
+  .container-fluid.py-4.bg-light
+    //- HEADER Y FILTROS
+    .d-flex.justify-content-between.align-items-center.mb-4
+      div
+        a.text-muted.text-decoration-none.small.mb-1.d-block(href="/app/finanzas") < Volver al Hub
+        h3.fw-bold.text-dark.mb-0 🗂️ Historial de Cotizaciones
+      div
+        a.btn.btn-dark.shadow-sm.px-4(href="/app/finanzas/crear" style="background-color: #67d826ff; border:none;") 
+          i.bx.bx-plus.me-1
+          | Nueva
+
+    //- BARRA DE HERRAMIENTAS
+    .card.border-0.shadow-sm.mb-4.rounded-4
+      .card-body.p-3
+        form(action="/app/finanzas/historial" method="GET")
+          .row.g-2.align-items-center
+            .col-md-4
+              .input-group
+                span.input-group-text.bg-white.border-end-0: i.bx.bx-search.text-muted
+                input.form-control.border-start-0(name="q" placeholder="Buscar por Folio, Cliente o Notas..." value=filtros.q)
+            .col-md-3
+              select.form-select(name="estado")
+                option(value="") Todos los Estados
+                option(value="Borrador" selected=(filtros.estado=='Borrador')) 📝 Borradores
+                option(value="Pendiente" selected=(filtros.estado=='Pendiente')) ⏳ Enviadas / Pendientes
+                option(value="Aceptada" selected=(filtros.estado=='Aceptada')) ✅ Ganadas
+                option(value="Rechazada" selected=(filtros.estado=='Rechazada')) ❌ Perdidas
+            .col-md-2
+              button.btn.btn-outline-dark.w-100(type="submit") Filtrar
+
+    //- TABLA DE RESULTADOS
+    .card.border-0.shadow-sm.rounded-4.overflow-hidden
+      .card-body.p-0
+        .table-responsive
+          table.table.table-hover.align-middle.mb-0
+            thead.bg-light
+              tr.small.text-uppercase.text-muted
+                th.ps-4.py-3 Folio
+                th Cliente
+                th Emisión / Vencimiento
+                th.text-end Monto Total
+                th.text-center Margen %
+                th.text-center Estado
+                th.text-end.pe-4 Acciones
+            tbody
+              if cotizaciones.length > 0
+                each c in cotizaciones
+                  tr
+                    td.ps-4
+                      div.fw-bold.text-dark= c.folio
+                      small.text-muted ID: #{c.id}
+                    td
+                      div.fw-bold.text-dark= c.nombre_comercial
+                      if c.contacto
+                        small.text-muted: i.bx.bx-user.me-1= c.contacto
+                    td
+                      div= new Date(c.fecha_creacion).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'numeric'})
+                      
+                      //- Lógica de Vencimiento
+                      - var hoy = new Date()
+                      - var vence = new Date(c.fecha_vencimiento)
+                      if c.estado == 'Pendiente' && hoy > vence
+                         span.badge.bg-danger.bg-opacity-10.text-danger.px-2 Vencida
+                      else
+                         small.text-muted Vence: #{vence.toLocaleDateString('es-MX')}
+                    
+                    td.text-end
+                      span.fw-bold.text-dark= "$" + parseFloat(c.monto_total).toLocaleString('es-MX', {minimumFractionDigits: 2})
+                    
+                    td.text-center
+                      //- Semáforo de Rentabilidad (Solo visible internamente)
+                      - var margen = parseFloat(c.margen_porcentaje || 0)
+                      if margen < 20
+                        span.badge.rounded-pill.bg-danger.bg-opacity-10.text-danger #{margen.toFixed(1)}%
+                      else if margen < 40
+                        span.badge.rounded-pill.bg-warning.bg-opacity-10.text-warning.text-dark #{margen.toFixed(1)}%
+                      else
+                        span.badge.rounded-pill.bg-success.bg-opacity-10.text-success #{margen.toFixed(1)}%
+
+                    td.text-center
+                      if c.estado == 'Borrador'
+                        span.badge.bg-secondary.bg-opacity-10.text-secondary 📝 Borrador
+                      else if c.estado == 'Pendiente'
+                        span.badge.bg-warning.bg-opacity-10.text-warning ⏳ Enviada
+                      else if c.estado == 'Aceptada'
+                        span.badge.bg-success.bg-opacity-10.text-success ✅ Ganada
+                      else
+                        span.badge.bg-danger.bg-opacity-10.text-danger ❌ Rechazada
+
+                    td.text-end.pe-4
+                      .dropdown
+                        button.btn.btn-sm.btn-light.border-0(type="button" data-bs-toggle="dropdown")
+                          i.bx.bx-dots-vertical-rounded.fs-5
+                        ul.dropdown-menu.dropdown-menu-end.shadow.border-0
+                          li: h6.dropdown-header Acciones
+                          //- Ver Detalle (Redirige a la vista completa)
+                          li: a.dropdown-item(href=`/app/finanzas/detalle/${c.id}`) 
+                             i.bx.bx-show.me-2
+                             | Ver Expediente
+                          
+                          //- Descargar PDF
+                          li: a.dropdown-item(href=`/app/finanzas/pdf/${c.id}` target="_blank") 
+                             i.bx.bx-file-pdf.me-2
+                             | Descargar PDF Formal
+                          
+                          //- Cambiar Estado (Solo si no está cerrada)
+                          if c.estado == 'Pendiente' || c.estado == 'Borrador'
+                             li: hr.dropdown-divider
+                             li: a.dropdown-item.text-success(href="#" onclick=`cambiarEstado(${c.id}, 'Aceptada')`) 
+                                i.bx.bx-check-circle.me-2
+                                | Marcar Ganada
+                             li: a.dropdown-item.text-danger(href="#" onclick=`cambiarEstado(${c.id}, 'Rechazada')`) 
+                                i.bx.bx-x-circle.me-2
+                                | Marcar Perdida
+              else
+                tr
+                  td.text-center.py-5(colspan="7")
+                    div.mb-3: i.bx.bx-search-alt.fs-1.text-muted.opacity-25
+                    h6.text-muted No se encontraron cotizaciones con estos filtros.
+                    a.btn.btn-sm.btn-outline-dark.mt-2(href="/app/finanzas/historial") Limpiar Filtros
+
+  //- SCRIPTS
+  script.
+    async function cambiarEstado(id, nuevoEstado) {
+       if(!confirm(`¿Estás seguro de cambiar el estado a ${nuevoEstado}?`)) return;
+
+       try {
+           const res = await fetch('/app/finanzas/cambiar-estado', {
+               method: 'POST',
+               headers: {'Content-Type': 'application/json'},
+               body: JSON.stringify({ id, nuevo_estado: nuevoEstado })
+           });
+           
+           const json = await res.json();
+           if(json.success) {
+               window.location.reload(); // Recargar para ver cambios
+           } else {
+               alert("Error: " + json.error);
+           }
+       } catch(e) {
+           alert("Error de conexión");
+       }
+    }

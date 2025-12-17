@@ -1,0 +1,167 @@
+extends layout_app
+
+block content
+  //- Librería para gráficos
+  script(src="https://cdn.jsdelivr.net/npm/chart.js")
+
+  .container-fluid.py-4.bg-light
+    //- SECCIÓN 1: ENCABEZADO CON BIENVENIDA
+    .d-flex.justify-content-between.align-items-center.mb-5
+      div
+        h2.fw-bold.text-dark.mb-1 💼 Hub Financiero & Comercial
+        p.text-muted.mb-0 Panel de control para gestión de propuestas, rentabilidad y flujo de ventas.
+      div
+        span.badge.bg-white.text-dark.shadow-sm.px-3.py-2.border
+          i.bx.bx-calendar.me-1
+          | #{new Date().toLocaleDateString('es-MX', {weekday:'long', year:'numeric', month:'long', day:'numeric'})}
+
+    //- SECCIÓN 2: ACCIONES PRINCIPALES (BOTONES GIGANTES)
+    .row.g-4.mb-5
+      .col-md-6
+        //- TARJETA DE ACCIÓN: CREAR
+        a.card.h-100.border-0.shadow-hover.text-decoration-none.action-card(href="/app/finanzas/crear" style="transition: all 0.3s; overflow: hidden;")
+          .card-body.p-5.position-relative
+            .d-flex.align-items-center.position-relative.z-1
+              .icon-box.bg-success.bg-opacity-10.text-success.rounded-circle.p-4.me-4
+                i.bx.bx-plus-medical.fs-1(style="color: #67d826ff;")
+              div
+                h3.fw-bold.text-dark.mb-1 Nueva Propuesta
+                p.text-muted.mb-0 Crear cotización, calcular márgenes y dar de alta clientes.
+            //- Decoración de fondo
+            i.bx.bx-file.position-absolute.opacity-10(style="font-size: 15rem; right: -40px; bottom: -50px; color: #67d826ff;")
+
+      .col-md-6
+        //- TARJETA DE ACCIÓN: HISTORIAL
+        a.card.h-100.border-0.shadow-hover.text-decoration-none.action-card(href="/app/finanzas/historial" style="transition: all 0.3s;")
+          .card-body.p-5.position-relative
+            .d-flex.align-items-center.position-relative.z-1
+              .icon-box.bg-dark.bg-opacity-10.text-dark.rounded-circle.p-4.me-4
+                i.bx.bx-library.fs-1
+              div
+                h3.fw-bold.text-dark.mb-1 Historial y Gestión
+                p.text-muted.mb-0 Buscar cotizaciones anteriores, editar borradores y descargar PDFs.
+            //- Decoración de fondo
+            i.bx.bx-folder-open.position-absolute.text-dark.opacity-10(style="font-size: 15rem; right: -40px; bottom: -50px;")
+
+    //- SECCIÓN 3: INDICADORES DE DESEMPEÑO (KPIs)
+    h5.fw-bold.text-dark.mb-4 📊 Indicadores de Rendimiento
+    .row.g-4.mb-4
+      //- KPI 1: Dinero en Juego
+      .col-xl-3.col-md-6
+        .card.border-0.shadow-sm.rounded-4.h-100
+          .card-body.p-4
+            .d-flex.justify-content-between.mb-3
+              div
+                small.text-muted.text-uppercase.fw-bold Pipeline Activo
+                h3.fw-bold.mb-0.text-primary= "$" + parseFloat(kpis.dinero_juego).toLocaleString('es-MX', {notation: "compact"})
+              .icon-sm.bg-primary.bg-opacity-10.text-primary.rounded-3.p-2.d-flex.align-items-center.justify-content-center(style="width: 45px; height: 45px;")
+                i.bx.bx-timer.fs-4
+            p.small.text-muted.mb-0 Monto total en propuestas pendientes de respuesta.
+
+      //- KPI 2: Dinero Ganado
+      .col-xl-3.col-md-6
+        .card.border-0.shadow-sm.rounded-4.h-100
+          .card-body.p-4
+            .d-flex.justify-content-between.mb-3
+              div
+                small.text-muted.text-uppercase.fw-bold Ventas Cerradas
+                h3.fw-bold.mb-0(style="color: #67d826ff;")= "$" + parseFloat(kpis.dinero_ganado).toLocaleString('es-MX', {notation: "compact"})
+              .icon-sm.bg-success.bg-opacity-10.rounded-3.p-2.d-flex.align-items-center.justify-content-center(style="width: 45px; height: 45px; color: #67d826ff;")
+                i.bx.bx-check-shield.fs-4
+            p.small.text-muted.mb-0 Ingresos asegurados por cotizaciones aceptadas.
+
+      //- KPI 3: Volumen Operativo
+      .col-xl-3.col-md-6
+        .card.border-0.shadow-sm.rounded-4.h-100
+          .card-body.p-4
+            .d-flex.justify-content-between.mb-3
+              div
+                small.text-muted.text-uppercase.fw-bold Actividad Total
+                h3.fw-bold.mb-0.text-dark= kpis.total
+              .icon-sm.bg-dark.bg-opacity-10.text-dark.rounded-3.p-2.d-flex.align-items-center.justify-content-center(style="width: 45px; height: 45px;")
+                i.bx.bx-file.fs-4
+            p.small.text-muted.mb-0 Propuestas generadas (incluyendo borradores).
+
+      //- KPI 4: Tasa de Conversión (Gráfico Mini)
+      .col-xl-3.col-md-6
+        .card.border-0.shadow-sm.rounded-4.h-100.bg-dark.text-white
+          .card-body.p-3.d-flex.align-items-center.justify-content-between
+             div
+               small.text-white-50.text-uppercase.fw-bold Efectividad
+               h2.fw-bold.mb-0(style="color: #67d826ff;") #{((kpis.dinero_ganado / (kpis.dinero_ganado + kpis.dinero_juego || 1)) * 100).toFixed(0)}%
+               small.text-white-50 Tasa de Cierre
+             div(style="width: 80px; height: 80px;")
+               canvas#chartConversion
+
+    //- SECCIÓN 4: RESUMEN DE ACTIVIDAD RECIENTE
+    .row
+      .col-12
+        .card.border-0.shadow-sm.rounded-4
+          .card-header.bg-white.py-3.border-bottom.d-flex.justify-content-between.align-items-center
+             h6.fw-bold.mb-0 ⏱️ Últimos Movimientos
+             a.btn.btn-sm.btn-light(href="/app/finanzas/historial") Ver Todo
+          
+          .card-body.p-0
+            .table-responsive
+              table.table.table-hover.align-middle.mb-0
+                thead.bg-light
+                  tr.small.text-uppercase.text-muted
+                    th.ps-4 Folio
+                    th Cliente
+                    th Fecha
+                    th Estado
+                    th.text-end.pe-4 Monto
+                tbody
+                  if recientes.length > 0
+                    each r in recientes
+                      tr
+                        td.ps-4
+                          span.badge.bg-light.text-dark.border= r.folio
+                        td.fw-bold.text-dark= r.nombre_comercial
+                        td.text-muted.small= new Date(r.fecha_creacion).toLocaleDateString('es-MX', {day: 'numeric', month: 'short'})
+                        td
+                          if r.estado == 'Borrador'
+                            span.badge.bg-secondary.bg-opacity-10.text-secondary Borrador
+                          else if r.estado == 'Pendiente'
+                            span.badge.bg-warning.bg-opacity-10.text-warning Pendiente
+                          else if r.estado == 'Aceptada'
+                            span.badge.bg-success.bg-opacity-10.text-success Aceptada
+                          else
+                            span.badge.bg-danger.bg-opacity-10.text-danger Rechazada
+                        td.text-end.pe-4.fw-bold= "$" + parseFloat(r.monto_total).toLocaleString('es-MX', {minimumFractionDigits: 2})
+                  else
+                    tr
+                      td.text-center.py-4(colspan="5")
+                        i.bx.bx-ghost.fs-3.text-muted.mb-2
+                        p.text-muted.small.mb-0 No hay actividad reciente. ¡Crea tu primera cotización!
+
+  //- ESTILOS PERSONALIZADOS
+  style.
+    .shadow-hover:hover { transform: translateY(-5px); box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important; }
+    .action-card { background: linear-gradient(145deg, #ffffff, #f8f9fa); }
+
+  //- SCRIPTS PARA GRÁFICAS
+  script.
+    // Datos inyectados desde el servidor
+    const ganada = !{kpis.dinero_ganado || 0};
+    const juego = !{kpis.dinero_juego || 0};
+
+    // Gráfica de Donut para Conversión
+    const ctx = document.getElementById('chartConversion').getContext('2d');
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Ganado', 'Pendiente'],
+        datasets: [{
+          data: [ganada, juego],
+          backgroundColor: ['#67d826ff', '#ffffff30'],
+          borderWidth: 0,
+          cutout: '70%'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } }
+      }
+    });

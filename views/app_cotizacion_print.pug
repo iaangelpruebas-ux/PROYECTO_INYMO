@@ -1,0 +1,361 @@
+doctype html
+html(lang="es")
+  head
+    meta(charset="UTF-8")
+    title Cotización #{c.folio} | INYMO
+    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet")
+    link(href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet")
+    link(href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet')
+    
+    style.
+      /* --- CONFIGURACIÓN DE IMPRESIÓN --- */
+      @page { size: letter; margin: 0; }
+      @media print {
+        body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; background: white !important; }
+        .no-print { display: none !important; }
+        .hoja { box-shadow: none !important; margin: 0 !important; width: 100% !important; }
+      }
+
+      /* --- ESTILOS VISUALES (Inter Font) --- */
+      body {
+        font-family: 'Inter', sans-serif;
+        background: #525659;
+        margin: 0;
+        padding: 40px 0;
+        color: #1f1f1f;
+      }
+
+      .hoja {
+        width: 216mm;
+        min-height: 279mm;
+        background: white;
+        margin: 0 auto;
+        position: relative;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ENCABEZADO */
+      .header-bar {
+        background-color: #111;
+        height: 12px;
+        width: 100%;
+        border-bottom: 3px solid #67d826ff;
+      }
+      
+      .brand-section {
+        padding: 40px 50px 20px 50px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+
+      .logo-text { font-weight: 900; font-size: 2.5rem; letter-spacing: -1.5px; line-height: 1; margin-bottom: 10px; }
+      .logo-dot { color: #67d826ff; }
+      .company-details { font-size: 0.7rem; color: #666; line-height: 1.5; border-left: 2px solid #e5e5e5; padding-left: 15px; }
+
+      .folio-display { text-align: right; }
+      .folio-number { font-size: 1.5rem; font-weight: 800; color: #111; letter-spacing: -0.5px; }
+      .folio-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: #888; margin-bottom: 5px; }
+      
+      .meta-grid { 
+        display: grid; 
+        grid-template-columns: auto auto; 
+        gap: 5px 20px; 
+        text-align: right; 
+        margin-top: 15px; 
+        font-size: 0.8rem;
+      }
+      .meta-label { font-weight: 600; color: #111; }
+      .meta-val { color: #555; }
+
+      /* SECCIÓN CLIENTE (CLEAN & UNIFICADA) */
+      .client-section {
+        margin: 20px 50px;
+        padding: 25px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #edf2f4;
+        display: flex;
+        justify-content: space-between;
+      }
+      
+      .client-block { width: 48%; }
+      .section-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #adb5bd; letter-spacing: 1px; margin-bottom: 8px; }
+      
+      .client-name { font-size: 1.1rem; font-weight: 700; color: #000; margin-bottom: 5px; }
+      
+      /* Corrección de tipografía unificada */
+      .client-data { 
+        font-size: 0.85rem; 
+        color: #495057; 
+        line-height: 1.6; 
+        font-family: 'Inter', sans-serif; /* Asegurar misma fuente */
+      }
+      
+      .icon-data { 
+        display: flex; 
+        align-items: center; 
+        gap: 8px; 
+        margin-bottom: 4px;
+        font-family: 'Inter', sans-serif;
+      }
+      
+      /* Asegurar que el icono no rompa la fuente */
+      .icon-data i { font-size: 1.1em; color: #6c757d; }
+
+      /* TABLA PRO */
+      .table-section { padding: 10px 50px; flex-grow: 1; }
+      .pro-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+      
+      .pro-table th {
+        text-align: left;
+        padding: 12px 10px;
+        border-bottom: 2px solid #111;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.5px;
+        color: #111;
+      }
+      
+      .pro-table td {
+        padding: 14px 10px;
+        border-bottom: 1px solid #f1f3f5;
+        vertical-align: top;
+        color: #333;
+      }
+      
+      /* Columnas específicas */
+      .col-idx { width: 5%; text-align: center; color: #adb5bd; }
+      .col-desc { width: 40%; }
+      .col-entrega { width: 15%; font-size: 0.75rem; color: #67d826ff; font-weight: 600; } 
+      .col-cant { width: 10%; text-align: center; }
+      .col-precio { width: 15%; text-align: right; font-family: 'Inter', monospace; }
+      .col-total { width: 15%; text-align: right; font-weight: 700; font-family: 'Inter', monospace; }
+
+      /* TOTALES DARK */
+      .totals-section {
+        background-color: #fff;
+        padding: 0 50px 20px 50px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        page-break-inside: avoid;
+      }
+      
+      .amount-in-words {
+        width: 50%;
+        font-size: 0.75rem;
+        color: #868e96;
+        padding-top: 15px;
+        border-top: 1px solid #e9ecef;
+      }
+
+      .calc-box { width: 40%; }
+      .calc-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 0;
+        font-size: 0.9rem;
+        color: #495057;
+      }
+      
+      .grand-total {
+        background-color: #111; /* NEGRO PURO */
+        color: white;
+        padding: 15px 20px;
+        border-radius: 6px;
+        margin-top: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+      .total-tag { font-size: 0.9rem; font-weight: 600; letter-spacing: 1px; }
+      .total-val { font-size: 1.4rem; font-weight: 700; color: #67d826ff; /* VERDE SOLO EN NÚMERO */ }
+
+      /* PIE DE PÁGINA */
+      .footer-section {
+        margin-top: auto;
+        padding-bottom: 0;
+      }
+      
+      .signatures {
+        display: flex;
+        justify-content: space-between;
+        padding: 40px 50px;
+        margin-top: 20px;
+      }
+      .sign-block {
+        width: 45%;
+        border-top: 1px solid #ced4da;
+        padding-top: 10px;
+        text-align: center;
+      }
+      .sign-name { font-weight: 700; font-size: 0.85rem; color: #111; }
+      .sign-title { font-size: 0.7rem; color: #868e96; text-transform: uppercase; }
+
+      .legal-bar {
+        background-color: #f8f9fa;
+        color: #adb5bd;
+        text-align: center;
+        font-size: 0.65rem;
+        padding: 12px 50px;
+        border-top: 1px solid #e9ecef;
+      }
+
+      /* WATERMARK */
+      .bg-watermark {
+        position: absolute;
+        top: 45%; left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 15rem;
+        font-weight: 900;
+        color: #f1f3f5;
+        z-index: -1;
+        letter-spacing: -10px;
+      }
+
+  body
+    .no-print(style="position: fixed; bottom: 30px; right: 30px; z-index: 1000;")
+      button.btn.btn-dark.rounded-pill.shadow-lg.px-4.py-2(onclick="window.print()")
+        i.bx.bx-printer.me-2
+        | Imprimir Documento
+
+    .hoja
+      .bg-watermark INYMO
+      .header-bar
+
+      //- 1. HEADER (DISEÑO MANTENIDO)
+      .brand-section
+        .company-block
+          .logo-text INYMO<span class="logo-dot">.</span>
+          .company-details
+            strong Ingeniería y Montajes de Occidente S.A. de C.V.
+            br
+            | RFC: INY250101ABC
+            br
+            | Av. Vallarta 1234, Guadalajara, Jalisco.
+            br
+            | contacto@inymo.com | (33) 1234-5678
+
+        .folio-display
+          .folio-label COTIZACIÓN
+          .folio-number #{c.folio}
+          .meta-grid
+            .meta-label Emisión:
+            .meta-val #{new Date(c.fecha_creacion).toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric'})}
+            .meta-label Vencimiento:
+            .meta-val #{new Date(c.fecha_creacion.getTime() + (c.validez_dias * 86400000)).toLocaleDateString('es-MX', {day:'2-digit', month:'long', year:'numeric'})}
+            .meta-label Elaborado:
+            .meta-val #{usuario || 'Agente INYMO'}
+
+      //- 2. CLIENTE (TIPOGRAFÍA UNIFICADA)
+      .client-section
+        .client-block
+          .section-label DATOS FISCALES DEL CLIENTE
+          .client-name #{c.nombre_comercial}
+          .client-data.mt-2
+            div <strong>RFC:</strong> #{c.rfc || 'XAXX010101000'}
+            div <strong>Dirección:</strong> #{c.direccion || 'Domicilio Fiscal no registrado'}
+            div <strong>Régimen:</strong> General de Ley
+        
+        .client-block(style="border-left: 1px solid #e9ecef; padding-left: 25px;")
+          .section-label CONTACTO Y ENTREGA
+          .client-data
+            //- Uso de divs limpios en lugar de icon-data complejo para asegurar fuente
+            div.mb-1
+               i.bx.bx-user.me-2
+               strong Atn: 
+               | #{c.contacto || 'A quien corresponda'}
+            div.mb-1
+               i.bx.bx-phone.me-2
+               strong Tel: 
+               | #{c.telefono || '--'}
+            div
+               i.bx.bx-envelope.me-2
+               strong Email: 
+               | #{c.correo || '--'}
+
+      //- 3. TABLA DE PARTIDAS
+      .table-section
+        table.pro-table
+          thead
+            tr
+              th.col-idx #
+              th.col-desc Descripción
+              th.col-entrega T. Entrega
+              th.col-cant Cant.
+              th.col-cant Unidad
+              th.col-precio P. Unitario
+              th.col-total Importe
+          tbody
+            each item, index in items
+              tr
+                td.col-idx= index + 1
+                td.col-desc
+                  strong= item.descripcion
+                td.col-entrega
+                  i.bx.bx-time-five.me-1
+                  | #{item.tiempo_entrega || 'Inmediata'}
+                td.col-cant= item.cantidad
+                td.col-cant(style="text-transform: lowercase;")= item.unidad
+                td.col-precio= "$" + parseFloat(item.precio_unitario).toLocaleString('es-MX', {minimumFractionDigits:2})
+                td.col-total= "$" + parseFloat(item.subtotal).toLocaleString('es-MX', {minimumFractionDigits:2})
+            
+            if items.length < 8
+              tr: td(colspan="7" style="height: 60px;")
+
+      //- 4. FINANZAS
+      .totals-section
+        .amount-in-words
+          .section-label IMPORTE TOTAL CON LETRA
+          div#textoLetra.fw-bold.text-dark (Cargando...)
+          
+          .section-label.mt-3 CONDICIONES COMERCIALES
+          ul.ps-3.mt-1(style="line-height: 1.4;")
+            li Precios en Moneda Nacional (MXN) + IVA.
+            li Vigencia de cotización: #{c.validez_dias} días naturales.
+            li Forma de pago: 50% Anticipo, 50% Contra entrega.
+            li Tiempos de entrega cuentan a partir del anticipo.
+
+        .calc-box
+          .calc-row
+            span Subtotal:
+            strong= "$" + parseFloat(c.subtotal).toLocaleString('es-MX', {minimumFractionDigits:2})
+          if c.descuento > 0
+            .calc-row.text-danger
+              span Descuento Aplicado:
+              span= "-$" + parseFloat(c.descuento).toLocaleString('es-MX', {minimumFractionDigits:2})
+          .calc-row
+            span IVA (16%):
+            span= "$" + parseFloat(c.iva).toLocaleString('es-MX', {minimumFractionDigits:2})
+          
+          .grand-total
+            span.total-tag Total Neto
+            span.total-val= "$" + parseFloat(c.monto_total).toLocaleString('es-MX', {minimumFractionDigits:2})
+
+      //- 5. PIE DE PÁGINA
+      .footer-section
+        .signatures
+          .sign-block
+            .sign-name INYMO S.A. de C.V.
+            .sign-title Departamento Comercial
+          .sign-block
+            .sign-name #{c.nombre_comercial}
+            .sign-title Firma de Conformidad
+        
+        .legal-bar
+          div CONFIDENCIALIDAD: La información técnica y económica aquí contenida es propiedad de INYMO S.A. de C.V.
+          div www.inymo.com | Documento generado el #{new Date().toLocaleDateString('es-MX')}
+
+  //- SCRIPT NÚMERO A LETRAS
+  script.
+    function numeroALetras(num) {
+        const formatter = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
+        return `(SON: ${formatter.format(num)} PESOS 00/100 M.N.)`.toUpperCase().replace('$', '').replace('MXN', '');
+    }
+    document.getElementById('textoLetra').innerText = numeroALetras(!{c.monto_total});

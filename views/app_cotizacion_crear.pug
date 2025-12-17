@@ -1,0 +1,536 @@
+extends layout_app
+
+block content
+  .container-fluid.py-4.bg-light
+    form#formCotizador
+      //- =========================================================================
+      //- SECCIÓN 1: ENCABEZADO Y ACCIONES PRINCIPALES
+      //- =========================================================================
+      .d-flex.justify-content-between.align-items-center.mb-4
+        div
+          a.text-muted.text-decoration-none.small.mb-1.d-block(href="/app/finanzas") 
+            i.bx.bx-arrow-back.me-1
+            | Volver al Hub Financiero
+          h3.fw-bold.text-dark.mb-0 Nueva Propuesta Comercial
+          p.text-muted.mb-0 Gestión de precios, rentabilidad y alta de clientes en un solo flujo.
+        
+        div.d-flex.align-items-center.gap-3
+          //- Indicador de Folio
+          div.text-end.d-none.d-md-block
+            small.text-muted.d-block Folio Asignado
+            span.badge.bg-dark.px-3.py-2.fs-6.shadow-sm
+              i.bx.bx-hash.me-1
+              | #{folio}
+          
+          //- Botón de Guardado Principal
+          button.btn.btn-lg.shadow.text-white.px-5.fw-bold#btnGuardar(type="button" style="background-color: #67d826ff; border-radius: 12px; transition: all 0.2s;") 
+            i.bx.bx-save.me-2
+            | Guardar y Emitir
+
+      .row.g-4
+        //- =========================================================================
+        //- SECCIÓN 2: COLUMNA IZQUIERDA (CLIENTE Y CONDICIONES)
+        //- =========================================================================
+        .col-lg-4
+          
+          //- TARJETA DE GESTIÓN DE CLIENTE
+          .card.border-0.shadow-sm.rounded-4.mb-4.overflow-hidden
+            .card-header.bg-white.py-3.border-bottom
+              .d-flex.justify-content-between.align-items-center
+                h6.fw-bold.mb-0.text-primary 
+                  i.bx.bx-user-circle.me-2
+                  | Información del Cliente
+                
+                //- Switch para alternar modo
+                .form-check.form-switch
+                  input.form-check-input#checkNuevoCliente(type="checkbox" style="cursor: pointer; width: 3em; height: 1.5em;")
+                  label.form-check-label.small.fw-bold.ms-2(for="checkNuevoCliente" style="cursor: pointer; line-height: 1.8;") Alta Nueva
+            
+            .card-body.p-4
+              //- MODO A: BUSCAR CLIENTE EXISTENTE
+              .mb-3#divSelectCliente
+                label.form-label.fw-bold.small Buscar en Directorio
+                .input-group.input-group-lg
+                  span.input-group-text.bg-light.border-0: i.bx.bx-search
+                  input.form-control.bg-light.border-0#busquedaCliente(list="listaClientes" placeholder="Escribe para buscar..." autocomplete="off")
+                  //- Input oculto para el ID real
+                  input(type="hidden" name="cliente_id" id="clienteIdHidden")
+                  
+                  //- Botón Editar (Solo aparece con JS)
+                  a.btn.btn-outline-secondary.border-0#btnEditarCliente(href="#" target="_blank" style="display: none;" title="Editar datos de este cliente")
+                    i.bx.bx-edit.fs-4
+                
+                //- Feedback de selección
+                .mt-2.small.text-muted#infoClienteSeleccionado(style="min-height: 20px;") 
+                  i.bx.bx-info-circle.me-1
+                  | Seleccione un cliente para ver su RFC y Contacto.
+
+              //- MODO B: ALTA DE CLIENTE NUEVO
+              .d-none#divInputCliente
+                .alert.alert-success.border-0.d-flex.align-items-center.p-2.mb-3
+                  i.bx.bx-user-plus.fs-4.me-2
+                  div
+                    small.fw-bold Creación de Expediente
+                    br
+                    small.text-muted (Se guardará al finalizar la cotización)
+
+                .mb-3
+                  label.form-label.fw-bold.small Razón Social / Nombre Comercial *
+                  .input-group
+                    input.form-control.bg-light.border-0#nombreNuevo(name="cliente_nuevo_nombre" placeholder="Ej: Industrias del Bajío S.A.")
+                    button.btn.btn-light.border(type="button" onclick="verificarCliente()" title="Verificar si ya existe") 
+                      i.bx.bx-check-double
+                      | Validar
+                  small.text-danger.d-none#errorCliente ⚠️ Este cliente ya existe.
+
+                .row.g-2.mb-3
+                  .col-6
+                    label.form-label.fw-bold.small RFC *
+                    input.form-control.bg-light.border-0(name="cliente_nuevo_rfc" placeholder="XAXX010101000")
+                  .col-6
+                    label.form-label.fw-bold.small ID Interno (Opc.)
+                    input.form-control.bg-light.border-0(name="cliente_nuevo_codigo" placeholder="C-001")
+
+                .mb-3
+                  label.form-label.fw-bold.small Contacto Principal
+                  input.form-control.bg-light.border-0(name="cliente_nuevo_contacto" placeholder="Nombre de quien recibe")
+                
+                .row.g-2
+                   .col-6: input.form-control.bg-light.border-0.small(name="cliente_nuevo_telefono" placeholder="Teléfono / Celular")
+                   .col-6: input.form-control.bg-light.border-0.small(name="cliente_nuevo_correo" placeholder="Correo Electrónico")
+
+              hr.my-4.text-muted.opacity-25
+
+              //- FECHAS DE LA PROPUESTA
+              .row.g-3
+                .col-6
+                   label.form-label.fw-bold.small 📅 Fecha de Emisión
+                   input.form-control.bg-light.border-0(type="date" name="fecha_emision" value=new Date().toISOString().split('T')[0])
+                .col-6
+                   label.form-label.fw-bold.small ⏳ Vigencia (Días)
+                   input.form-control.bg-light.border-0(type="number" name="vigencia_dias" value="15")
+
+          //- TARJETA DE CONDICIONES Y NOTAS
+          .card.border-0.shadow-sm.rounded-4
+             .card-header.bg-white.py-3.fw-bold 
+                i.bx.bx-notepad.me-2
+                | Condiciones Comerciales
+             .card-body.p-4
+                .mb-3
+                  label.form-label.fw-bold.small Notas Visibles en PDF
+                  //- CHIPS DE PLANTILLAS RÁPIDAS
+                  div.mb-2.d-flex.flex-wrap.gap-2
+                    span.badge.bg-white.border.text-dark.cursor-pointer.shadow-sm(onclick="addNota('Precios más IVA.')" title="Clic para agregar") + IVA
+                    span.badge.bg-white.border.text-dark.cursor-pointer.shadow-sm(onclick="addNota('Tiempo de entrega: Inmediato.')") + Entrega
+                    span.badge.bg-white.border.text-dark.cursor-pointer.shadow-sm(onclick="addNota('50% Anticipo, 50% Contra entrega.')") + Pagos
+                    span.badge.bg-white.border.text-dark.cursor-pointer.shadow-sm(onclick="addNota('Cotización sujeta a disponibilidad.')") + Stock
+                  
+                  textarea.form-control.bg-light.border-0#txtNotasPublicas(name="notas_publicas" rows="4" placeholder="Escriba aquí condiciones de entrega, garantía, etc...")
+                
+                .mb-0
+                  label.form-label.fw-bold.small.text-danger 🔒 Notas Internas (Solo Admin)
+                  textarea.form-control.bg-light.border-0(name="notas_privadas" rows="2" placeholder="Ej: Margen mínimo del 25% autorizado. Cliente pide descuento por volumen.")
+
+        //- =========================================================================
+        //- SECCIÓN 3: COLUMNA DERECHA (DESGLOSE FINANCIERO)
+        //- =========================================================================
+        .col-lg-8
+          .card.border-0.shadow-sm.rounded-4.h-100.d-flex.flex-column
+            .card-header.bg-white.py-3.d-flex.justify-content-between.align-items-center.border-bottom
+              h6.fw-bold.mb-0 🛠️ Desglose de Partidas
+              button.btn.btn-dark.rounded-pill.px-4#btnAgregarFila(type="button") 
+                i.bx.bx-plus.me-1
+                | Agregar Producto
+            
+            //- TABLA SIN SCROLL INTERNO (SE EXPANDE)
+            .card-body.p-0.flex-grow-1
+              .table-responsive
+                table.table.table-hover.align-middle.mb-0#tablaItems(style="min-width: 950px;")
+                  thead.bg-light
+                    tr.small.text-uppercase.text-muted
+                      th.ps-4.py-3(width="30%") Descripción / Item
+                      th.text-center(width="10%") Cant.
+                      th.text-center(width="10%") Unidad
+                      th.text-end.text-nowrap(width="12%") P. Venta
+                      th.text-end.text-nowrap(width="12%" style="background-color: #fff8e1;") Costo Base
+                      th.text-center.text-nowrap(width="8%") Desc %
+                      th.text-end.text-nowrap(width="15%") Total / Margen
+                      th(width="5%")
+                  tbody
+                    //- LAS FILAS SE GENERAN CON JS
+
+            //- FOOTER DE TOTALES (PANEL DE CONTROL)
+            .card-footer.bg-white.p-4.border-top
+              .row.align-items-center
+                //- WIDGET DE RENTABILIDAD
+                .col-lg-6.mb-3.mb-lg-0
+                  .p-4.rounded-4.border(style="background: linear-gradient(to right, #f8f9fa, #ffffff);")
+                     .d-flex.justify-content-between.align-items-center.mb-3
+                        h6.fw-bold.mb-0.text-dark 
+                           i.bx.bx-line-chart.me-2
+                           | Rentabilidad del Proyecto
+                        span.badge.bg-secondary#badgeMargen 0% Margen
+                     
+                     .progress.mb-3(style="height: 12px; background-color: #e9ecef; border-radius: 6px;")
+                        .progress-bar#barMargen(role="progressbar" style="width: 0%; transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);")
+
+                     .d-flex.justify-content-between.small.text-muted
+                        span Costo Total (Interno): <span class="fw-bold text-dark" id="lblCostoTotal">$0.00</span>
+                        span Utilidad Neta: <span class="fw-bold text-success" id="lblUtilidad">$0.00</span>
+
+                //- TOTALES FINALES
+                .col-lg-6
+                  .ps-lg-5
+                    .d-flex.justify-content-between.mb-2
+                       span.text-muted.fs-6 Subtotal:
+                       span.fw-bold.fs-6#lblSubtotal $0.00
+                    .d-flex.justify-content-between.mb-2
+                       span.text-muted.fs-6 Descuentos:
+                       span.text-danger.fw-bold#lblDescuento -$0.00
+                    .d-flex.justify-content-between.mb-3.pb-3.border-bottom
+                       span.text-muted.fs-6 IVA (16%):
+                       span.fw-bold.fs-6#lblIVA $0.00
+                    .d-flex.justify-content-between.align-items-center.mt-2
+                       h5.fw-bold.text-dark.mb-0 Total a Pagar:
+                       h2.fw-bold.mb-0(style="color: #67d826ff; letter-spacing: -1px;")#lblTotal $0.00
+
+  //- DATALISTS (Bases de datos locales para búsqueda rápida)
+  datalist#listaClientes
+    each c in clientes
+      option(value=c.nombre_comercial data-id=c.id data-rfc=c.rfc)
+
+  datalist#list-productos
+    each p in productos
+      option(value=p.nombre)
+
+  //- ESTILOS LOCALES
+  style.
+    .cursor-pointer { cursor: pointer; }
+    .fila-producto input:focus, .fila-producto select:focus { 
+       background-color: #fff !important; 
+       box-shadow: none; 
+       border-bottom: 2px solid #67d826ff !important; 
+    }
+    /* Eliminar flechas del input number para diseño limpio */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; margin: 0; 
+    }
+
+  //- =========================================================================
+  //- LÓGICA JAVASCRIPT DEL COTIZADOR
+  //- =========================================================================
+  script.
+    // 1. CARGA DE DATOS INICIALES
+    const catalogo = !{JSON.stringify(productos)};
+    const clientesDB = !{JSON.stringify(clientes)}; // Para validación en frontend
+
+    // 2. FUNCIÓN PARA AGREGAR NOTAS
+    function addNota(texto) {
+       const area = document.getElementById('txtNotasPublicas');
+       area.value = area.value ? area.value + "\n" + texto : texto;
+       area.scrollTop = area.scrollHeight; // Auto scroll al final
+    }
+
+    // 3. GENERADOR DE FILAS (CORE)
+    function agregarFila() {
+      const tbody = document.querySelector('#tablaItems tbody');
+      const row = tbody.insertRow();
+      row.className = "fila-producto align-top"; 
+      
+      row.innerHTML = `
+        <td class="ps-4 py-3">
+           <div class="d-flex flex-column">
+             <input class="form-control border-0 bg-transparent fw-bold desc mb-1" list="list-productos" placeholder="Buscar o escribir nuevo..." autocomplete="off">
+             <div class="form-check d-flex align-items-center ms-1">
+               <input class="form-check-input guardar-check me-2" type="checkbox" id="chk_${Date.now()}" style="cursor: pointer;">
+               <label class="form-check-label text-muted small" for="chk_${Date.now()}" style="font-size: 11px; cursor: pointer;">Guardar en Catálogo</label>
+             </div>
+             <input type="hidden" class="id-prod">
+           </div>
+        </td>
+        <td class="py-3">
+            <input type="number" class="form-control text-center cant border-0 bg-light fw-bold" value="1" step="1" min="0">
+        </td>
+        <td class="py-3">
+            <select class="form-select border-0 bg-transparent text-center unidad small text-muted">
+                <option value="pza">pza</option>
+                <option value="m">m</option>
+                <option value="srv">srv</option>
+                <option value="lote">lote</option>
+                <option value="kg">kg</option>
+                <option value="kit">kit</option>
+                <option value="hrs">hrs</option>
+                <option value="m2">m²</option>
+                <option value="m3">m³</option>
+                <option value="juego">juego</option>
+            </select>
+        </td>
+        <td class="py-3">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text border-0 bg-transparent text-muted">$</span>
+                <input type="number" class="form-control text-end precio border-0 bg-light fw-bold" value="0" step="0.01">
+            </div>
+        </td>
+        <td class="py-3" style="background-color: #fff8e1;">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text border-0 bg-transparent text-muted">$</span>
+                <input type="number" class="form-control text-end costo border-0 bg-transparent" value="0" step="0.01" title="Costo Interno">
+            </div>
+        </td>
+        <td class="py-3">
+            <input type="number" class="form-control text-center desc-porc border-0 bg-light" value="0" max="100">
+        </td>
+        <td class="py-3 pe-3 text-end">
+            <div class="fw-bold total-linea mb-1 fs-6">$0.00</div>
+            
+            
+            <div class="progress mb-1" style="height: 4px; background-color: #e9ecef;">
+                <div class="progress-bar bar-linea" role="progressbar" style="width: 0%"></div>
+            </div>
+            <small class="text-muted d-block" style="font-size: 10px;">Utilidad: <span class="util-linea fw-bold text-success">$0.00</span></small>
+        </td>
+        <td class="py-3 text-center">
+            <button type="button" class="btn btn-link text-muted hover-danger btn-borrar p-0" title="Eliminar fila">
+                <i class='bx bx-trash fs-5'></i>
+            </button>
+        </td>
+      `;
+
+      // VINCULACIÓN DE EVENTOS DE CÁLCULO
+      const inputsCalc = row.querySelectorAll('input, select');
+      inputsCalc.forEach(i => i.addEventListener('input', calcular));
+      
+      // EVENTO BORRAR
+      row.querySelector('.btn-borrar').onclick = () => { row.remove(); calcular(); };
+      
+      // LÓGICA DE AUTOCOMPLETADO
+      const inputDesc = row.querySelector('.desc');
+      inputDesc.addEventListener('input', (e) => {
+          const val = e.target.value;
+          const match = catalogo.find(p => p.nombre === val);
+          const chk = row.querySelector('.guardar-check');
+          const lblChk = chk.nextElementSibling;
+          
+          if(match) {
+             row.querySelector('.id-prod').value = match.id;
+             row.querySelector('.precio').value = match.precio_base;
+             row.querySelector('.costo').value = match.costo_base;
+             
+             // Seleccionar unidad correcta si existe
+             const selUnidad = row.querySelector('.unidad');
+             const optionExists = [...selUnidad.options].some(o => o.value === match.unidad);
+             if(optionExists) selUnidad.value = match.unidad;
+
+             // Deshabilitar checkbox de guardado
+             chk.checked = false; 
+             chk.disabled = true; 
+             lblChk.innerText = "En Catálogo";
+             lblChk.classList.add('text-success');
+             
+             calcular();
+          } else {
+             // Si es nuevo
+             row.querySelector('.id-prod').value = "";
+             chk.disabled = false;
+             lblChk.innerText = "Guardar en Catálogo";
+             lblChk.classList.remove('text-success');
+          }
+      });
+    }
+
+    // 4. MOTOR DE CÁLCULO FINANCIERO
+    function calcular() {
+      let sub = 0, costoTotalGlobal = 0;
+      
+      document.querySelectorAll('.fila-producto').forEach(r => {
+         const q = parseFloat(r.querySelector('.cant').value) || 0;
+         const p = parseFloat(r.querySelector('.precio').value) || 0;
+         const c = parseFloat(r.querySelector('.costo').value) || 0;
+         const d = parseFloat(r.querySelector('.desc-porc').value) || 0;
+         
+         const totalLinea = (q * p) * (1 - d/100);
+         const costoLinea = q * c;
+         const utilidadLinea = totalLinea - costoLinea;
+         const margenLinea = totalLinea > 0 ? (utilidadLinea / totalLinea) * 100 : 0;
+
+         // Actualizar textos de la fila
+         r.querySelector('.total-linea').innerText = "$" + totalLinea.toLocaleString('es-MX', {minimumFractionDigits:2});
+         r.querySelector('.util-linea').innerText = "$" + utilidadLinea.toLocaleString('es-MX', {minimumFractionDigits:2});
+         
+         // Actualizar barrita de la fila
+         const bar = r.querySelector('.bar-linea');
+         bar.style.width = Math.min(Math.max(margenLinea, 0), 100) + "%";
+         
+         // Color dinámico
+         if(margenLinea < 20) bar.className = "progress-bar bar-linea bg-danger";
+         else if(margenLinea < 40) bar.className = "progress-bar bar-linea bg-warning";
+         else bar.className = "progress-bar bar-linea bg-success";
+
+         sub += totalLinea;
+         costoTotalGlobal += costoLinea;
+      });
+      
+      // TOTALES GLOBALES
+      const iva = sub * 0.16;
+      const total = sub + iva;
+      const utilidadGlobal = sub - costoTotalGlobal;
+      const margenGlobal = sub > 0 ? (utilidadGlobal / sub) * 100 : 0;
+
+      // FORMATO MONEDA
+      const fmt = (n) => "$" + n.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
+      
+      document.getElementById('lblSubtotal').innerText = fmt(sub);
+      document.getElementById('lblIVA').innerText = fmt(iva);
+      document.getElementById('lblTotal').innerText = fmt(total);
+      
+      document.getElementById('lblCostoTotal').innerText = fmt(costoTotalGlobal);
+      document.getElementById('lblUtilidad').innerText = fmt(utilidadGlobal);
+      
+      // WIDGET DE RENTABILIDAD GLOBAL
+      const badge = document.getElementById('badgeMargen');
+      const barGlobal = document.getElementById('barMargen');
+      
+      badge.innerText = margenGlobal.toFixed(1) + "%";
+      barGlobal.style.width = Math.min(Math.max(margenGlobal, 0), 100) + "%";
+      
+      if(margenGlobal < 20) {
+         badge.className = "badge bg-danger";
+         barGlobal.className = "progress-bar bg-danger";
+      } else if (margenGlobal < 40) {
+         badge.className = "badge bg-warning text-dark";
+         barGlobal.className = "progress-bar bg-warning";
+      } else {
+         badge.className = "badge bg-success";
+         barGlobal.className = "progress-bar bg-success";
+      }
+    }
+
+    // 5. LÓGICA DE CLIENTES (SWITCHER)
+    document.getElementById('checkNuevoCliente').addEventListener('change', (e) => {
+       const divSel = document.getElementById('divSelectCliente');
+       const divInp = document.getElementById('divInputCliente');
+       
+       if(e.target.checked) {
+          divSel.classList.add('d-none');
+          divInp.classList.remove('d-none');
+          // Limpiar selección previa
+          document.getElementById('busquedaCliente').value = "";
+          document.getElementById('clienteIdHidden').value = "";
+          document.getElementById('btnEditarCliente').style.display = 'none';
+       } else {
+          divSel.classList.remove('d-none');
+          divInp.classList.add('d-none');
+       }
+    });
+
+    // 6. DETECCIÓN DE CLIENTE EXISTENTE (BUSCADOR)
+    document.getElementById('busquedaCliente').addEventListener('input', function(e) {
+       const val = e.target.value;
+       const match = clientesDB.find(c => c.nombre_comercial === val);
+       
+       if(match) {
+          document.getElementById('clienteIdHidden').value = match.id;
+          document.getElementById('infoClienteSeleccionado').innerHTML = `<span class="text-success fw-bold"><i class='bx bx-check-circle'></i> Cliente seleccionado: RFC ${match.rfc || 'N/A'}</span>`;
+          
+          // Mostrar botón de editar
+          const btnEdit = document.getElementById('btnEditarCliente');
+          btnEdit.style.display = 'inline-block';
+          btnEdit.href = `/app/clientes/detalle/${match.id}`; // Ruta al detalle del cliente
+       } else {
+          document.getElementById('clienteIdHidden').value = "";
+          document.getElementById('infoClienteSeleccionado').innerText = "Busque un cliente o cambie a 'Alta Nueva'.";
+          document.getElementById('btnEditarCliente').style.display = 'none';
+       }
+    });
+
+    // 7. VALIDACIÓN DE CLIENTE NUEVO (SIN RECARGAR)
+    function verificarCliente() {
+       const nombre = document.getElementById('nombreNuevo').value;
+       const match = clientesDB.find(c => c.nombre_comercial.toLowerCase() === nombre.toLowerCase());
+       const err = document.getElementById('errorCliente');
+       
+       if(match) {
+          err.classList.remove('d-none');
+          err.innerText = `⚠️ Cuidado: Ya existe "${match.nombre_comercial}" en la base de datos.`;
+       } else {
+          err.classList.remove('d-none');
+          err.classList.replace('text-danger', 'text-success');
+          err.innerText = "✅ Nombre disponible.";
+          setTimeout(() => err.classList.add('d-none'), 3000);
+       }
+    }
+
+    // 8. GUARDADO EN SERVIDOR
+    document.getElementById('btnGuardar').onclick = async (e) => {
+       const btn = e.currentTarget;
+       btn.disabled = true; 
+       btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Guardando...';
+       
+       const items = [];
+       document.querySelectorAll('.fila-producto').forEach(r => {
+          items.push({
+             id_producto: r.querySelector('.id-prod').value,
+             descripcion: r.querySelector('.desc').value,
+             cantidad: r.querySelector('.cant').value,
+             unidad: r.querySelector('.unidad').value,
+             precio: r.querySelector('.precio').value,
+             costo: r.querySelector('.costo').value,
+             descuento: r.querySelector('.desc-porc').value,
+             guardar_en_catalogo: r.querySelector('.guardar-check').checked
+          });
+       });
+       
+       if(items.length === 0) {
+          alert("⚠️ La cotización está vacía. Agrega productos.");
+          btn.disabled = false; btn.innerHTML = '<i class="bx bx-save me-2"></i> Guardar y Emitir';
+          return;
+       }
+
+       // Validar selección de cliente
+       let clienteId = document.getElementById('clienteIdHidden').value;
+       const esNuevo = document.getElementById('checkNuevoCliente').checked;
+       
+       if(!esNuevo && !clienteId) {
+           alert("⚠️ Debes seleccionar un cliente existente o activar 'Alta Nueva'.");
+           btn.disabled = false; btn.innerHTML = '<i class="bx bx-save me-2"></i> Guardar y Emitir';
+           return;
+       }
+
+       const data = {
+           cliente_id: clienteId,
+           cliente_nuevo_nombre: document.querySelector('[name="cliente_nuevo_nombre"]').value,
+           cliente_nuevo_rfc: document.querySelector('[name="cliente_nuevo_rfc"]').value,
+           cliente_nuevo_contacto: document.querySelector('[name="cliente_nuevo_contacto"]').value,
+           cliente_nuevo_telefono: document.querySelector('[name="cliente_nuevo_telefono"]').value,
+           cliente_nuevo_correo: document.querySelector('[name="cliente_nuevo_correo"]').value,
+           fecha_emision: document.querySelector('[name="fecha_emision"]').value,
+           vigencia_dias: document.querySelector('[name="vigencia_dias"]').value,
+           notas_publicas: document.querySelector('[name="notas_publicas"]').value,
+           notas_privadas: document.querySelector('[name="notas_privadas"]').value,
+           items: JSON.stringify(items)
+       };
+
+       try {
+           const res = await fetch('/app/finanzas/guardar-nueva', {
+               method: 'POST', 
+               headers: {'Content-Type':'application/json'},
+               body: JSON.stringify(data)
+           });
+           const json = await res.json();
+           
+           if(json.success) {
+               window.location.href = '/app/finanzas';
+           } else {
+               alert("❌ Error: " + json.error);
+               btn.disabled = false; btn.innerHTML = '<i class="bx bx-save me-2"></i> Guardar y Emitir';
+           }
+       } catch(e) {
+           alert("❌ Error de red.");
+           btn.disabled = false; btn.innerHTML = '<i class="bx bx-save me-2"></i> Guardar y Emitir';
+       }
+    };
+
+    // INICIALIZACIÓN
+    document.getElementById('btnAgregarFila').addEventListener('click', agregarFila);
+    agregarFila(); // Agregar primera fila vacía

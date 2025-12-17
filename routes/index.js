@@ -51,9 +51,11 @@ router.get('/app/dashboard', verificarSesion, function(req, res) {
 
 /* L. VISTA DE CALENDARIO/EVENTOS (Timeline Unificado) */
 router.get('/app/eventos', verificarSesion, async function(req, res) {
+  let client;
   try {
-    const client = await pool.connect();
+    client = await pool.connect();
 
+    // Consultar eventos de bitácora
     const resultBitacora = await client.query(
       'SELECT proyecto_id, titulo, descripcion, tipo_registro AS tipo, fecha_registro AS fecha, autor FROM bitacora'
     );
@@ -65,6 +67,7 @@ router.get('/app/eventos', verificarSesion, async function(req, res) {
       isHito: false
     }));
 
+    // Consultar hitos de proyectos (Fechas de entrega)
     const resultProyectos = await client.query(
       `SELECT id, nombre, codigo, fecha_fin FROM proyectos WHERE salud <> 'Archivado' AND fecha_fin IS NOT NULL`
     );
@@ -80,6 +83,7 @@ router.get('/app/eventos', verificarSesion, async function(req, res) {
       isHito: true
     }));
 
+    // Eventos corporativos fijos
     const hoy = new Date();
     const manana = new Date(hoy);
     manana.setDate(hoy.getDate() + 1);
@@ -89,10 +93,9 @@ router.get('/app/eventos', verificarSesion, async function(req, res) {
       { titulo: 'Día Festivo - Aniversario', descripcion: 'Día no laboral para todo el equipo.', tipo: 'Festivo', fecha: new Date('2026-03-21'), proyecto_codigo: 'HR', autor: 'Sistema', isHito: false }
     ];
 
+    // Unificación y ordenamiento cronológico inverso (Más reciente arriba)
     let eventosUnificados = eventosBitacora.concat(eventosHitos).concat(eventosFijos);
     eventosUnificados.sort((a, b) => b.fecha - a.fecha);
-
-    client.release();
 
     res.render('app_eventos', {
       title: 'Calendario de Eventos | INYMO',
@@ -101,13 +104,15 @@ router.get('/app/eventos', verificarSesion, async function(req, res) {
 
   } catch (err) {
     console.error("Error al cargar eventos:", err);
-    res.send("Error de base de datos al cargar eventos: " + err);
+    res.status(500).send("Error de base de datos al cargar eventos: " + err);
+  } finally {
+    if (client) client.release();
   }
 });
 
 /* ==========================================
    3. SALIDA
-   ========================================== */
+   ========================================= */
 
 router.get('/logout', function(req, res) {
   req.session.destroy(() => {

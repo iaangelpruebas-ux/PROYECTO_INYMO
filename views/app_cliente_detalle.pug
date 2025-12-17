@@ -1,0 +1,65 @@
+extends layout_app
+
+block content
+  .container-fluid.py-4.bg-light
+    .row.mb-3
+      .col
+        a.text-muted(href="/app/clientes") < Volver al Directorio
+
+    .row.g-4
+      //- COLUMNA IZQUIERDA: EDICIÓN
+      .col-lg-4
+        .card.border-0.shadow-sm.rounded-4
+          .card-header.bg-white.py-3.fw-bold 🏢 Perfil del Cliente
+          .card-body.p-4
+            form(action="/app/clientes/editar" method="POST")
+              input(type="hidden" name="id" value=cliente.id)
+              .mb-3
+                label.small.fw-bold Razón Social / Nombre
+                input.form-control(name="nombre" value=cliente.nombre_comercial)
+              .mb-3
+                label.small.fw-bold RFC
+                input.form-control(name="rfc" value=cliente.rfc)
+              .mb-3
+                label.small.fw-bold Contacto Directo
+                input.form-control(name="contacto" value=cliente.contacto)
+              .row.mb-4
+                .col-6
+                   label.small.fw-bold Teléfono
+                   input.form-control(name="telefono" value=cliente.telefono)
+                .col-6
+                   label.small.fw-bold Correo
+                   input.form-control(name="correo" value=cliente.correo)
+              
+              .d-grid.gap-2
+                button.btn.btn-dark(type="submit") Guardar Cambios
+                a.btn.btn-outline-danger.btn-sm(href=`/app/clientes/eliminar/${cliente.id}` onclick="return confirm('¿Seguro?')") Eliminar Cliente
+
+      //- COLUMNA DERECHA: HISTORIAL
+      .col-lg-8
+        .card.border-0.shadow-sm.rounded-4
+          .card-header.bg-white.py-3.fw-bold 📜 Cotizaciones Realizadas
+          .table-responsive
+            table.table.table-hover.align-middle.mb-0
+              thead.bg-light
+                tr
+                  th Folio
+                  th Fecha
+                  th Estado
+                  th.text-end Monto
+                  th
+              tbody
+                each h in historial
+                  tr
+                    td.fw-bold= h.folio
+                    td= new Date(h.fecha_creacion).toLocaleDateString('es-MX')
+                    td
+                      if h.estado == 'Aceptada'
+                        span.badge.bg-success Ganada
+                      else if h.estado == 'Pendiente'
+                        span.badge.bg-warning.text-dark Pendiente
+                      else
+                        span.badge.bg-secondary= h.estado
+                    td.text-end= "$" + parseFloat(h.monto_total).toLocaleString('es-MX')
+                    td.text-end
+                      a.btn.btn-sm.btn-light(href=`/app/finanzas/detalle/${h.id}`) Ver
