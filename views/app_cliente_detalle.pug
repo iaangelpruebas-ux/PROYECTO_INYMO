@@ -1,65 +1,632 @@
 extends layout_app
 
 block content
-  .container-fluid.py-4.bg-light
-    .row.mb-3
-      .col
-        a.text-muted(href="/app/clientes") < Volver al Directorio
+  //- ==========================================================================
+  //- LIBRERÍAS DE VISUALIZACIÓN Y RECURSOS
+  //- ==========================================================================
+  script(src="https://cdn.jsdelivr.net/npm/chart.js")
+  link(rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css")
+  script(src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js")
 
-    .row.g-4
-      //- COLUMNA IZQUIERDA: EDICIÓN
-      .col-lg-4
-        .card.border-0.shadow-sm.rounded-4
-          .card-header.bg-white.py-3.fw-bold 🏢 Perfil del Cliente
-          .card-body.p-4
-            form(action="/app/clientes/editar" method="POST")
-              input(type="hidden" name="id" value=cliente.id)
-              .mb-3
-                label.small.fw-bold Razón Social / Nombre
-                input.form-control(name="nombre" value=cliente.nombre_comercial)
-              .mb-3
-                label.small.fw-bold RFC
-                input.form-control(name="rfc" value=cliente.rfc)
-              .mb-3
-                label.small.fw-bold Contacto Directo
-                input.form-control(name="contacto" value=cliente.contacto)
-              .row.mb-4
-                .col-6
-                   label.small.fw-bold Teléfono
-                   input.form-control(name="telefono" value=cliente.telefono)
-                .col-6
-                   label.small.fw-bold Correo
-                   input.form-control(name="correo" value=cliente.correo)
-              
-              .d-grid.gap-2
-                button.btn.btn-dark(type="submit") Guardar Cambios
-                a.btn.btn-outline-danger.btn-sm(href=`/app/clientes/eliminar/${cliente.id}` onclick="return confirm('¿Seguro?')") Eliminar Cliente
+  .container-fluid.px-4.py-4
+    
+    //- ==========================================================================
+    //- BARRA DE NAVEGACIÓN SUPERIOR (BREADCRUMBS)
+    //- ==========================================================================
+    .d-flex.justify-content-between.align-items-center.mb-4
+        div
+            a.text-muted.text-decoration-none.fw-bold.small(href="/app/clientes") 
+                i.bx.bx-arrow-back.me-1
+                | VOLVER AL DIRECTORIO
+            h3.fw-bold.mt-1 Expediente Digital 360°
+        
+        div.d-flex.gap-2
+            span.badge.bg-white.border.text-secondary.d-flex.align-items-center.px-3.rounded-pill
+                i.bx.bx-hash.me-1
+                | ID: #{cliente.id}
+            
+            //- Botón para el nuevo reporte impreso en PDF
+            a.btn.btn-dark.btn-sm.rounded-pill.px-3.d-flex.align-items-center(href=`/app/clientes/reporte-impreso/${cliente.id}` target="_blank") 
+                i.bx.bxs-printer.me-2
+                | Imprimir Reporte Ejecutivo
 
-      //- COLUMNA DERECHA: HISTORIAL
-      .col-lg-8
-        .card.border-0.shadow-sm.rounded-4
-          .card-header.bg-white.py-3.fw-bold 📜 Cotizaciones Realizadas
-          .table-responsive
-            table.table.table-hover.align-middle.mb-0
-              thead.bg-light
-                tr
-                  th Folio
-                  th Fecha
-                  th Estado
-                  th.text-end Monto
-                  th
-              tbody
-                each h in historial
-                  tr
-                    td.fw-bold= h.folio
-                    td= new Date(h.fecha_creacion).toLocaleDateString('es-MX')
-                    td
-                      if h.estado == 'Aceptada'
-                        span.badge.bg-success Ganada
-                      else if h.estado == 'Pendiente'
-                        span.badge.bg-warning.text-dark Pendiente
-                      else
-                        span.badge.bg-secondary= h.estado
-                    td.text-end= "$" + parseFloat(h.monto_total).toLocaleString('es-MX')
-                    td.text-end
-                      a.btn.btn-sm.btn-light(href=`/app/finanzas/detalle/${h.id}`) Ver
+    //- ==========================================================================
+    //- HEADER EJECUTIVO (TARJETA NEGRA PRINCIPAL)
+    //- ==========================================================================
+    .card.border-0.shadow-lg.rounded-4.mb-4.bg-dark.text-white.overflow-hidden(style="background: linear-gradient(160deg, #1a1a1a 0%, #2d3436 100%);")
+      .card-body.p-4
+        .row.align-items-center
+            //- Sección 1: Identidad y Segmentación del Cliente
+            .col-lg-5.border-end.border-secondary
+                .d-flex.align-items-center.mb-3
+                    //- Foto de Perfil o Icono Genérico
+                    .bg-white.text-dark.rounded-circle.p-3.me-3.d-flex.align-items-center.justify-content-center(style="width: 64px; height: 64px; overflow:hidden;")
+                        if cliente.fotos_lugar && cliente.fotos_lugar.length > 0
+                             img(src=`/${cliente.fotos_lugar[0]}` style="width: 100%; height: 100%; object-fit: cover;")
+                        else
+                             i.bx.bxs-business.fs-1
+                    div
+                        h2.fw-bold.mb-0.text-truncate(style="max-width: 350px;")= cliente.nombre_comercial
+                        div.text-white-50
+                            i.bx.bx-barcode.me-1
+                            | RFC: #{cliente.rfc || 'No registrado'}
+
+                //- Badges de Estado y Categoría
+                .d-flex.flex-wrap.gap-2.mb-2
+                    if cliente.segmento_badge == 'A'
+                        span.badge.bg-success.text-white.border.border-success.px-3.py-2 VIP (A)
+                    else if cliente.segmento_badge == 'B'
+                        span.badge.bg-warning.text-dark.border.border-warning.px-3.py-2 Recurrente (B)
+                    else
+                        span.badge.bg-secondary.text-white.border.border-secondary.px-3.py-2 Ocasional (C)
+                    
+                    if cliente.estatus_badge == 'Activo'
+                        span.badge.bg-primary.bg-opacity-75.text-white.px-3.py-2 Activo
+                    else
+                        span.badge.bg-danger.bg-opacity-75.text-white.px-3.py-2 Inactivo
+
+                    span.badge.border.border-secondary.text-light.px-3.py-2 Ejecutivo: #{cliente.ejecutivo}
+
+            //- Sección 2: KPIs y Estado Operativo
+            .col-lg-7.ps-lg-5
+                .row.h-100.align-items-center
+                    .col-md-6
+                        div.mb-3
+                            small.text-white-50.text-uppercase.fw-bold Última Interacción
+                            if cliente.ultima_actividad_fecha
+                                 div.h4.fw-bold.mb-0= new Date(cliente.ultima_actividad_fecha).toLocaleDateString('es-MX', {day: 'numeric', month: 'long', year: 'numeric'})
+                                 div.small.text-success.mt-1
+                                    i.bx.bx-check-double.me-1
+                                    | Operación registrada
+                            else
+                                 div.h4.fw-bold.mb-0 Sin actividad reciente
+                                 div.small.text-danger.mt-1
+                                    i.bx.bxs-alarm-exclamation.me-1
+                                    | Alerta de abandono (+60 días)
+                    
+                    .col-md-6
+                        .p-3.rounded-3(style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);")
+                            .d-flex.justify-content-between.mb-2
+                                span.small.text-white-50 LTV (Valor Total):
+                                span.fw-bold.text-success= "$" + kpi.ltv.toLocaleString('es-MX', {maximumFractionDigits:0})
+                            .d-flex.justify-content-between.mb-2
+                                span.small.text-white-50 Ticket Promedio:
+                                span.fw-bold= "$" + kpi.ticket_compra.toLocaleString('es-MX', {maximumFractionDigits:0})
+                            .d-flex.justify-content-between
+                                span.small.text-white-50 Satisfacción:
+                                span.fw-bold.text-warning 
+                                    - var n = 1;
+                                    while n <= kpi.voc
+                                        i.bx.bxs-star
+                                        - n++
+                                    |  (#{kpi.voc}/10)
+
+    //- ==========================================================================
+    //- SISTEMA DE PESTAÑAS (TABS)
+    //- ==========================================================================
+    ul.nav.nav-pills.nav-fill.mb-4.p-2.bg-white.rounded-pill.shadow-sm#pills-tab(role="tablist")
+      li.nav-item: button.nav-link.active.rounded-pill.fw-bold#tab-dashboard(data-bs-toggle="pill" data-bs-target="#dashboard") 
+        i.bx.bx-pie-chart-alt-2.me-2
+        | Desempeño
+      li.nav-item: button.nav-link.rounded-pill.fw-bold#tab-finanzas(data-bs-toggle="pill" data-bs-target="#finanzas") 
+        i.bx.bx-wallet.me-2
+        | Finanzas
+      li.nav-item: button.nav-link.rounded-pill.fw-bold#tab-bitacora(data-bs-toggle="pill" data-bs-target="#bitacora") 
+        i.bx.bx-support.me-2
+        | CRM
+      li.nav-item: button.nav-link.rounded-pill.fw-bold#tab-docs(data-bs-toggle="pill" data-bs-target="#docs") 
+        i.bx.bx-folder-open.me-2
+        | Docs
+      li.nav-item: button.nav-link.rounded-pill.fw-bold#tab-perfil(data-bs-toggle="pill" data-bs-target="#perfil") 
+        i.bx.bx-map-pin.me-2
+        | Perfil
+      li.nav-item: button.nav-link.rounded-pill.fw-bold#tab-comercial(data-bs-toggle="pill" data-bs-target="#comercial") 
+        i.bx.bx-list-check.me-2
+        | Cotizaciones
+
+    //- ==========================================================================
+    //- CONTENIDO DE LAS PESTAÑAS
+    //- ==========================================================================
+    .tab-content#pills-tabContent.pb-5
+      
+      //- ------------------------------------------------------------------------
+      //- TAB 1: DASHBOARD (GRÁFICAS)
+      //- ------------------------------------------------------------------------
+      .tab-pane.fade.show.active#dashboard
+        .row.g-4
+            .col-lg-8
+                .card.border-0.shadow-sm.rounded-4.h-100
+                    .card-header.bg-white.py-3.d-flex.justify-content-between.align-items-center
+                        h5.fw-bold.mb-0 Evolución Comercial (12 Meses)
+                        //- Filtros de fecha rápidos
+                        form.d-flex.gap-2.align-items-center.bg-light.p-1.rounded-pill(action=`/app/clientes/detalle/${cliente.id}` method="GET")
+                            input.form-control.form-control-sm.border-0.bg-transparent(type="date" name="inicio" value=filtros.inicio required)
+                            span.text-muted -
+                            input.form-control.form-control-sm.border-0.bg-transparent(type="date" name="fin" value=filtros.fin required)
+                            button.btn.btn-dark.btn-sm.rounded-circle(type="submit"): i.bx.bx-filter-alt
+                    .card-body
+                        canvas#chartDesempeno(height="300" style="max-height:300px")
+
+            .col-lg-4
+                .card.border-0.shadow-sm.rounded-4.h-100.bg-light
+                    .card-body.p-4
+                        h5.fw-bold Resumen del Periodo
+                        hr
+                        - let totalC = grafica.cotizado.reduce((a,b)=>a+b, 0)
+                        - let totalV = grafica.vendido.reduce((a,b)=>a+b, 0)
+                        
+                        .mb-4
+                            small.text-muted Total Cotizado
+                            h3.fw-bold.text-dark= "$" + totalC.toLocaleString('es-MX', {maximumFractionDigits:0})
+                        
+                        .mb-4
+                            small.text-muted Total Vendido
+                            h3.fw-bold.text-success= "$" + totalV.toLocaleString('es-MX', {maximumFractionDigits:0})
+                        
+                        div.p-3.bg-white.rounded-3.border
+                            small.fw-bold.d-block.mb-2 Eficiencia
+                            - let rate = totalC > 0 ? (totalV/totalC)*100 : 0
+                            .progress.rounded-pill(style="height: 12px;")
+                                .progress-bar.bg-success(style=`width: ${rate}%`)
+                            div.text-end.small.mt-1 #{rate.toFixed(1)}% Éxito
+
+      //- ------------------------------------------------------------------------
+      //- TAB 2: FINANZAS Y CRÉDITO
+      //- ------------------------------------------------------------------------
+      .tab-pane.fade#finanzas
+        .row.g-4
+            .col-lg-4
+                .card.border-0.shadow-sm.rounded-4.mb-4
+                    .card-header.bg-primary.text-white.py-3.d-flex.justify-content-between.align-items-center
+                        div
+                            i.bx.bx-credit-card.me-2
+                            span.fw-bold Línea de Crédito
+                        button.btn.btn-light.btn-sm.rounded-pill.text-primary.fw-bold(data-bs-toggle="modal" data-bs-target="#modalCredito") 
+                            i.bx.bx-edit-alt
+                            | Modificar
+                    .card-body.text-center.p-4.bg-light
+                        h1.fw-bolder.text-primary.mb-0= "$" + parseFloat(cliente.credito_asignado).toLocaleString('es-MX')
+                        small.text-uppercase.fw-bold.text-muted Límite Asignado
+                        hr
+                        .d-flex.justify-content-between.small.mb-1
+                            span Uso Actual
+                            span Disponible
+                        .progress.mb-2(style="height: 8px;")
+                            .progress-bar.bg-primary(style="width: 0%")
+                        .d-flex.justify-content-between.fw-bold
+                            span $0.00
+                            span.text-success= "$" + parseFloat(cliente.credito_asignado).toLocaleString('es-MX')
+
+                .card.border-0.shadow-sm.rounded-4
+                    .card-header.bg-white.fw-bold Condiciones Comerciales
+                    .card-body
+                        ul.list-group.list-group-flush
+                            li.list-group-item.d-flex.justify-content-between
+                                span Bonificaciones Activas
+                                span.badge.bg-light.text-dark Ninguna
+                            li.list-group-item.d-flex.justify-content-between
+                                span Descuento Fijo
+                                span.fw-bold 0%
+                            li.list-group-item.d-flex.justify-content-between
+                                span Días de Crédito
+                                span.fw-bold 30 días
+
+            .col-lg-8
+                .card.border-0.shadow-sm.rounded-4.mb-4
+                    .card-header.bg-white.py-3.d-flex.justify-content-between.align-items-center
+                        div
+                            h5.fw-bold.mb-0.text-danger: i.bx.bx-error-circle.me-2
+                            span Incidencias Financieras
+                        button.btn.btn-danger.btn-sm.rounded-pill(data-bs-toggle="modal" data-bs-target="#modalIncidencia") 
+                            i.bx.bx-plus
+                            | Nueva Incidencia
+                    .card-body.p-0
+                        if incidencias.length > 0
+                            table.table.table-hover.align-middle.mb-0
+                                thead.bg-light: tr
+                                    th Fecha
+                                    th Tipo
+                                    th Descripción
+                                    th Monto
+                                    th Estatus
+                                tbody
+                                    each inc in incidencias
+                                        tr
+                                            td.small= new Date(inc.fecha_reporte).toLocaleDateString()
+                                            td: span.badge.bg-danger.bg-opacity-10.text-danger= inc.tipo
+                                            td.small= inc.descripcion
+                                            td.fw-bold= "$" + parseFloat(inc.monto_involucrado).toLocaleString('es-MX')
+                                            td: span.badge(class=inc.estatus=='Abierta'?'bg-warning text-dark':'bg-success')= inc.estatus
+                        else
+                            .text-center.py-5.text-muted
+                                i.bx.bx-check-shield.fs-1.mb-2.text-success
+                                h6 Historial Limpio
+                                p.small.mb-0 No hay incidencias de pago registradas.
+
+                .card.border-0.shadow-sm.rounded-4.border-warning(style="border-left: 5px solid #ffc107 !important")
+                    .card-body.d-flex.align-items-center.p-4
+                        i.bx.bx-time.fs-1.text-warning.me-3
+                        div
+                            h5.fw-bold Gestión de Pagos Atrasados
+                            p.mb-0.small.text-muted Visualización automática de facturas vencidas (Requiere módulo de Facturación activo).
+                        .ms-auto
+                            span.badge.bg-warning.text-dark Pendiente
+
+      //- ------------------------------------------------------------------------
+      //- TAB 3: DOCUMENTOS
+      //- ------------------------------------------------------------------------
+      .tab-pane.fade#docs
+        .d-flex.justify-content-between.align-items-center.mb-4
+            div
+                h5.fw-bold Repositorio Digital
+                p.small.text-muted Documentación legal y técnica organizada.
+            button.btn.btn-dark.rounded-pill(data-bs-toggle="modal" data-bs-target="#modalCarpeta")
+                i.bx.bxs-folder-plus.me-2
+                | Crear Carpeta
+
+        .row.g-4
+            if carpetas.length > 0
+                each carpeta in carpetas
+                    .col-md-4
+                        .card.border-0.shadow-sm.h-100
+                            .card-header.bg-white.border-0.pt-3.d-flex.align-items-center
+                                i.bx.bxs-folder.fs-3.text-warning.me-2
+                                span.fw-bold= carpeta.nombre
+                            
+                            .card-body.p-0(style="min-height: 100px; max-height: 200px; overflow-y: auto;")
+                                if carpeta.archivos.length > 0
+                                    ul.list-group.list-group-flush
+                                        each arch in carpeta.archivos
+                                            li.list-group-item.border-0.small.d-flex.justify-content-between.align-items-center
+                                                div.d-flex.align-items-center.text-truncate
+                                                    i.bx.bxs-file-pdf.text-danger.me-2
+                                                    span.text-truncate(style="max-width: 140px;" title=arch.nombre_archivo)= arch.nombre_archivo
+                                                a.btn.btn-sm.btn-light(href=`/${arch.ruta_archivo}` download target="_blank"): i.bx.bx-download
+                                else
+                                    .text-center.py-4.text-muted.small Carpeta vacía
+                            
+                            .card-footer.bg-light.border-0.p-2
+                                form(action="/app/clientes/upload-archivo" method="POST" enctype="multipart/form-data")
+                                    input(type="hidden" name="cliente_id" value=cliente.id)
+                                    input(type="hidden" name="carpeta_id" value=carpeta.id)
+                                    .input-group.input-group-sm
+                                        input.form-control(type="file" name="archivo" required)
+                                        button.btn.btn-dark(type="submit") Subir
+
+            .col-md-4
+                .card.border-0.shadow-sm.h-100.border-dashed
+                    .card-header.bg-transparent.border-0.pt-3.text-muted
+                        i.bx.bx-file.me-2
+                        strong Archivos Generales
+                    .card-body.p-0
+                        if archivos_sueltos.length > 0
+                            ul.list-group.list-group-flush.bg-transparent
+                                each arch in archivos_sueltos
+                                    li.list-group-item.bg-transparent.border-0.small.d-flex.justify-content-between
+                                        span.text-truncate= arch.nombre_archivo
+                                        a.btn.btn-sm.btn-light(href=`/${arch.ruta_archivo}` download target="_blank"): i.bx.bx-download
+                        else
+                            .text-center.py-5.text-muted.small No hay archivos sueltos.
+                    
+                    .card-footer.bg-transparent.border-0.p-2
+                        form(action="/app/clientes/upload-archivo" method="POST" enctype="multipart/form-data")
+                            input(type="hidden" name="cliente_id" value=cliente.id)
+                            .input-group.input-group-sm
+                                input.form-control(type="file" name="archivo" required)
+                                button.btn.btn-outline-dark(type="submit") Subir
+
+      //- ------------------------------------------------------------------------
+      //- TAB 4: CRM (BITÁCORA)
+      //- ------------------------------------------------------------------------
+      .tab-pane.fade#bitacora
+        .row.g-4
+            .col-lg-8
+                .card.border-0.shadow-sm.rounded-4.h-100
+                    .card-header.bg-white.py-3.d-flex.justify-content-between.align-items-center
+                        h5.fw-bold.mb-0 Bitácora de Seguimiento
+                        div.d-flex.gap-2
+                            form(action="/app/clientes/add-actividad" method="POST" style="display:inline")
+                                input(type="hidden" name="cliente_id" value=cliente.id)
+                                input(type="hidden" name="tipo" value="Intento Fallido")
+                                input(type="hidden" name="resultado" value="Se marcó y no hubo respuesta.")
+                                button.btn.btn-outline-danger.btn-sm.rounded-pill(type="submit" title="Reportar que no contesta")
+                                    i.bx.bx-phone-off.me-1
+                                    | No Contesta
+                            
+                            button.btn.btn-dark.btn-sm.rounded-pill(data-bs-toggle="modal" data-bs-target="#modalActividad") 
+                                i.bx.bx-plus
+                                | Registrar Nota
+                    
+                    .card-body.p-0
+                        if actividades.length > 0
+                            .p-4(style="max-height:500px; overflow-y:auto")
+                                each act in actividades
+                                    .d-flex.mb-4
+                                        .flex-shrink-0.me-3
+                                            if act.tipo.includes('Fallido')
+                                                .bg-danger.text-white.rounded-circle.p-2: i.bx.bx-phone-off
+                                            else if act.tipo == 'Correo'
+                                                .bg-warning.text-white.rounded-circle.p-2: i.bx.bx-envelope
+                                            else
+                                                .bg-primary.text-white.rounded-circle.p-2: i.bx.bx-conversation
+                                        div
+                                            .d-flex.justify-content-between.align-items-center.mb-1
+                                                strong.text-dark= act.tipo
+                                                small.text-muted= new Date(act.fecha_actividad).toLocaleString()
+                                            p.mb-1.small= act.resultado
+                                            small.text-muted.fst-italic Por: #{act.registrado_por}
+                        else
+                            .text-center.py-5.text-muted
+                                i.bx.bx-history.fs-1.mb-2
+                                h6 Sin actividad registrada
+                                p.small Comienza a registrar llamadas y correos.
+
+            .col-lg-4
+                .card.border-0.shadow-sm.rounded-4.bg-warning.text-dark(style="background: linear-gradient(135deg, #ffc107, #ffca2c);")
+                    .card-body.p-4.text-center
+                        h5.fw-bold.mb-3 Voz del Cliente (VOC)
+                        .display-1.fw-bolder.my-3= kpi.voc
+                        p.fw-bold Calificación Actual
+                        
+                        form.bg-white.p-3.rounded-4.shadow-sm.mt-4(action="/app/clientes/update-satisfaccion" method="POST")
+                            input(type="hidden" name="cliente_id" value=cliente.id)
+                            label.small.fw-bold.mb-2 Actualizar Nivel:
+                            .d-flex.justify-content-center.gap-1.mb-3
+                                - var n = 1
+                                while n <= 10
+                                    input.btn-check(type="radio" name="satisfaccion" id=`sat${n}` value=n checked=(n==kpi.voc))
+                                    label.btn.btn-outline-warning.rounded-circle.p-0.d-flex.align-items-center.justify-content-center(for=`sat${n}` style="width:30px; height:30px; font-size:0.8rem; font-weight:bold")= n++
+                            button.btn.btn-dark.w-100.rounded-pill(type="submit") Guardar
+
+      //- ------------------------------------------------------------------------
+      //- TAB 5: PERFIL (CON MAPA)
+      //- ------------------------------------------------------------------------
+      .tab-pane.fade#perfil
+        .row.g-4
+            .col-lg-5
+                .card.border-0.shadow-sm.rounded-4
+                    .card-header.bg-white.fw-bold Datos del Cliente
+                    .card-body
+                        form(action="/app/clientes/editar" method="POST")
+                            input(type="hidden" name="id" value=cliente.id)
+                            .mb-3
+                                label.small.fw-bold Razón Social
+                                input.form-control(name="nombre" value=cliente.nombre_comercial)
+                            .mb-3
+                                label.small.fw-bold RFC
+                                input.form-control(name="rfc" value=cliente.rfc)
+                            
+                            //- SELECTOR DE SEGMENTO MANUAL
+                            .mb-3.p-2.bg-light.rounded
+                                label.small.fw-bold Segmento (Clasificación)
+                                select.form-select(name="segmento_manual")
+                                    option(value="Auto" selected=(!cliente.segmento_manual)) Automático (Según Ventas)
+                                    option(value="A" selected=(cliente.segmento_manual=='A')) A (VIP)
+                                    option(value="B" selected=(cliente.segmento_manual=='B')) B (Recurrente)
+                                    option(value="C" selected=(cliente.segmento_manual=='C')) C (Ocasional)
+
+                            .row.mb-3
+                                .col-6
+                                    label.small.fw-bold Teléfono
+                                    input.form-control(name="telefono" value=cliente.telefono)
+                                .col-6
+                                    label.small.fw-bold Correo
+                                    input.form-control(name="correo" value=cliente.correo)
+                            hr
+                            label.small.fw-bold Ubicación GPS (Arrastra el marcador)
+                            .input-group.mb-2
+                                input.form-control.form-control-sm(name="latitud" id="inputLat" value=cliente.latitud placeholder="Latitud" readonly)
+                                input.form-control.form-control-sm(name="longitud" id="inputLng" value=cliente.longitud placeholder="Longitud" readonly)
+                            input.form-control.form-control-sm.mb-3(name="direccion" value=cliente.direccion placeholder="Dirección completa")
+                            
+                            button.btn.btn-dark.w-100.rounded-pill(type="submit") Actualizar Perfil
+
+            .col-lg-7
+                .card.border-0.shadow-sm.rounded-4.mb-4
+                    .card-header.bg-white.fw-bold Mapa de Ubicación
+                    .card-body.p-0
+                        //- IMPORTANTE: height fijo para evitar que el mapa colapse
+                        #mapa-cliente(style="height: 350px; background: #eee; width: 100%;")
+                            
+                .card.border-0.shadow-sm.rounded-4
+                    .card-header.bg-white.d-flex.justify-content-between.align-items-center
+                        span.fw-bold Fotos del Lugar / Fachada
+                        button.btn.btn-outline-dark.btn-sm.rounded-pill(data-bs-toggle="modal" data-bs-target="#modalFotos") 
+                            i.bx.bx-upload.me-1
+                            | Subir
+                    .card-body
+                        if cliente.fotos_lugar && cliente.fotos_lugar.length > 0
+                            .row.g-2
+                                each foto in cliente.fotos_lugar
+                                    .col-3
+                                        a(href=`/${foto}` target="_blank")
+                                            .ratio.ratio-1x1.rounded-3.overflow-hidden
+                                                img.object-fit-cover(src=`/${foto}` alt="Foto lugar")
+                        else
+                            .text-center.py-4.text-muted.small
+                                i.bx.bx-image-add.fs-3.mb-2
+                                div No hay fotos registradas.
+
+      //- ------------------------------------------------------------------------
+      //- TAB 6: HISTORIAL COTIZACIONES (FIXED LINKS)
+      //- ------------------------------------------------------------------------
+      .tab-pane.fade#comercial
+         .card.border-0.shadow-sm.rounded-4
+            .card-header.bg-white.d-flex.justify-content-between.align-items-center.py-3
+                h5.fw-bold.mb-0 Historial de Cotizaciones
+                //- Enlace corregido para pasar por el módulo de clientes (Proxy a Finanzas)
+                //- Esto redirige a /app/finanzas/crear?cliente_id=X
+                a.btn.btn-dark.rounded-pill.btn-sm(href=`/app/clientes/accion-cotizacion/nueva/${cliente.id}`) Nueva Cotización
+            .table-responsive
+                table.table.table-hover.align-middle.mb-0
+                   thead.bg-light: tr
+                     th Folio
+                     th Fecha
+                     th Estado
+                     th.text-end Monto
+                     th.text-center Ver
+                   tbody
+                     each c in cotizaciones
+                       tr
+                         td.fw-bold.text-primary= c.folio
+                         td= new Date(c.fecha_creacion).toLocaleDateString()
+                         td
+                           if c.estado == 'Aceptada'
+                               span.badge.bg-success Ganada
+                           else if c.estado == 'Pendiente'
+                               span.badge.bg-warning.text-dark Pendiente
+                           else
+                               span.badge.bg-secondary= c.estado
+                         td.text-end= "$" + parseFloat(c.monto_total).toLocaleString('es-MX')
+                         td.text-center
+                           //- Enlace para vista rápida de cotización
+                           a.btn.btn-light.btn-sm.rounded-circle.shadow-sm(href=`/app/clientes/accion-cotizacion/ver/${c.id}` title="Ver documento" target="_blank")
+                               i.bx.bx-show.fs-5
+
+    //- ==========================================================================
+    //- MODALES DE ACCIÓN
+    //- ==========================================================================
+    
+    //- MODAL CARPETA
+    .modal.fade#modalCarpeta
+        .modal-dialog.modal-sm.modal-dialog-centered
+            .modal-content
+                .modal-header.border-0: h6.modal-title Nueva Carpeta
+                .modal-body
+                    form(action="/app/clientes/crear-carpeta" method="POST")
+                        input(type="hidden" name="cliente_id" value=cliente.id)
+                        input.form-control.mb-3(name="nombre_carpeta" placeholder="Nombre (Ej. Planos)" required)
+                        button.btn.btn-dark.w-100(type="submit") Crear
+
+    //- MODAL CRÉDITO
+    .modal.fade#modalCredito
+        .modal-dialog.modal-sm.modal-dialog-centered
+            .modal-content
+                .modal-header.bg-primary.text-white: h6.modal-title Modificar Crédito
+                .modal-body
+                    form(action="/app/clientes/update-credito" method="POST")
+                        input(type="hidden" name="cliente_id" value=cliente.id)
+                        label.small.fw-bold Monto
+                        input.form-control.mb-3(type="number" step="0.01" name="nuevo_credito" required)
+                        .d-grid.gap-2
+                            button.btn.btn-outline-success.btn-sm(type="submit" name="accion" value="sumar") Sumar
+                            button.btn.btn-outline-danger.btn-sm(type="submit" name="accion" value="restar") Restar
+                            button.btn.btn-dark.btn-sm(type="submit" name="accion" value="reemplazar") Reemplazar Total
+
+    //- MODAL INCIDENCIA
+    .modal.fade#modalIncidencia
+        .modal-dialog
+            .modal-content
+                .modal-header.bg-danger.text-white: h6.modal-title Registrar Incidencia
+                .modal-body
+                    form(action="/app/clientes/add-incidencia" method="POST")
+                        input(type="hidden" name="cliente_id" value=cliente.id)
+                        select.form-select.mb-2(name="tipo")
+                            option(value="Retraso de Pago") Retraso de Pago
+                            option(value="Cheque Devuelto") Cheque Devuelto
+                            option(value="Disputa") Disputa Comercial
+                        input.form-control.mb-2(type="date" name="fecha_reporte" value=new Date().toISOString().split('T')[0])
+                        input.form-control.mb-2(type="number" step="0.01" name="monto" placeholder="Monto involucrado (Opcional)")
+                        textarea.form-control.mb-3(name="descripcion" placeholder="Detalles del problema..." required)
+                        button.btn.btn-danger.w-100(type="submit") Registrar
+
+    //- MODAL ACTIVIDAD
+    .modal.fade#modalActividad
+        .modal-dialog
+            .modal-content
+                .modal-header: h6.modal-title Registrar Actividad CRM
+                .modal-body
+                    form(action="/app/clientes/add-actividad" method="POST")
+                        input(type="hidden" name="cliente_id" value=cliente.id)
+                        select.form-select.mb-2(name="tipo")
+                            option(value="Llamada") Llamada
+                            option(value="Correo") Correo
+                            option(value="Visita") Visita
+                            option(value="Whatsapp") Whatsapp
+                        textarea.form-control.mb-3(name="resultado" placeholder="Resultado de la interacción..." required)
+                        button.btn.btn-dark.w-100(type="submit") Guardar
+
+    //- MODAL FOTOS
+    .modal.fade#modalFotos
+        .modal-dialog
+            .modal-content
+                .modal-header: h6.modal-title Subir Fotos
+                .modal-body
+                    form(action="/app/clientes/upload-foto-lugar" method="POST" enctype="multipart/form-data")
+                        input(type="hidden" name="cliente_id" value=cliente.id)
+                        input.form-control.mb-3(type="file" name="fotos" multiple accept="image/*" required)
+                        button.btn.btn-dark.w-100(type="submit") Subir Imágenes
+
+  //- ==========================================================================
+  //- SCRIPTS DEL CLIENTE
+  //- ==========================================================================
+  script.
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Chart.js - Gráfica de Desempeño Comercial
+        const dataGrafica = !{JSON.stringify(grafica)}; 
+        const ctx = document.getElementById('chartDesempeno');
+        if (ctx) {
+            new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: dataGrafica.labels,
+                    datasets: [
+                        { type: 'line', label: 'Tendencia', data: dataGrafica.tendencia, borderColor: '#fd7e14', borderWidth: 2, tension: 0.4, pointRadius: 0 },
+                        { label: 'Vendido', data: dataGrafica.vendido, backgroundColor: '#198754' },
+                        { label: 'Cotizado', data: dataGrafica.cotizado, backgroundColor: '#e9ecef' }
+                    ]
+                },
+                options: { responsive: true, scales: { x: {grid:{display:false}}, y: {grid:{display:false}} } }
+            });
+        }
+
+        // 2. Leaflet Map (Configuración y Renderizado)
+        // Usamos valores por defecto (Guadalajara) si no hay datos
+        let lat = !{cliente.latitud || 20.659698};
+        let lng = !{cliente.longitud || -103.349609};
+        
+        let map = null;
+        if (document.getElementById('mapa-cliente')) {
+            map = L.map('mapa-cliente').setView([lat, lng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            
+            let marker = L.marker([lat, lng], {draggable: true}).addTo(map);
+            
+            // Evento al arrastrar el marcador para actualizar coordenadas
+            marker.on('dragend', function(event){
+                var position = marker.getLatLng();
+                document.getElementById('inputLat').value = position.lat;
+                document.getElementById('inputLng').value = position.lng;
+            });
+
+            // Evento al hacer clic en el mapa para mover marcador
+            map.on('click', function(e){
+                marker.setLatLng(e.latlng);
+                document.getElementById('inputLat').value = e.latlng.lat;
+                document.getElementById('inputLng').value = e.latlng.lng;
+            });
+        }
+
+        // 3. FIX: Redimensionar mapa al cambiar a la pestaña "Perfil"
+        // Esto soluciona el problema de que el mapa no cargue correctamente al estar en una pestaña oculta
+        const tabLinks = document.querySelectorAll('button[data-bs-toggle="pill"]');
+        tabLinks.forEach(t => {
+            t.addEventListener('shown.bs.tab', e => {
+                const targetId = e.target.getAttribute('data-bs-target');
+                window.location.hash = targetId;
+                
+                // Si la pestaña es perfil y el mapa existe, actualizamos tamaño
+                if (targetId === '#perfil' && map) {
+                    setTimeout(() => { map.invalidateSize(); }, 200);
+                }
+            });
+        });
+
+        // 4. Activar Tab desde Hash URL (Deep Linking)
+        // Permite compartir enlaces directos a pestañas específicas (ej: .../detalle/1#finanzas)
+        let hash = window.location.hash;
+        if (hash) {
+            let triggerEl = document.querySelector(`button[data-bs-target="${hash}"]`);
+            if (triggerEl) bootstrap.Tab.getOrCreateInstance(triggerEl).show();
+        }
+    });

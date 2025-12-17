@@ -1,0 +1,513 @@
+extends layout_app
+
+block content
+  //- ==========================================================================
+  //- LIBRERÍAS Y RECURSOS EXTERNOS
+  //- ==========================================================================
+  script(src="https://cdn.jsdelivr.net/npm/chart.js")
+  
+  //- ESTILOS CSS ESPECÍFICOS PARA EL MÓDULO DE CLIENTES
+  style.
+    :root {
+      --inymo-dark: #1e293b;
+      --inymo-green: #22c55e;
+      --inymo-blue: #3b82f6;
+      --inymo-orange: #f59e0b;
+      --inymo-red: #ef4444;
+      --inymo-gray: #f8fafc;
+      --inymo-info: #0dcaf0;
+    }
+    
+    .dashboard-container {
+       background-color: #f1f5f9;
+       min-height: 100vh;
+    }
+    
+    /* Tarjetas KPI con efecto Hover 3D y Borde de Acento */
+    .kpi-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+    }
+    .kpi-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      border-color: #cbd5e1;
+    }
+    .kpi-icon-wrapper {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    /* Panel de Gráfica y Filtros */
+    .chart-panel {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+    }
+    
+    /* Tarjetas de Clientes (Grid) */
+    .client-card {
+      border: none;
+      border-radius: 16px;
+      background: white;
+      transition: all 0.2s ease;
+      border-left: 5px solid transparent; /* El color se inyecta inline según segmento */
+    }
+    .client-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      z-index: 2;
+    }
+    
+    /* Tipografía y Utilidades */
+    .text-value { font-family: 'Inter', sans-serif; font-weight: 800; letter-spacing: -0.5px; }
+    .text-label { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: #64748b; }
+    .badge-soft { padding: 0.35em 0.8em; border-radius: 6px; font-weight: 600; font-size: 0.75em; }
+    .badge-soft-danger { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    .badge-soft-success { background-color: rgba(34, 197, 94, 0.1); color: #22c55e; }
+    .badge-soft-info { background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+
+  .container-fluid.px-4.py-4
+    
+    //- ==========================================================================
+    //- 1. HEADER EJECUTIVO
+    //- ==========================================================================
+    .row.align-items-center.mb-5
+      .col-md-7
+        .d-flex.align-items-center.gap-3
+          .bg-dark.text-white.p-3.rounded-4.shadow-sm
+             i.bx.bxs-data.fs-3
+          div
+             h1.h3.fw-bold.text-dark.mb-1 Central de Clientes y Valor
+             p.text-muted.mb-0 Panorama comercial, seguimiento de cartera y análisis de retención.
+      
+      .col-md-5
+        .d-flex.gap-2.justify-content-md-end
+             //- Botón Reset para limpiar filtros
+             a.btn.btn-white.border.shadow-sm.rounded-pill.px-3(href="/app/clientes" title="Recargar y Limpiar")
+               i.bx.bx-refresh.fs-5.text-muted
+             
+             //- Botón Nuevo Cliente (Dispara Modal)
+             button.btn.btn-dark.rounded-pill.px-4.fw-bold.shadow.d-flex.align-items-center.gap-2(data-bs-toggle="modal" data-bs-target="#modalNuevoCliente")
+               i.bx.bx-user-plus.fs-5
+               | Registrar Cliente
+
+    //- ==========================================================================
+    //- 2. DASHBOARD DE INDICADORES (KPIs REPARADOS Y FORMATEADOS)
+    //- ==========================================================================
+    //- Lógica de visualización de dinero para millones o miles
+    - var ltvRaw = parseFloat(kpis.ltv_total || 0)
+    - var ltvDisplay = ""
+    if ltvRaw > 1000000
+        - ltvDisplay = "$" + (ltvRaw / 1000000).toFixed(2) + "M"
+    else if ltvRaw > 1000
+        - ltvDisplay = "$" + (ltvRaw / 1000).toFixed(1) + "k"
+    else
+        - ltvDisplay = "$" + ltvRaw.toLocaleString('es-MX', {minimumFractionDigits: 2})
+
+    .row.g-4.mb-5
+      //- KPI 1: Satisfacción (VOC)
+      .col-md-6.col-xl-3
+        .kpi-card.p-4(style="border-bottom: 4px solid var(--inymo-info)")
+            .d-flex.justify-content-between.mb-2
+                .kpi-icon-wrapper.bg-info.bg-opacity-10
+                    i.bx.bxs-smile.text-info
+                span.badge.bg-light.text-dark.border.align-self-start Mensual
+            .text-label SATISFACCIÓN GLOBAL
+            .h2.text-value.mt-1.mb-0 #{kpis.voc_global} / 10
+            .progress.mt-3.rounded-pill(style="height: 6px;")
+                .progress-bar.bg-info(style=`width: ${kpis.voc_global * 10}%`)
+            small.text-muted.mt-2.d-block Promedio ponderado de encuestas
+
+      //- KPI 2: Valor de Cartera (LTV)
+      .col-md-6.col-xl-3
+        .kpi-card.p-4(style="border-bottom: 4px solid var(--inymo-green)")
+            .d-flex.justify-content-between.mb-2
+                .kpi-icon-wrapper.bg-success.bg-opacity-10
+                    i.bx.bxs-wallet.text-success
+                span.badge.bg-light.text-dark.border.align-self-start Histórico
+            .text-label VALOR DE CARTERA (LTV)
+            .h2.text-value.mt-1.mb-0.text-success= ltvDisplay
+            .progress.mt-3.rounded-pill(style="height: 6px;")
+                .progress-bar.bg-success(style="width: 100%")
+            small.text-muted.mt-2.d-block Total acumulado de ventas cerradas
+
+      //- KPI 3: Clientes VIP (Segmento A)
+      .col-md-6.col-xl-3
+        .kpi-card.p-4(style="border-bottom: 4px solid var(--inymo-orange)")
+            .d-flex.justify-content-between.mb-2
+                .kpi-icon-wrapper.bg-warning.bg-opacity-10
+                    i.bx.bxs-crown.text-warning
+                span.badge.bg-light.text-dark.border.align-self-start Segmento A
+            .text-label CLIENTES VIP
+            .h2.text-value.mt-1.mb-0 #{kpis.clientes_a}
+            div.d-flex.align-items-center.gap-2.mt-3
+                - var pctA = kpis.total_clientes > 0 ? (kpis.clientes_a / kpis.total_clientes * 100).toFixed(0) : 0
+                .progress.flex-grow-1.rounded-pill(style="height: 6px;")
+                    .progress-bar.bg-warning(style=`width: ${pctA}%`)
+                span.small.fw-bold #{pctA}%
+
+      //- KPI 4: Base de Clientes (Activos vs Inactivos)
+      .col-md-6.col-xl-3
+        .kpi-card.p-4(style="border-bottom: 4px solid var(--inymo-dark)")
+            .d-flex.justify-content-between.mb-2
+                .kpi-icon-wrapper.bg-dark.bg-opacity-10
+                    i.bx.bxs-user-account.text-dark
+                span.badge.bg-light.text-dark.border.align-self-start Total
+            .text-label BASE DE CLIENTES
+            .h2.text-value.mt-1.mb-0 #{kpis.total_clientes}
+            small.d-flex.align-items-center.gap-2.mt-3
+                span.badge.bg-success.bg-opacity-25.text-success-emphasis
+                    i.bx.bxs-circle.me-1.xm-text
+                    | #{kpis.activos} Activos
+                span.badge.bg-danger.bg-opacity-25.text-danger-emphasis
+                    i.bx.bxs-circle.me-1.xm-text
+                    | #{kpis.inactivos} Inactivos
+
+    //- ==========================================================================
+    //- 3. ANALÍTICA AVANZADA (GRÁFICA MULTIEJE Y FILTROS)
+    //- ==========================================================================
+    .row.mb-5
+      .col-12
+        .chart-panel.overflow-hidden
+          //- Header de la Gráfica con Filtros Persistentes
+          .card-header.bg-white.p-4.border-bottom
+            .d-flex.flex-wrap.justify-content-between.align-items-center.gap-3
+              div
+                h5.fw-bold.mb-1 Tendencia Comercial y Operativa
+                p.text-muted.small.mb-0.d-flex.align-items-center
+                    i.bx.bx-info-circle.me-1
+                    | Haz clic en las leyendas de la gráfica para apagar/prender indicadores.
+              
+              //- FORMULARIO DE FILTROS
+              form.d-flex.align-items-center.gap-2.bg-light.p-1.rounded-pill.border(action="/app/clientes" method="GET")
+                if filtro
+                    input(type="hidden" name="q" value=filtro)
+                
+                //- Valores por defecto seguros para evitar errores en renderizado
+                - var defInicio = (filtros && filtros.inicio) ? filtros.inicio : new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0]
+                - var defFin = (filtros && filtros.fin) ? filtros.fin : new Date().toISOString().split('T')[0]
+
+                div.px-2.d-flex.align-items-center.gap-2
+                    label.small.fw-bold.text-muted Desde:
+                    input.form-control.form-control-sm.border-0.bg-transparent.fw-bold(type="date" name="inicio" value=defInicio required)
+                
+                div.border-start.mx-1(style="height: 20px;")
+                
+                div.px-2.d-flex.align-items-center.gap-2
+                    label.small.fw-bold.text-muted Hasta:
+                    input.form-control.form-control-sm.border-0.bg-transparent.fw-bold(type="date" name="fin" value=defFin required)
+                
+                button.btn.btn-dark.rounded-circle.btn-sm(type="submit" title="Aplicar Filtro") 
+                    i.bx.bx-filter-alt
+
+          //- Cuerpo de la Gráfica y Sidebar de Resumen
+          .card-body.p-4
+            .row
+                .col-lg-9
+                    div.chart-container(style="height: 380px;")
+                        canvas#chartMasterGlobal
+                
+                //- Panel Lateral de Resumen Dinámico (Se actualiza con la query global)
+                .col-lg-3.border-start.d-none.d-lg-block
+                    .d-flex.flex-column.justify-content-center.h-100.gap-4.ps-3
+                        div
+                            .text-label MONTO COTIZADO (PERIODO)
+                            - var cotizadoP = parseFloat(kpis.monto_cotizado_periodo || 0)
+                            .h3.fw-bold.mb-0.text-dark= "$" + cotizadoP.toLocaleString('es-MX', {maximumFractionDigits:0})
+                        
+                        div
+                            .text-label MONTO VENDIDO (PERIODO)
+                            - var vendidoP = parseFloat(kpis.monto_vendido_periodo || 0)
+                            .h3.fw-bold.mb-0.text-success= "$" + vendidoP.toLocaleString('es-MX', {maximumFractionDigits:0})
+                            
+                            //- Tasa de Conversión Calculada
+                            - var tasaConv = cotizadoP > 0 ? (vendidoP / cotizadoP) * 100 : 0
+                            .d-flex.align-items-center.gap-2.mt-2
+                                .progress.flex-grow-1(style="height: 6px;")
+                                    .progress-bar.bg-success(style=`width: ${tasaConv}%`)
+                                span.small.fw-bold #{tasaConv.toFixed(1)}% Conv.
+                        
+                        div.p-3.bg-light.rounded-4.border
+                             .text-label.mb-2 PROMEDIO VOC
+                             .d-flex.align-items-center.gap-2
+                                i.bx.bxs-star.text-warning.fs-3
+                                .h2.mb-0.fw-bold #{kpis.voc_global}
+
+    //- ==========================================================================
+    //- 4. LISTADO Y BÚSQUEDA DE CLIENTES
+    //- ==========================================================================
+    .card.border-0.shadow.rounded-4.mb-5.overflow-hidden
+        .card-header.bg-white.p-4.border-bottom
+            .row.align-items-center
+                .col-md-6
+                    h4.fw-bold.mb-0 Directorio de Expedientes
+                    p.text-muted.small.mb-0 Acceso rápido a información de clientes.
+                .col-md-6
+                    form(action="/app/clientes" method="GET")
+                        input(type="hidden" name="inicio" value=defInicio)
+                        input(type="hidden" name="fin" value=defFin)
+                        .input-group.input-group-lg.border.rounded-pill.overflow-hidden.bg-light
+                             span.input-group-text.bg-transparent.border-0.ps-4: i.bx.bx-search.fs-4.text-muted
+                             input.form-control.bg-transparent.border-0.shadow-none(type="text" name="q" placeholder="Buscar Cliente, RFC o Contacto..." value=filtro autocomplete="off")
+                             if filtro
+                                a.btn.btn-white.border-0(href="/app/clientes"): i.bx.bx-x
+                             button.btn.btn-dark.px-4.fw-bold(type="submit") Buscar
+
+        .card-body.p-4.bg-light.bg-opacity-25
+            if clientes.length > 0
+                .row.g-4
+                    each c in clientes
+                        .col-md-6.col-xl-4
+                            //- Color de borde según segmento (A=Verde, B=Naranja, C=Gris)
+                            .card.client-card.shadow-sm.h-100(style=`border-left-color: ${c.segmento_calculado == 'A' ? '#22c55e' : (c.segmento_calculado == 'B' ? '#f59e0b' : '#cbd5e1')}`)
+                                .card-body.p-4
+                                    .d-flex.justify-content-between.mb-3
+                                        span.badge.bg-light.text-secondary.border.small ID: #{c.id}
+                                        
+                                        //- Badge Estatus Lógico
+                                        if c.alerta
+                                            span.badge.badge-soft-danger
+                                                i.bx.bxs-hot.me-1
+                                                | Inactivo
+                                        else if c.estatus_badge == 'Nuevo'
+                                            span.badge.badge-soft-info
+                                                i.bx.bxs-star.me-1
+                                                | Nuevo
+                                        else
+                                            span.badge.badge-soft-success
+                                                i.bx.bxs-check-circle.me-1
+                                                | Activo
+                                    
+                                    h5.fw-bold.text-dark.mb-1.text-truncate(title=c.nombre_comercial)= c.nombre_comercial
+                                    p.text-muted.small.mb-3= c.rfc || 'RFC Pendiente'
+                                    
+                                    hr.border-dashed.opacity-25.my-3
+                                    
+                                    //- Métricas Rápidas en la Tarjeta
+                                    .row.g-2.mb-3
+                                        .col-6
+                                            .text-label COTIZACIONES
+                                            span.fw-bold.text-dark.fs-5 #{c.total_cotizaciones || 0}
+                                        .col-6
+                                            .text-label LTV ACUMULADO
+                                            //- Formateo inteligente
+                                            - var ltvClient = parseFloat(c.valor_vida || 0)
+                                            if ltvClient > 1000000
+                                                span.fw-bold.text-success.fs-5= "$" + (ltvClient/1000000).toFixed(2) + "M"
+                                            else
+                                                span.fw-bold.text-success.fs-5= "$" + ltvClient.toLocaleString('es-MX', {maximumFractionDigits:0})
+
+                                    .d-flex.justify-content-between.align-items-center
+                                        div
+                                            if c.satisfaccion_cliente > 0
+                                                .text-warning.small.fw-bold.d-flex.align-items-center
+                                                    i.bx.bxs-star.me-1
+                                                    | #{c.satisfaccion_cliente}/10
+                                            else
+                                                span.text-muted.small.fst-italic Sin calificar
+                                        
+                                        a.btn.btn-outline-dark.rounded-pill.btn-sm.fw-bold.px-4.stretched-link(href=`/app/clientes/detalle/${c.id}`) 
+                                            | Ver 360°
+                                            i.bx.bx-chevron-right.ms-1
+            else
+                //- Estado vacío
+                .text-center.py-5
+                    i.bx.bx-search-alt.display-1.text-muted.opacity-25.mb-3
+                    h4 Sin resultados
+                    p.text-muted Intenta ajustar tus filtros de búsqueda o registra un nuevo cliente.
+                    a.btn.btn-dark.rounded-pill(href="/app/clientes") Limpiar Filtros
+
+  //- ==========================================================================
+  //- MODAL: NUEVO CLIENTE (FORMULARIO ROBUSTO)
+  //- ==========================================================================
+  .modal.fade#modalNuevoCliente(tabindex="-1" aria-hidden="true")
+    .modal-dialog.modal-lg.modal-dialog-centered
+      .modal-content.border-0.shadow-lg.rounded-4
+        .modal-header.bg-dark.text-white.p-4.rounded-top-4
+          h5.modal-title.fw-bold
+             i.bx.bx-user-plus.me-2
+             | Registro de Cliente Nuevo
+          button.btn-close.btn-close-white(data-bs-dismiss="modal")
+        
+        .modal-body.p-4
+          form(action="/app/clientes/nuevo" method="POST" enctype="multipart/form-data")
+            .row.g-3
+              .col-12
+                label.form-label.fw-bold.small Razón Social / Nombre Comercial *
+                input.form-control.form-control-lg.bg-light(name="nombre" required placeholder="Ej. Constructora del Norte S.A. de C.V.")
+              
+              .col-md-6
+                label.form-label.fw-bold.small RFC
+                .input-group
+                   span.input-group-text.bg-white: i.bx.bx-id-card
+                   input.form-control(name="rfc" placeholder="XAXX010101000" style="text-transform: uppercase;")
+              
+              .col-md-6
+                label.form-label.fw-bold.small Contacto Responsable
+                .input-group
+                   span.input-group-text.bg-white: i.bx.bx-user
+                   input.form-control(name="contacto" placeholder="Nombre completo")
+              
+              .col-md-6
+                label.form-label.fw-bold.small Teléfono
+                .input-group
+                   span.input-group-text.bg-white: i.bx.bx-phone
+                   input.form-control(name="telefono" placeholder="(00) 0000-0000")
+              
+              .col-md-6
+                label.form-label.fw-bold.small Correo
+                .input-group
+                   span.input-group-text.bg-white: i.bx.bx-envelope
+                   input.form-control(name="correo" type="email" placeholder="contacto@empresa.com")
+              
+              .col-12
+                .p-3.border.rounded-3.bg-light.mt-2.d-flex.align-items-center.gap-3
+                   i.bx.bxs-file-pdf.fs-1.text-danger
+                   div.flex-grow-1
+                       label.form-label.fw-bold.small.mb-0 Cargar Constancia Fiscal (PDF)
+                       input.form-control.form-control-sm.mt-1(type="file" name="constancia" accept="application/pdf")
+                       small.text-muted Opcional. Se guardará automáticamente en el expediente.
+
+            .d-flex.justify-content-end.gap-2.mt-4.pt-3.border-top
+              button.btn.btn-light.rounded-pill.px-4(type="button" data-bs-dismiss="modal") Cancelar
+              button.btn.btn-dark.rounded-pill.px-5.fw-bold(type="submit") Guardar Cliente
+
+  //- ==========================================================================
+  //- SCRIPT DE GRÁFICA MAESTRA (Chart.js Configuración)
+  //- ==========================================================================
+  script.
+    document.addEventListener("DOMContentLoaded", function() {
+      // 1. Obtener datos (Manejo seguro de variables para evitar errores en consola)
+      const data = !{JSON.stringify(graficaGlobal || { labels: [], cotizado: [], vendido: [], activos: [], voc: [] })};
+      
+      const ctx = document.getElementById('chartMasterGlobal');
+      if(ctx) {
+        new Chart(ctx.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: data.labels,
+            datasets: [
+              {
+                label: 'Monto Cotizado ($)',
+                data: data.cotizado,
+                backgroundColor: 'rgba(203, 213, 225, 0.6)', // Gris suave
+                borderRadius: 4,
+                yAxisID: 'yMonto',
+                order: 4
+              },
+              {
+                label: 'Monto Vendido ($)',
+                data: data.vendido,
+                backgroundColor: '#22c55e', // Verde INYMO
+                borderRadius: 4,
+                yAxisID: 'yMonto',
+                order: 3
+              },
+              {
+                label: 'Clientes Activos',
+                type: 'line',
+                data: data.activos,
+                borderColor: '#0dcaf0', // Azul Info
+                backgroundColor: '#0dcaf0',
+                borderWidth: 3,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                yAxisID: 'yCant', // Eje Derecho
+                order: 2
+              },
+              {
+                label: 'Promedio VOC',
+                type: 'line',
+                data: data.voc,
+                borderColor: '#ffc107', // Amarillo
+                backgroundColor: '#ffc107',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                pointStyle: 'star',
+                pointRadius: 6,
+                yAxisID: 'yCal', // Eje Oculto 0-10
+                hidden: true, // OCULTO POR DEFECTO PARA NO SATURAR VISUALMENTE
+                order: 1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: { 
+                    usePointStyle: true, 
+                    padding: 20, 
+                    font: { size: 12, weight: 'bold', family: 'system-ui' } 
+                },
+                // Lógica personalizada para ocultar/mostrar datasets
+                onClick: function(e, legendItem, legend) {
+                    const index = legendItem.datasetIndex;
+                    const ci = legend.chart;
+                    if (ci.isDatasetVisible(index)) {
+                        ci.hide(index);
+                        legendItem.hidden = true;
+                    } else {
+                        ci.show(index);
+                        legendItem.hidden = false;
+                    }
+                }
+              },
+              tooltip: {
+                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                padding: 12,
+                titleFont: { size: 13 },
+                bodyFont: { size: 12 },
+                callbacks: {
+                  label: function(context) {
+                    let label = context.dataset.label || '';
+                    if (context.dataset.yAxisID === 'yMonto') {
+                      // Formato Moneda MXN
+                      label += ': ' + new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(context.parsed.y);
+                    } else {
+                      label += ': ' + context.parsed.y;
+                    }
+                    return label;
+                  }
+                }
+              }
+            },
+            scales: {
+              yMonto: {
+                type: 'linear', position: 'left',
+                title: { display: true, text: 'Monto ($)' },
+                ticks: { callback: (val) => '$' + val.toLocaleString('es-MX', {notation: 'compact'}) },
+                grid: { borderDash: [4, 4] }
+              },
+              yCant: {
+                type: 'linear', position: 'right',
+                title: { display: true, text: 'Clientes' },
+                min: 0,
+                grid: { drawOnChartArea: false }
+              },
+              yCal: {
+                type: 'linear', display: false, // Eje oculto de referencia
+                min: 0, max: 10
+              },
+              x: { grid: { display: false } }
+            }
+          }
+        });
+      }
+    });

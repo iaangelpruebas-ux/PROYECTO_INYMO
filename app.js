@@ -7,7 +7,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var session = require('express-session');
-var clientesRouter = require('./routes/clientes');
+
 
 // 2. IMPORTACIÓN DE ROUTERS (JERARQUÍA MAESTRA)
 
@@ -20,6 +20,8 @@ var proyectosRouter = require('./routes/proyectos');
 var proyectosDetalleRouter = require('./routes/proyectos_detalles');
 var bitacoraRouter = require('./routes/bitacora');
 var repositorioRouter = require('./routes/repositorio');
+var clientesRouter = require('./routes/clientes');
+
 
 // C. Módulos Financieros (Estructura PMBOK - Inteligencia Comercial)
 var finanzasRouter = require('./routes/finanzas');         // Maneja Hub e Historial
