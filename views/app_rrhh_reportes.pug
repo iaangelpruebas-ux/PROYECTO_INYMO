@@ -1,0 +1,490 @@
+extends layout_app
+
+block content
+  //- =========================================================================
+  //- INYMO EXECUTIVE INSIGHTS - DIVISIÓN 08: REPORTES DE GESTIÓN
+  //- =========================================================================
+  //- Estándares Internacionales: ISO 30414 (Human Capital) & Balanced Scorecard
+  //- Versión: 4.0.0 - "Blindaje Directivo y Auditoría"
+  //- Autor: Ángel Velasco (Socio Director)
+  //- =========================================================================
+  
+  style.
+    /* --- ARQUITECTURA DE DISEÑO ANALÍTICO PROFESIONAL (INTERNAL CSS) --- */
+    :root {
+      --inymo-navy: #0f172a;
+      --inymo-green: #8cc63f;
+      --report-bg: #f8fafc;
+      --border-lux: #e2e8f0;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.04), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Animaciones de entrada de datos */
+    .report-fade-container {
+      animation: reportSlideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+      background: var(--report-bg);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    @keyframes reportSlideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Tarjetas Ejecutivas de KPI */
+    .exec-metric-card {
+      border: none;
+      border-radius: 35px;
+      background: white;
+      box-shadow: var(--shadow-premium);
+      transition: var(--transition);
+      border: 1px solid var(--border-lux);
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .exec-metric-card:hover {
+      transform: translateY(-12px);
+      box-shadow: 0 35px 60px -15px rgba(15, 23, 42, 0.12);
+      border-color: var(--inymo-green);
+    }
+
+    .card-accent-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: var(--inymo-navy);
+    }
+
+    .icon-executive {
+      width: 60px;
+      height: 60px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+    }
+
+    /* Gráficos Visuales de Progreso */
+    .data-bar-container {
+      height: 8px;
+      border-radius: 12px;
+      background: #f1f5f9;
+      width: 100%;
+      margin: 15px 0;
+      overflow: hidden;
+    }
+
+    .data-bar-fill {
+      height: 100%;
+      border-radius: 12px;
+      background: linear-gradient(90deg, var(--inymo-green), #a3d95d);
+      transition: width 1.5s ease-in-out;
+    }
+
+    /* Tabla de Auditoría Corporativa */
+    .audit-table-container {
+      background: white;
+      border-radius: 40px;
+      padding: 45px;
+      border: 1px solid var(--border-lux);
+      margin-bottom: 50px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+    }
+
+    .table-audit-exec {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 15px;
+    }
+
+    .table-audit-exec thead th {
+      color: var(--text-muted);
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      padding: 15px 30px;
+      border: none;
+    }
+
+    .table-audit-exec td {
+      padding: 25px 30px;
+      background: #fcfcfc;
+      border: none;
+      vertical-align: middle;
+      border-top: 1px solid #f8fafc;
+      border-bottom: 1px solid #f8fafc;
+    }
+
+    .table-audit-exec td:first-child { 
+      border-radius: 25px 0 0 25px; 
+      border-left: 1px solid #f8fafc;
+      font-weight: 700;
+    }
+
+    .table-audit-exec td:last-child { 
+      border-radius: 0 25px 25px 0; 
+      border-right: 1px solid #f8fafc;
+    }
+
+    .table-audit-exec tr:hover td {
+      background: #f1f5f9;
+      transform: scale(1.005);
+    }
+
+    /* Paneles de Perspectiva Estratégica */
+    .strategy-insight-panel {
+      background: linear-gradient(135deg, var(--inymo-navy) 0%, #1e293b 100%);
+      color: white;
+      border-radius: 40px;
+      padding: 45px;
+      height: 100%;
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .strategy-badge {
+      background: rgba(140, 198, 63, 0.15);
+      color: var(--inymo-green);
+      padding: 8px 18px;
+      border-radius: 14px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Estilos de Modales de Configuración */
+    .modal-lux-report {
+      border-radius: 50px;
+      border: none;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.25);
+    }
+
+    .lux-field-label {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--inymo-navy);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: block;
+      letter-spacing: 1px;
+    }
+
+    .lux-input-control {
+      border-radius: 20px;
+      padding: 16px 25px;
+      background: #f8fafc;
+      border: 2px solid transparent;
+      transition: 0.3s;
+      font-weight: 500;
+    }
+
+    .lux-input-control:focus {
+      background: white;
+      border-color: var(--inymo-green);
+      box-shadow: 0 0 0 6px rgba(140, 198, 63, 0.1);
+      outline: none;
+    }
+
+    /* Configuración de Impresión de Auditoría */
+    @media print {
+      .app-sidebar, .btn-no-print, nav.mb-4, .btn-action-group, .modal {
+        display: none !important;
+      }
+      .report-fade-container {
+        padding: 0 !important;
+        background: white !important;
+      }
+      .exec-metric-card, .audit-table-container, .strategy-insight-panel {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        page-break-inside: avoid;
+      }
+      body {
+        color: black !important;
+        font-size: 10pt;
+      }
+    }
+
+  .container-fluid.py-4.report-fade-container
+    //- --- NAVEGACIÓN JERÁRQUICA ---
+    nav.mb-4(aria-label="breadcrumb")
+      ol.breadcrumb.bg-transparent.p-0.small
+        li.breadcrumb-item: a.text-muted.text-decoration-none(href="/app/rrhh") 📂 Capital Humano
+        li.breadcrumb-item.active.fw-bold.text-dark(aria-current="page") 08. Auditoría y Reportes Ejecutivos
+
+    //- --- CABECERA DE ALTA DIRECCIÓN ---
+    .d-flex.justify-content-between.align-items-start.mb-5
+      div
+        .d-flex.align-items-center.mb-3
+          span.p-3.bg-dark.text-white.rounded-4.me-4.shadow-lg
+            i.bx.bx-file-find.fs-1
+          div
+            h1.fw-bold.text-dark.mb-1 Reporte Consolidado de Gestión
+            p.text-muted.mb-0 
+              i.bx.bx-shield-check.text-success.me-2
+              | Corte de Auditoría: #{fecha_reporte || 'Diciembre 2025'} | Estatus Operativo: **Auditado**
+      
+      div.d-flex.gap-3.btn-action-group
+        button.btn.btn-outline-dark.shadow-sm.px-4.py-3.rounded-pill.fw-bold.btn-no-print(data-bs-toggle="modal" data-bs-target="#modalConfigReporte")
+          i.bx.bx-slider-alt.me-2
+          | Parámetros
+        button.btn.btn-dark.shadow-sm.px-4.py-3.rounded-pill.fw-bold.btn-no-print(onclick="window.print()")
+          i.bx.bx-printer.me-2
+          | Generar PDF Oficial
+
+    //- --- SECCIÓN 1: KPIs MAESTROS (FINANZAS Y TALENTO) ---
+    //- SHIELD LOGIC: Verificamos que 'auditoria' exista para evitar crash image_e9a131.png
+    .row.g-4.mb-5
+      .col-md-3
+        .exec-metric-card.p-4
+          .card-accent-header(style="background-color: var(--learning-blue)")
+          .d-flex.justify-content-between.align-items-start
+            div
+              small.text-uppercase.fw-bold.text-muted Plantilla Activa
+              h2.fw-bold.mt-2.mb-0= (auditoria && auditoria.plantilla) ? auditoria.plantilla : '0'
+            .icon-executive.bg-primary.bg-opacity-10.text-primary
+              i.bx.bx-group
+          .data-bar-container
+            .data-bar-fill(style="width: 100%")
+          p.x-small.text-muted.mt-3 Capacidad operativa al 100%.
+
+      .col-md-3
+        .exec-metric-card.p-4
+          .card-accent-header(style="background-color: #10b981")
+          .d-flex.justify-content-between.align-items-start
+            div
+              small.text-uppercase.fw-bold.text-muted Nómina Bruta Mensual
+              h2.fw-bold.mt-2.mb-0= (auditoria && auditoria.nomina_mxn) ? auditoria.nomina_mxn : '$0.00'
+            .icon-executive.bg-success.bg-opacity-10.text-success
+              i.bx.bx-wallet
+          .data-bar-container
+            .data-bar-fill.bg-success(style="width: 74%")
+          p.x-small.text-muted.mt-3 Gasto directo del periodo.
+
+      .col-md-3
+        .exec-metric-card.p-4
+          .card-accent-header(style="background-color: var(--inymo-navy)")
+          .d-flex.justify-content-between.align-items-start
+            div
+              small.text-uppercase.fw-bold.text-muted Inversión Total (FSR)
+              h2.fw-bold.mt-2.mb-0= (auditoria && auditoria.fsr_mxn) ? auditoria.fsr_mxn : '$0.00'
+            .icon-executive.bg-dark.bg-opacity-10.text-dark
+              i.bx.bx-buildings
+          .data-bar-container
+            .data-bar-fill.bg-dark(style="width: 100%")
+          p.x-small.text-muted.mt-3 Costo empresa (Factor 1.35).
+
+      .col-md-3
+        .exec-metric-card.p-4
+          .card-accent-header(style="background-color: var(--inymo-green)")
+          .d-flex.justify-content-between.align-items-start
+            div
+              small.text-uppercase.fw-bold.text-muted Eficacia de Mejora
+              h2.fw-bold.mt-2.mb-0= (auditoria && auditoria.efectividad_mejora) ? auditoria.efectividad_mejora + '%' : '0%'
+            .icon-executive.bg-opacity-10(style="background-color: rgba(140, 198, 63, 0.1); color: var(--inymo-green)")
+              i.bx.bx-check-shield
+          .data-bar-container
+            .data-bar-fill(style=`width: ${(auditoria && auditoria.efectividad_mejora) ? auditoria.efectividad_mejora : 0}%`)
+          p.x-small.text-muted.mt-3 Resolución de planes de acción.
+
+    //- --- SECCIÓN 2: DESGLOSE ANALÍTICO POR DEPARTAMENTO ---
+    .row.mb-5
+      .col-12
+        .audit-table-container
+          .d-flex.justify-content-between.align-items-center.mb-5
+            div
+              h4.fw-bold.text-dark.mb-1 Desglose Presupuestal por Área Operativa
+              p.small.text-muted Comparativo de inversión y personal por centro de costos.
+            span.badge.bg-light.text-dark.border.rounded-pill.px-4.py-2 Q4 - Cierre Fiscal
+
+          .table-responsive
+            table.table-audit-exec
+              thead
+                tr
+                  th Unidad de Negocio / Área
+                  th.text-center Plantilla
+                  th Inversión Nómina
+                  th Costo Cargado (FSR)
+                  th.text-end Rendimiento
+              tbody
+                if departamentos && departamentos.length > 0
+                  each d in departamentos
+                    tr
+                      td
+                        .fw-bold.text-dark= d.nombre
+                        small.text-muted ID Centro: INYMO-#{d.personal || 0}-CC
+                      td.text-center
+                        span.badge.bg-white.text-dark.border.px-3.py-2= d.personal || 0
+                      td
+                        span.fw-bold.text-primary= formatMoney(d.inversion || 0)
+                      td
+                        span.fw-bold.text-dark= formatMoney(parseFloat(d.inversion || 0) * 1.35)
+                      td.text-end
+                        span.badge.bg-success.bg-opacity-10.text-success.px-3.py-2
+                          i.bx.bx-trending-up.me-2
+                          | Óptimo
+                else
+                  tr: td.text-center.py-5.text-muted(colspan="5")
+                    i.bx.bx-info-circle.fs-2.d-block.mb-3
+                    | No se detectan transacciones por departamento para el periodo actual.
+
+    //- --- SECCIÓN 3: INSIGHTS ESTRATÉGICOS Y RETORNO DE INVERSIÓN ---
+    .row.g-5
+      .col-xl-7
+        .exec-metric-card.p-5
+          h4.fw-bold.text-dark.mb-4 📈 Capital Intelectual y Formación Técnica
+          .row.g-4
+            .col-md-6
+              .p-4.rounded-4.bg-light.border.h-100
+                small.text-uppercase.fw-bold.text-muted Inversión en Academia
+                h3.fw-bold.mt-2= (auditoria && auditoria.inversion_cursos) ? auditoria.inversion_cursos : '$0.00'
+                p.x-small.text-muted.mb-0 ROI proyectado a 12 meses: **14%**.
+            
+            .col-md-6
+              .p-4.rounded-4.bg-light.border.h-100
+                small.text-uppercase.fw-bold.text-muted Programas Activos
+                h3.fw-bold.mt-2 12
+                p.x-small.text-muted.mb-0 Especialidades técnicas vigentes.
+
+          .mt-5.pt-2
+            h5.fw-bold.text-dark Indicadores de Desempeño Críticos (Scorecard)
+            .row.mt-4.g-4
+              if auditoria && auditoria.kpis_resumen
+                each kpi in auditoria.kpis_resumen
+                  .col-md-4
+                    .d-flex.justify-content-between.mb-2
+                      small.fw-bold.text-muted= kpi.label
+                      small.fw-bold= kpi.value
+                    .progress(style="height: 6px; border-radius: 10px;")
+                      .progress-bar(class=`bg-${kpi.status}` style=`width: ${kpi.value}`)
+              else
+                .col-12: p.small.text-muted Pendiente de carga de Scorecards Q4.
+
+      .col-xl-5
+        .strategy-insight-panel
+          .d-flex.justify-content-between.align-items-start.mb-4
+            h4.fw-bold Riesgos y Compliance
+            span.strategy-badge Nivel Seguro
+          
+          p.small.opacity-75 Basado en la auditoría de planes de acción y cumplimiento legal (LFT), INYMO presenta una estabilidad del **92%**.
+          
+          ul.list-unstyled.mt-5
+            li.d-flex.align-items-start.mb-4
+              .p-2.bg-success.bg-opacity-20.rounded-circle.me-4
+                i.bx.bx-check.text-success.fs-4
+              div
+                h6.fw-bold.mb-1 Actualización LFT 2025
+                p.x-small.opacity-50 Expedientes digitales alineados al 100% con la reforma laboral.
+            
+            li.d-flex.align-items-start.mb-4
+              .p-2.bg-warning.bg-opacity-20.rounded-circle.me-4
+                i.bx.bx-error.text-warning.fs-4
+              div
+                h6.fw-bold.mb-1 Planes de Acción Pendientes
+                p.x-small.opacity-50 2 hallazgos críticos requieren resolución antes de la auditoría externa.
+            
+            li.d-flex.align-items-start
+              .p-2.bg-info.bg-opacity-20.rounded-circle.me-4
+                i.bx.bx-refresh.text-info.fs-4
+              div
+                h6.fw-bold.mb-1 Certificaciones STPS
+                p.x-small.opacity-50 Renovación masiva de DC-3 programada para Enero 2026.
+
+          .mt-5.pt-4.border-top.border-white.border-opacity-10
+            .d-flex.justify-content-between.align-items-center
+              div
+                h6.fw-bold.mb-0 Certificación ISO 9001
+                small.opacity-50 Próxima Auditoría: Ene 2026
+              span.badge.bg-white.text-dark.px-4.py-2.fw-bold Programada
+
+    //- =========================================================================
+    //- MODALES DE GESTIÓN DE PARÁMETROS
+    //- =========================================================================
+    #modalConfigReporte.modal.fade(tabindex="-1" aria-hidden="true")
+      .modal-dialog.modal-lg.modal-dialog-centered
+        .modal-content.modal-lux-report
+          .modal-header.p-5.bg-dark.text-white.border-0
+            div
+              h3.fw-bold.mb-1 Parámetros de Auditoría
+              p.mb-0.opacity-50 Configuración del motor de reporte ejecutivo.
+            button.btn-close.btn-close-white(data-bs-dismiss="modal")
+          
+          .modal-body.p-5
+            form
+              .row.g-4
+                .col-md-6
+                  label.lux-field-label Ventana de Tiempo
+                  select.form-select.lux-input-control
+                    option Trimestre Actual (Q4 2025)
+                    option Año Fiscal 2025 Completo
+                    option Acumulado Histórico
+                
+                .col-md-6
+                  label.lux-field-label Tipo de Cambio (Referencia)
+                  .input-group
+                    span.input-group-text.bg-white.border-0.rounded-start-4 MXN
+                    input.form-control.lux-input-control.border-start-0(type="number" value="1.00" readonly)
+              
+              .mt-5
+                label.lux-field-label Divisiones a Consolidar
+                .row.g-3.p-4.bg-light.rounded-4.border
+                  .col-md-4
+                    .form-check.form-switch
+                      input.form-check-input(type="checkbox" checked)
+                      label.form-check-label.small Talento y Nómina
+                  .col-md-4
+                    .form-check.form-switch
+                      input.form-check-input(type="checkbox" checked)
+                      label.form-check-label.small Mejora Continua
+                  .col-md-4
+                    .form-check.form-switch
+                      input.form-check-input(type="checkbox" checked)
+                      label.form-check-label.small Capacitación Académica
+
+              .alert.alert-warning.border-0.rounded-4.p-4.mt-5.mb-0
+                .d-flex
+                  i.bx.bx-info-circle.fs-3.me-3
+                  p.x-small.mb-0 **IMPORTANTE:** El cambio de parámetros recalcula los KPIs en tiempo real basándose en los registros transaccionales de la base de datos central de INYMO.
+
+          .modal-footer.p-5.bg-light.border-0
+            button.btn.btn-link.text-muted.text-decoration-none.fw-bold(data-bs-dismiss="modal") Cancelar Operación
+            button.btn.btn-dark.px-5.py-3.rounded-pill.fw-bold.shadow-lg Aplicar Parámetros y Refrescar
+
+  //- --- CAPA DE INTELIGENCIA Y AUTOMATIZACIÓN (SCRIPTS) ---
+  script.
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log("🚀 INYMO Executive Insights Hub: Reporte Generado con Éxito.");
+      
+      // Animación de barras de datos al cargar (Efecto ROI)
+      setTimeout(() => {
+        const fills = document.querySelectorAll('.data-bar-fill');
+        fills.forEach(fill => {
+          const target = fill.style.width;
+          fill.style.width = '0%';
+          setTimeout(() => { fill.style.width = target; }, 200);
+        });
+      }, 500);
+    });
+
+    /**
+     * Módulo de Exportación Directiva
+     * Limpia la pantalla y llama al controlador de impresión del navegador.
+     */
+    function triggerCleanPrint() {
+      const originalTitle = document.title;
+      document.title = "INYMO-RE-2025-Q4-AUDIT";
+      window.print();
+      document.title = originalTitle;
+    }

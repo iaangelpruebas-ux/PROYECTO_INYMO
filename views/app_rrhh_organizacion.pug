@@ -1,0 +1,340 @@
+extends layout_app
+
+block content
+  //- =========================================================================
+  //- INYMO ORGANIZATIONAL ENGINE - DIVISIÓN 02: ESTRUCTURA ORGANIZACIONAL
+  //- =========================================================================
+  //- Estándares: ISO 9001 (Calidad) y ISO 30414 (Human Capital Reporting)
+  
+  style.
+    /* --- ESTILOS DE ALTO IMPACTO PARA ESTRUCTURA --- */
+    :root {
+      --inymo-navy: #0f172a;
+      --inymo-green: #8cc63f;
+      --glass-bg: rgba(255, 255, 255, 0.9);
+      --directivo: #0f172a;
+      --gerencial: #1e293b;
+      --operativo: #64748b;
+    }
+
+    .org-container {
+      animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dept-card {
+      border: none;
+      border-radius: 20px;
+      background: white;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+      transition: all 0.3s ease;
+      border-left: 6px solid var(--inymo-navy);
+      height: 100%;
+    }
+
+    .dept-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+      border-left: 6px solid var(--inymo-green);
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+      overflow: hidden;
+      border: 1px solid #f1f5f9;
+    }
+
+    .table-header-custom {
+      background: #f8fafc;
+      padding: 20px 30px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .badge-nivel {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .nivel-directivo { background: rgba(15, 23, 42, 0.1); color: #0f172a; border: 1px solid #0f172a; }
+    .nivel-gerencial { background: rgba(30, 41, 59, 0.1); color: #1e293b; }
+    .nivel-operativo { background: rgba(100, 116, 139, 0.1); color: #64748b; }
+
+    .raci-indicator {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.8rem;
+      margin: 0 auto;
+    }
+
+    .r-bg { background: #dcfce7; color: #166534; } /* Responsible */
+    .a-bg { background: #0f172a; color: white; }   /* Accountable */
+    .c-bg { background: #e0f2fe; color: #0369a1; } /* Consulted */
+    .i-bg { background: #f1f5f9; color: #64748b; } /* Informed */
+
+    .salary-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--inymo-green);
+    }
+
+    .kpi-indicator {
+      font-size: 0.85rem;
+      color: #64748b;
+      border-left: 2px solid #e2e8f0;
+      padding-left: 10px;
+    }
+
+    .btn-action-round {
+      width: 35px;
+      height: 35px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s;
+    }
+
+    /* Custom Scrollbar for RACI */
+    .scroll-x-custom::-webkit-scrollbar { height: 6px; }
+    .scroll-x-custom::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+  .container-fluid.py-4.org-container
+    //- --- NAVEGACIÓN ---
+    nav.mb-4(aria-label="breadcrumb")
+      ol.breadcrumb.bg-transparent.p-0.small
+        li.breadcrumb-item: a.text-muted.text-decoration-none(href="/app/rrhh") 📂 Capital Humano
+        li.breadcrumb-item.active.fw-bold.text-dark(aria-current="page") 02. Estructura Organizacional
+
+    //- --- CABECERA DE GOBERNANZA ---
+    .d-flex.justify-content-between.align-items-start.mb-5
+      div
+        .d-flex.align-items-center.mb-2
+          span.p-2.bg-success.bg-opacity-10.text-success.rounded-3.me-3
+            i.bx.bx-sitemap.fs-4
+          h2.fw-bold.text-dark.mb-0 Arquitectura Organizacional
+        p.text-muted.ms-5.ps-2 Definición de jerarquías, bandas salariales y matriz de responsabilidades para la eficiencia operativa.
+      
+      div.d-flex.gap-3
+        button.btn.btn-outline-dark.shadow-sm.px-4.rounded-pill(data-bs-toggle="modal" data-bs-target="#modalDept")
+          i.bx.bx-folder-plus.me-2
+          | Nuevo Departamento
+        button.btn.btn-dark.shadow-sm.px-4.rounded-pill(data-bs-toggle="modal" data-bs-target="#modalPuesto")
+          i.bx.bx-user-plus.me-2
+          | Definir Puesto
+
+    //- =========================================================================
+    //- SECCIÓN 1: DEPARTAMENTOS Y PRESUPUESTO
+    //- =========================================================================
+    .row.g-4.mb-5
+      each d in deps
+        .col-md-6.col-xl-3
+          .dept-card.p-4
+            .d-flex.justify-content-between.align-items-start.mb-3
+              div
+                h6.text-uppercase.text-muted.small.fw-bold.mb-1= d.nombre
+                h4.fw-bold.mb-0= d.total_puestos
+                  small.fs-6.text-muted.fw-normal.ms-1 Puestos
+              .p-2.bg-light.rounded-3
+                i.bx.bx-buildings.text-dark
+            
+            .progress.mb-2(style="height: 6px; border-radius: 10px;")
+              - var perc = (d.total_puestos / d.plazas_presupuestadas) * 100
+              .progress-bar(class=(perc > 90 ? 'bg-danger':'bg-success') role="progressbar" style=`width: ${perc}%`)
+            
+            .d-flex.justify-content-between.align-items-center
+              small.text-muted Capacidad: #{d.plazas_presupuestadas} plazas
+              span.fw-bold.small(style="color: var(--inymo-green)") #{formatMoney(d.presupuesto_mensual)}
+
+    .row.g-4
+      //- =========================================================================
+      //- SECCIÓN 2: DICCIONARIO DE PUESTOS Y BANDAS (LADO IZQUIERDO)
+      //- =========================================================================
+      .col-xl-8
+        .table-container
+          .table-header-custom.d-flex.justify-content-between.align-items-center
+            div
+              h5.fw-bold.mb-0 Diccionario de Puestos de Ingeniería
+              p.small.text-muted.mb-0 Control de rangos salariales y KPIs por perfil.
+            span.badge.bg-dark.px-3.py-2 #{puestos.length} Perfiles Activos
+
+          .table-responsive
+            table.table.table-hover.align-middle.mb-0
+              thead.bg-light
+                tr
+                  th.ps-4 Perfil / Puesto
+                  th Departamento
+                  th Nivel
+                  th.text-center Banda Salarial (MXN)
+                  th KPI Maestro
+                  th.text-end.pe-4 Acción
+              tbody
+                if puestos.length > 0
+                  each p in puestos
+                    tr
+                      td.ps-4
+                        .fw-bold.text-dark= p.nombre
+                        small.text-muted.x-small ID-#{p.id.toString().padStart(3,'0')}
+                      td
+                        span.text-muted.small= p.departamento_nombre
+                      td
+                        span.badge-nivel(class=`nivel-${p.nivel.toLowerCase()}`)= p.nivel
+                      td.text-center
+                        .salary-tag.small= formatMoney(p.banda_salarial_min)
+                        .text-muted(style="font-size: 0.65rem;") HASTA
+                        .salary-tag.small= formatMoney(p.banda_salarial_max)
+                      td
+                        .kpi-indicator.small= p.kpi_maestro
+                      td.text-end.pe-4
+                        a.btn-action-round.bg-light.text-danger(href=`/app/rrhh/division/02/puesto/delete/${p.id}` onclick="return confirm('¿Eliminar perfil de la estructura?')")
+                          i.bx.bx-trash-alt
+                else
+                  tr: td.text-center.py-5(colspan="6") No hay puestos definidos en la estructura.
+
+      //- =========================================================================
+      //- SECCIÓN 3: MATRIZ RACI (LADO DERECHO)
+      //- =========================================================================
+      .col-xl-4
+        .table-container
+          .table-header-custom.bg-dark.text-white
+            h5.fw-bold.mb-0 Matriz RACI de Procesos
+            p.small.opacity-75.mb-0 Responsabilidades en flujo de ingeniería.
+          
+          .p-0
+            .table-responsive.scroll-x-custom
+              table.table.table-sm.align-middle.mb-0
+                thead.bg-light
+                  tr
+                    th.ps-4 Proceso Crítico
+                    th.text-center R
+                    th.text-center A
+                    th.text-center C
+                    th.text-center I
+                tbody
+                  each r in raci
+                    tr
+                      td.ps-4.py-3
+                        .fw-bold(style="font-size: 0.85rem;")= r.proceso
+                      td: .raci-indicator.r-bg(title=`Responsable: ${r.r_puesto}`) R
+                      td: .raci-indicator.a-bg(title=`Aprueba: ${r.a_puesto}`) A
+                      td: .raci-indicator.c-bg(title=`Consultado: ${r.c_puesto}`) C
+                      td: .raci-indicator.i-bg(title=`Informado: ${r.i_puesto}`) I
+            
+            .p-4.bg-light.border-top
+              .row.g-2
+                .col-6: small.text-muted <strong>R:</strong> Ejecuta la tarea.
+                .col-6: small.text-muted <strong>A:</strong> Dueño del resultado.
+                .col-6: small.text-muted <strong>C:</strong> Aporta opinión.
+                .col-6: small.text-muted <strong>I:</strong> Recibe el output.
+              button.btn.btn-sm.btn-dark.w-100.mt-3(data-bs-toggle="modal" data-bs-target="#modalRaci") + Vincular Proceso
+
+    //- =========================================================================
+    //- MODALES DE GESTIÓN (CRUD)
+    //- =========================================================================
+
+    //- 1. MODAL DEPARTAMENTO
+    #modalDept.modal.fade(tabindex="-1" aria-hidden="true")
+      .modal-dialog.modal-dialog-centered
+        .modal-content.border-0.shadow-lg(style="border-radius: 20px;")
+          form(action="/app/rrhh/division/02/departamento/add" method="POST")
+            .modal-header.border-0.pt-4.px-4
+              h5.fw-bold Nuevo Departamento Operativo
+              button.btn-close(data-bs-dismiss="modal")
+            .modal-body.p-4
+              .mb-3
+                label.form-label.fw-bold Nombre del Área
+                input.form-control.rounded-3(name="nombre" placeholder="Ej: Ingeniería Estructural" required)
+              .row
+                .col-6
+                  label.form-label.fw-bold Plazas
+                  input.form-control.rounded-3(type="number" name="plazas" placeholder="Ej: 10")
+                .col-6
+                  label.form-label.fw-bold Presupuesto Mensual
+                  input.form-control.rounded-3(type="number" name="presupuesto" placeholder="MXN")
+            .modal-footer.border-0.pb-4.px-4
+              button.btn.btn-light(data-bs-dismiss="modal") Cancelar
+              button.btn.btn-dark.px-4(type="submit") Crear Departamento
+
+    //- 2. MODAL PUESTO
+    #modalPuesto.modal.fade(tabindex="-1" aria-hidden="true")
+      .modal-dialog.modal-lg.modal-dialog-centered
+        .modal-content.border-0.shadow-lg(style="border-radius: 20px;")
+          form(action="/app/rrhh/division/02/puesto/add" method="POST")
+            .modal-header.border-0.pt-4.px-4
+              h5.fw-bold Definición de Perfil de Puesto
+              button.btn-close(data-bs-dismiss="modal")
+            .modal-body.p-4
+              .row
+                .col-md-6.mb-3
+                  label.form-label.fw-bold Nombre del Puesto
+                  input.form-control.rounded-3(name="nombre" placeholder="Ej: Senior Project Manager" required)
+                .col-md-6.mb-3
+                  label.form-label.fw-bold Departamento
+                  select.form-select.rounded-3(name="departamento_id" required)
+                    each d in deps
+                      option(value=d.id)= d.nombre
+                .col-md-4.mb-3
+                  label.form-label.fw-bold Nivel Jerárquico
+                  select.form-select.rounded-3(name="nivel" required)
+                    option(value="Directivo") Directivo
+                    option(value="Gerencial") Gerencial
+                    option(value="Operativo") Operativo
+                    option(value="Especialista") Especialista
+                .col-md-4.mb-3
+                  label.form-label.fw-bold Sueldo Mínimo (MXN)
+                  input.form-control.rounded-3(type="number" name="banda_min" required)
+                .col-md-4.mb-3
+                  label.form-label.fw-bold Sueldo Máximo (MXN)
+                  input.form-control.rounded-3(type="number" name="banda_max" required)
+                .col-12
+                  label.form-label.fw-bold KPI Maestro de Desempeño
+                  input.form-control.rounded-3(name="kpi" placeholder="Ej: Cumplimiento de Cronograma (SPI) > 0.95" required)
+            .modal-footer.border-0.pb-4.px-4
+              button.btn.btn-success.text-white.w-100(type="submit" style="background-color: var(--inymo-green); border:none;") Validar y Registrar Perfil
+
+    //- 3. MODAL RACI
+    #modalRaci.modal.fade(tabindex="-1" aria-hidden="true")
+      .modal-dialog.modal-dialog-centered
+        .modal-content.border-0.shadow-lg(style="border-radius: 20px;")
+          form(action="/app/rrhh/division/02/raci/add" method="POST")
+            .modal-header.border-0.pt-4.px-4
+              h5.fw-bold Nueva Vinculación RACI
+              button.btn-close(data-bs-dismiss="modal")
+            .modal-body.p-4
+              .mb-3
+                label.form-label.fw-bold Nombre del Proceso
+                input.form-control(name="proceso" placeholder="Ej: Firma de Planos Estructurales" required)
+              .row.g-3
+                .col-6
+                  label.small.fw-bold Responsable (R)
+                  input.form-control.form-control-sm(name="r" placeholder="Puesto")
+                .col-6
+                  label.small.fw-bold Aprueba (A)
+                  input.form-control.form-control-sm(name="a" placeholder="Puesto")
+                .col-6
+                  label.small.fw-bold Consultado (C)
+                  input.form-control.form-control-sm(name="c" placeholder="Puesto")
+                .col-6
+                  label.small.fw-bold Informado (I)
+                  input.form-control.form-control-sm(name="i" placeholder="Puesto")
+            .modal-footer.border-0.pb-4.px-4
+              button.btn.btn-dark.w-100(type="submit") Guardar Matriz
+
+  script.
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log("INYMO Organizational Architecture Loaded.");
+    });

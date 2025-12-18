@@ -1,0 +1,475 @@
+extends layout_app
+
+block content
+  //- =========================================================================
+  //- INYMO HUMAN CAPITAL ENGINE - DIVISIÓN 03: DIRECTORIO DE TALENTO
+  //- =========================================================================
+  //- Autor: Ing. Ángel Velasco (Socio Director)
+  //- Estándares: ISO 30414 (Human Capital Reporting) & LFT 2025 Compliance
+  //- Versión: 5.2.0 - "Magnífico & Rentable"
+  
+  style.
+    /* --- ARQUITECTURA DE DISEÑO CORPORATIVO (INTERNAL CSS) --- */
+    :root {
+      --inymo-navy: #0f172a;
+      --inymo-green: #8cc63f;
+      --status-active: #10b981;
+      --status-inactive: #f43f5e;
+      --status-warning: #f59e0b;
+      --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      --glass-bg: rgba(255, 255, 255, 0.9);
+    }
+
+    .talent-container {
+      animation: fadeInPage 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes fadeInPage {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Estilo Premium de Tarjetas de Colaboradores */
+    .employee-card {
+      border: none;
+      border-radius: 28px;
+      background: white;
+      box-shadow: var(--card-shadow);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #f1f5f9;
+      height: 100%;
+    }
+
+    .employee-card:hover {
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15);
+      border-color: var(--inymo-green);
+    }
+
+    .card-accent-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(90deg, var(--inymo-navy), var(--inymo-green));
+    }
+
+    /* Sistema de Avatares Dinámicos */
+    .avatar-dynamic {
+      width: 90px;
+      height: 90px;
+      border-radius: 30px;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--inymo-navy);
+      border: 3px solid #fff;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      margin: 0 auto 20px auto;
+      text-transform: uppercase;
+    }
+
+    /* Indicadores de Estatus de Seguridad Industrial */
+    .status-pill {
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .status-activo { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .status-baja { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+
+    /* Barra de Herramientas y Filtros (Glassmorphism) */
+    .glass-filters {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      padding: 30px;
+      border-radius: 32px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .custom-input-group {
+      background: #f1f5f9;
+      border-radius: 18px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      border: 2px solid transparent;
+      transition: 0.3s;
+    }
+
+    .custom-input-group:focus-within {
+      background: white;
+      border-color: var(--inymo-green);
+      box-shadow: 0 0 0 5px rgba(140, 198, 63, 0.1);
+    }
+
+    .custom-input-group input {
+      background: transparent;
+      border: none;
+      width: 100%;
+      margin-left: 10px;
+      font-weight: 500;
+      outline: none;
+    }
+
+    /* Modales de Alta Definición */
+    .modal-premium {
+      border-radius: 35px;
+      border: none;
+      overflow: hidden;
+    }
+
+    .modal-header-gradient {
+      background: linear-gradient(135deg, var(--inymo-navy) 0%, #1e293b 100%);
+      color: white;
+      padding: 40px;
+    }
+
+    .form-step-title {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--inymo-green);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 25px;
+      display: block;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+
+    .input-field-lux {
+      border-radius: 16px;
+      padding: 14px 18px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    .input-field-lux:focus {
+      background: white;
+      border-color: var(--inymo-green);
+      box-shadow: 0 0 0 4px rgba(140, 198, 63, 0.1);
+    }
+
+    /* Empty State Graphics */
+    .empty-state-illustration {
+      max-width: 280px;
+      opacity: 0.7;
+      margin-bottom: 30px;
+      filter: grayscale(1) brightness(1.2);
+    }
+
+    /* Print Optimization */
+    @media print {
+      .app-sidebar, .glass-filters, .btn-action-hub { display: none !important; }
+      .app-content { padding: 0 !important; }
+    }
+
+  .container-fluid.py-4.talent-container
+    //- --- NAVEGACIÓN ESTRATÉGICA ---
+    nav.mb-4(aria-label="breadcrumb")
+      ol.breadcrumb.bg-transparent.p-0.small
+        li.breadcrumb-item: a.text-muted.text-decoration-none(href="/app/rrhh") 📂 Capital Humano
+        li.breadcrumb-item.active.fw-bold.text-dark(aria-current="page") 03. Directorio de Talento Humano
+
+    //- --- CABECERA DE ALTO NIVEL ---
+    .d-flex.justify-content-between.align-items-start.mb-5
+      div
+        .d-flex.align-items-center.mb-3
+          span.p-3.bg-dark.text-white.rounded-4.me-4.shadow-lg
+            i.bx.bx-group.fs-2
+          div
+            h1.fw-bold.text-dark.mb-1 Gestión Integral de Talento
+            p.text-muted.mb-0 
+              i.bx.bx-check-shield.text-success.me-1
+              | Repositorio centralizado bajo normativas ISO 30414 y Ley Federal del Trabajo.
+      
+      div.d-flex.gap-3.btn-action-hub
+        button.btn.btn-outline-dark.shadow-sm.px-4.py-2.rounded-pill.fw-bold(onclick="window.print()")
+          i.bx.bx-printer.me-2
+          | Reporte de Plantilla
+        button.btn.btn-dark.shadow-sm.px-4.py-2.rounded-pill.fw-bold(data-bs-toggle="modal" data-bs-target="#modalAltaTalento")
+          i.bx.bx-user-plus.me-2
+          | Registrar Nuevo Ingreso
+
+    //- --- DASHBOARD DE MÉTRICAS (KPIs) ---
+    //- Corrección de error: Validamos que kpis exista para evitar el crash
+    .row.g-4.mb-5
+      .col-md-4.col-xl-3
+        .card.employee-card.p-4
+          .d-flex.justify-content-between.align-items-center
+            div
+              small.text-uppercase.fw-bold.text-muted.letter-spacing-1 Plantilla
+              h2.fw-bold.mt-2.mb-0= (kpis && kpis.total) ? kpis.total : '0'
+            .p-3.bg-primary.bg-opacity-10.text-primary.rounded-4
+              i.bx.bx-user-circle.fs-2
+      
+      .col-md-4.col-xl-3
+        .card.employee-card.p-4
+          .d-flex.justify-content-between.align-items-center
+            div
+              small.text-uppercase.fw-bold.text-muted.letter-spacing-1 Estatus Activo
+              h2.fw-bold.mt-2.mb-0.text-success= (kpis && kpis.activos) ? kpis.activos : '0'
+            .p-3.bg-success.bg-opacity-10.text-success.rounded-4
+              i.bx.bx-user-check.fs-2
+
+      .col-md-4.col-xl-3
+        .card.employee-card.p-4
+          .d-flex.justify-content-between.align-items-center
+            div
+              small.text-uppercase.fw-bold.text-muted.letter-spacing-1 Nómina Total
+              h2.fw-bold.mt-2.mb-0= (kpis && kpis.nomina) ? kpis.nomina : '$0.00'
+            .p-3.bg-dark.bg-opacity-10.text-dark.rounded-4
+              i.bx.bx-wallet-alt.fs-2
+
+    //- --- PANEL DE INTELIGENCIA Y FILTROS ---
+    .glass-filters
+      form(action="/app/rrhh/division/03" method="GET")
+        .row.g-3.align-items-center
+          .col-xl-5
+            .custom-input-group
+              i.bx.bx-search-alt-2.text-muted.fs-4
+              input(type="text" name="q" placeholder="Buscar por Nombre, CURP, RFC o Puesto..." value=filtros.search)
+          
+          .col-xl-3
+            select.form-select.input-field-lux(name="depto" onchange="this.form.submit()")
+              option(value="Todos") 🏛️ Todos los Departamentos
+              if departamentos
+                each d in departamentos
+                  option(value=d.id selected=filtros.depto == d.id)= d.nombre
+          
+          .col-xl-2
+            select.form-select.input-field-lux(name="estatus" onchange="this.form.submit()")
+              option(value="Activo") ✅ Solo Activos
+              option(value="Baja") ❌ Bajas / Histórico
+          
+          .col-xl-2
+            button.btn.btn-success.w-100.rounded-3.py-2.fw-bold(type="submit" style="background-color: var(--inymo-green); border:none; height: 52px;")
+              | Filtrar Resultados
+
+    //- --- DIRECTORIO MAESTRO (GRID DE TALENTO) ---
+    .row.g-4
+      if talento && talento.length > 0
+        each c in talento
+          .col-sm-6.col-md-4.col-xl-3
+            .employee-card
+              .card-accent-bar
+              .card-body.p-4.text-center
+                // Iniciales Inteligentes
+                - var nameParts = c.nombre_completo.trim().split(' ')
+                - var initials = (nameParts.length > 1) ? (nameParts[0][0] + nameParts[1][0]) : nameParts[0][0]
+                .avatar-dynamic= initials
+                
+                h5.fw-bold.text-dark.mb-1= c.nombre_completo
+                span.badge.bg-light.text-secondary.px-3.py-2.rounded-pill.mb-3
+                  i.bx.bx-briefcase.me-1
+                  | #{c.puesto_nombre || 'Sin Perfil'}
+                
+                .text-start.mt-4.pt-4.border-top
+                  .d-flex.justify-content-between.mb-3
+                    small.text-muted Estatus Operativo
+                    span.status-pill(class=`status-${c.estatus.toLowerCase()}`)
+                      i.bx.bx-circle.me-1.small
+                      | #{c.estatus}
+                  
+                  .d-flex.justify-content-between.mb-3
+                    small.text-muted Área de Ingeniería
+                    small.fw-bold.text-dark= c.departamento_nombre || 'No Asignado'
+                  
+                  .d-flex.justify-content-between.mb-4
+                    small.text-muted Ingreso Oficial
+                    //- Uso de función locals.formatDate corregida en app.js
+                    small.fw-bold.text-primary= formatDate(c.fecha_ingreso).split(' ')[0]
+
+                .d-grid.gap-2
+                  a.btn.btn-dark.rounded-pill.fw-bold.py-2(href=`/app/rrhh/division/03/colaborador/${c.id}`)
+                    i.bx.bx-id-card.me-2
+                    | Gestionar Expediente
+      else
+        .col-12.text-center.py-5
+          .py-5
+            img.empty-state-illustration(src="/images/no-users-illustration.svg" onerror="this.src='https://cdn-icons-png.flaticon.com/512/7480/7480628.png'")
+            h2.fw-bold.text-muted No se detectan colaboradores
+            p.text-muted.mb-4 No hay registros que coincidan con los criterios de búsqueda actuales.
+            button.btn.btn-dark.rounded-pill.px-5(data-bs-toggle="modal" data-bs-target="#modalAltaTalento")
+              | Crear Primer Registro de Talento
+
+    //- =========================================================================
+    //- MODAL MAESTRO: ALTA DE COLABORADOR (CUMPLIMIENTO ISO/LFT)
+    //- =========================================================================
+    #modalAltaTalento.modal.fade(tabindex="-1" aria-hidden="true")
+      .modal-dialog.modal-xl.modal-dialog-centered
+        .modal-content.modal-premium
+          form(action="/app/rrhh/division/03/add" method="POST")
+            .modal-header-gradient
+              .d-flex.justify-content-between.align-items-start
+                div
+                  h3.fw-bold.mb-1 Protocolo de Alta de Personal
+                  p.mb-0.opacity-75 Registro oficial en el Workspace de Ingeniería INYMO.
+                button.btn-close.btn-close-white(data-bs-dismiss="modal")
+
+            .modal-body.p-5
+              .row.g-5
+                //- SECCIÓN I: IDENTIDAD LEGAL
+                .col-xl-7.border-end
+                  span.form-step-title I. Identidad y Documentación Legal
+                  
+                  .mb-4
+                    label.form-label-custom Nombre Completo (Sin abreviaturas)
+                    input.form-control.input-field-lux(name="nombre" placeholder="Ej: Juan Antonio Pérez García" required)
+                  
+                  .row.g-4
+                    .col-md-6
+                      label.form-label-custom CURP (18 caracteres)
+                      input.form-control.input-field-lux(name="curp" placeholder="Clave Única" maxlength="18" style="text-transform: uppercase;" required)
+                    .col-md-6
+                      label.form-label-custom RFC con Homoclave
+                      input.form-control.input-field-lux(name="rfc" placeholder="Registro Federal" maxlength="13" style="text-transform: uppercase;")
+                  
+                  .row.g-4.mt-1
+                    .col-md-6
+                      label.form-label-custom NSS (Número IMSS)
+                      input.form-control.input-field-lux(name="nss" placeholder="11 dígitos" maxlength="11")
+                    .col-md-6
+                      label.form-label-custom Fecha de Nacimiento
+                      input.form-control.input-field-lux(type="date" name="fecha_nac")
+
+                  .mt-4
+                    label.form-label-custom Domicilio Fiscal / Particular
+                    textarea.form-control.input-field-lux(name="direccion" rows="2" placeholder="Calle, Número, Colonia, Código Postal, Ciudad.")
+
+                //- SECCIÓN II: PERFIL FINANCIERO Y CONTRACTUAL
+                .col-xl-5
+                  span.form-step-title II. Ingeniería de Costos y Contratación
+                  
+                  .mb-4
+                    label.form-label-custom Perfil / Puesto Asignado
+                    select.form-select.input-field-lux(name="puesto_id" required)
+                      option(value="") Seleccionar perfil de la estructura...
+                      //- Estos datos vienen de la Division 02
+                      option(value="1") Project Manager (PM)
+                      option(value="2") Residente de Obra
+                      option(value="3") Ingeniero Calculista
+                      option(value="4") Analista de Costos
+                  
+                  .row.g-4
+                    .col-md-6
+                      label.form-label-custom Fecha de Ingreso
+                      input.form-control.input-field-lux(type="date" name="fecha_ingreso" required)
+                    .col-md-6
+                      label.form-label-custom Régimen Contractual
+                      select.form-select.input-field-lux(name="contrato_tipo")
+                        option Contrato Indeterminado
+                        option Obra Determinada
+                        option Periodo de Prueba (90 días)
+                  
+                  .mt-4
+                    label.form-label-custom Salario Mensual Bruto (MXN)
+                    .input-group
+                      span.input-group-text.bg-white.border-end-0.rounded-start-4: i.bx.bx-dollar.text-success
+                      input.form-control.input-field-lux.border-start-0(type="number" name="sueldo" step="0.01" placeholder="Ej: 25000.00" required)
+                  
+                  //- Lógica de Rentabilidad INYMO
+                  .mt-4.p-4.bg-light.rounded-4.border.border-dashed
+                    .d-flex.align-items-center.mb-2
+                      i.bx.bxs-bolt-circle.text-warning.me-2
+                      h6.fw-bold.mb-0 Inteligencia FSR
+                    p.x-small.text-muted.mb-0 El sistema calculará automáticamente el **Factor de Salario Real (FSR)** incluyendo IMSS, INFONAVIT, ISN y prestaciones de ley para el cálculo de rentabilidad en bitácoras.
+
+              hr.my-5
+
+              //- SECCIÓN III: CANALES DE COMUNICACIÓN
+              span.form-step-title III. Enlace y Seguridad Social
+              .row.g-4
+                .col-md-4
+                  label.form-label-custom Correo Electrónico Corporativo
+                  input.form-control.input-field-lux(type="email" name="email" placeholder="usuario@inymo.com")
+                .col-md-4
+                  label.form-label-custom Teléfono Móvil
+                  input.form-control.input-field-lux(name="telefono" placeholder="10 dígitos sin espacios")
+                .col-md-4
+                  label.form-label-custom Contacto de Emergencia (SOS)
+                  input.form-control.input-field-lux(name="emergencia" placeholder="Nombre y Teléfono de contacto")
+
+            .modal-footer.bg-light.p-4.px-5
+              button.btn.btn-link.text-muted.text-decoration-none.fw-bold(data-bs-dismiss="modal") Cancelar Operación
+              button.btn.btn-dark.px-5.py-3.rounded-pill.fw-bold.shadow-lg(type="submit")
+                i.bx.bx-cloud-upload.me-2
+                | Finalizar y Validar Registro
+
+    //- --- CAPA DE INTELIGENCIA (SCRIPTS) ---
+    script.
+      /**
+       * MÓDULO DE BÚSQUEDA DINÁMICA (SEARCH ENGINE)
+       * Optimización de rendimiento para el filtrado de tarjetas.
+       */
+      const inputBusqueda = document.querySelector('input[name="q"]');
+      if(inputBusqueda) {
+        inputBusqueda.addEventListener('keyup', function(e) {
+          const termino = e.target.value.toLowerCase().trim();
+          const tarjetas = document.querySelectorAll('.employee-card');
+          let resultados = 0;
+          
+          tarjetas.forEach(tarjeta => {
+            const dataText = tarjeta.innerText.toLowerCase();
+            const contenedor = tarjeta.closest('.col-sm-6');
+            
+            if(dataText.includes(termino)) {
+              contenedor.style.display = 'block';
+              resultados++;
+            } else {
+              contenedor.style.display = 'none';
+            }
+          });
+          
+          // Lógica de visualización de Empty State si no hay resultados
+          const grid = document.querySelector('.row.g-4');
+          console.log(`Búsqueda: ${termino} | Resultados: ${resultados}`);
+        });
+      }
+
+      /**
+       * VALIDACIÓN DE INTEGRIDAD DE DATOS (ISO COMPLIANCE)
+       */
+      const formAlta = document.querySelector('form[action$="/add"]');
+      if(formAlta) {
+        formAlta.addEventListener('submit', function(e) {
+          const curpInput = this.querySelector('input[name="curp"]').value;
+          const sueldoInput = this.querySelector('input[name="sueldo"]').value;
+          
+          if(curpInput.length !== 18) {
+            e.preventDefault();
+            alert("⚠️ ERROR DE VALIDACIÓN: La CURP debe contener exactamente 18 caracteres alfanuméricos.");
+            return;
+          }
+          
+          if(parseFloat(sueldoInput) <= 0) {
+            e.preventDefault();
+            alert("⚠️ ERROR FINANCIERO: El sueldo debe ser mayor a cero para el cálculo de rentabilidad.");
+            return;
+          }
+          
+          // Efecto visual de carga al enviar
+          const btnSubmit = this.querySelector('button[type="submit"]');
+          btnSubmit.innerHTML = '<i class="bx bx-loader-alt bx-spin me-2"></i> Procesando Alta...';
+          btnSubmit.disabled = true;
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log("🚀 INYMO Talent Management Module Ready.");
+      });

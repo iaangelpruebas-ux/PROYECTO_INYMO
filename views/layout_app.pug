@@ -1,141 +1,238 @@
 doctype html
 html(lang="es")
   head
+    //- =========================================================================
+    //- INYMO WORKSPACE - CORE LAYOUT (V.10.0)
+    //- Desarrollado para: Ing. Ángel Velasco (Socio Director)
+    //- Estructura: Corporativa de Alto Nivel (Gobernanza ISO/PMBOK)
+    //- Corrección: Enlace de BI sincronizado con Router (/app/bi)
+    //- =========================================================================
     title INYMO | Workspace
     meta(charset="utf-8")
     meta(name="viewport", content="width=device-width, initial-scale=1")
     link(rel='icon', href='/images/icono.png', type='image/png')
     
-    // --- 1. LIBRERÍAS DE ESTILO (CRÍTICO) ---
-    // Bootstrap 5 (Para que las tarjetas del repositorio se acomoden bien)
+    // --- 1. LIBRERÍAS DE ESTILO EXTERNAS (CDNs) ---
     link(href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css", rel="stylesheet")
-    
-    // --- 2. FUENTES E ICONOS ---
-    // Google Fonts (Poppins)
     link(href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap", rel="stylesheet")
-    
-    // Boxicons (Para tu MENÚ LATERAL)
     link(href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css", rel="stylesheet")
-    
-    // FontAwesome (Para los ICONOS DEL REPOSITORIO como el PDF)
     link(href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css", rel="stylesheet")
     
-    // --- 3. TUS ESTILOS PERSONALIZADOS ---
+    // --- 2. ESTILOS PERSONALIZADOS INYMO ---
     link(rel='stylesheet', href='/stylesheets/base.css')
     link(rel='stylesheet', href='/stylesheets/dashboard.css')
     
-    // Estilos extra para asegurar compatibilidad
     style.
-      body { font-family: 'Poppins', sans-serif; background-color: #f3f4f6; }
-      a { text-decoration: none; }
-      /* Corrección para que Bootstrap no rompa tu Grid si usas uno custom */
-      .app-grid { display: flex; min-height: 100vh; }
-      .app-sidebar { min-width: 260px; background: #0b1120; color: white; }
-      .app-content { flex-grow: 1; padding: 20px; overflow-y: auto; }
-  
+      /* Variables y Ajustes Globales de UI */
+      :root {
+        --navy-sidebar: #0f172a;
+        --inymo-green: #8cc63f;
+        --danger-red: #f43f5e;
+        --danger-red-hover: #e11d48;
+      }
+
+      body { 
+        font-family: 'Poppins', sans-serif; 
+        background-color: #f8fafc; 
+        color: #334155;
+      }
+
+      a { text-decoration: none; transition: all 0.25s ease; }
+      
+      .app-grid { display: flex; min-height: 100vh; overflow: hidden; }
+      
+      .app-sidebar { 
+        min-width: 260px; 
+        max-width: 260px;
+        background: var(--navy-sidebar); 
+        color: white; 
+        border-right: 1px solid rgba(255,255,255,0.05);
+        display: flex;
+        flex-direction: column;
+        transition: 0.3s;
+      }
+
+      .app-content { 
+        flex-grow: 1; 
+        height: 100vh;
+        padding: 0; 
+        overflow-y: auto; 
+        background: #f8fafc; 
+      }
+      
+      .nav-label { 
+        color: #64748b; 
+        font-size: 11px; 
+        font-weight: 700; 
+        text-transform: uppercase; 
+        letter-spacing: 1.2px; 
+        margin: 25px 0 10px 20px; 
+      }
+
+      .sidebar-link { 
+        color: #94a3b8 !important; 
+        padding: 12px 20px; 
+        border-radius: 12px; 
+        margin: 0 15px 4px 15px; 
+        display: flex; 
+        align-items: center; 
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      .sidebar-link i { 
+        font-size: 1.4rem; 
+        margin-right: 12px; 
+      }
+
+      .sidebar-link:hover { 
+        background: rgba(255,255,255,0.08); 
+        color: white !important; 
+        transform: translateX(5px); 
+      }
+
+      .sidebar-link.active {
+        background: rgba(140, 198, 63, 0.1);
+        color: var(--inymo-green) !important;
+        font-weight: 700;
+      }
+      
+      .copilot-link { 
+        background: rgba(140, 198, 63, 0.05) !important; 
+        color: var(--inymo-green) !important; 
+        border: 1px solid rgba(140, 198, 63, 0.1) !important; 
+        margin-bottom: 15px !important;
+      }
+
+      .logout-link {
+        color: var(--danger-red) !important;
+        font-weight: 600;
+        border: 1px solid rgba(244, 63, 94, 0.1);
+        margin-top: 10px;
+      }
+
+      .content-area { padding: 40px; }
+
+      .app-header {
+        background: white;
+        border-bottom: 1px solid #e2e8f0;
+        position: sticky;
+        top: 0;
+        z-index: 999;
+      }
+
   body
     div.app-grid
       
-      // --- BARRA LATERAL (NAVY OSCURO) ---
-      aside.app-sidebar
-        div.sidebar-brand(style="padding: 20px; text-align: center;")
-          // Logo (Si no carga la imagen, muestra texto)
-          img.sidebar-logo(src="/images/logo-inymo-white.png" alt="INYMO" style="max-width: 150px;")
+      // --- BARRA LATERAL (SIDEBAR) ---
+      aside.app-sidebar.d-flex.flex-column
+        div.sidebar-brand(style="padding: 35px 20px; text-align: center;")
+          img.sidebar-logo(src="/images/logo-inymo-white.png" alt="INYMO" style="max-width: 170px;")
         
-        nav.sidebar-nav(style="padding: 0 15px;")
-          // 1. PRINCIPAL
-          p.nav-label(style="color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 20px; margin-bottom: 10px;") Principal
+        nav.sidebar-nav.flex-grow-1.overflow-auto
+          // 1. SECCIÓN: PRINCIPAL
+          p.nav-label Principal
           ul.list-unstyled
-            li.mb-2: a.d-flex.align-items-center.text-light.py-2.px-3.rounded(href="/app/dashboard" style="transition: 0.2s;") 
-              i.bx.bxs-dashboard.me-2
-              | Panel General
-            li.mb-2: a.d-flex.align-items-center.text-success.py-2.px-3.rounded.bg-dark.border.border-secondary.copilot-link(href="/app/copilot") 
-              i.bx.bxs-bot.me-2
-              | INYMO Copilot AI ✨
+            li: a.sidebar-link(href="/app/dashboard") 
+              i.bx.bxs-dashboard
+              span Panel General
+            li: a.sidebar-link.copilot-link(href="/app/copilot") 
+              i.bx.bxs-bot
+              span Copilot AI ✨
 
-          // 2. OPERATIVO (Ingeniería)
-          p.nav-label(style="color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 20px; margin-bottom: 10px;") Operativo
+          // 2. SECCIÓN: OPERATIVO (INGENIERÍA)
+          p.nav-label Operativo
           ul.list-unstyled
-            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/proyectos" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
-              i.bx.bx-hard-hat.me-2
-              | Gestión de Proyectos
-            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/bitacora" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
-              i.bx.bx-notepad.me-2
-              | Bitácora Digital
-            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/repositorio" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
-              i.bx.bx-map-alt.me-2
-              | Repositorio Planos
-            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/inventario" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
-              i.bx.bx-box.me-2
-              | Inventario y Almacén
+            li: a.sidebar-link(href="/app/proyectos") 
+              i.bx.bx-hard-hat
+              span Gestión de Proyectos
+            li: a.sidebar-link(href="/app/bitacora") 
+              i.bx.bx-notepad
+              span Bitácora Digital
+            li: a.sidebar-link(href="/app/repositorio") 
+              i.bx.bx-map-alt
+              span Repositorio Planos
+            li: a.sidebar-link(href="/app/inventario") 
+              i.bx.bx-box
+              span Inventario y Almacén
 
-          // 3. ADMINISTRATIVO
-          p.nav-label(style="color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 20px; margin-bottom: 10px;") Administrativo
+          // 3. SECCIÓN: INTELIGENCIA COMERCIAL
+          p.nav-label Inteligencia Comercial
           ul.list-unstyled
-            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/finanzas" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
-              i.bx.bx-dollar-circle.me-2
-              | Cotizaciones
-            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/facturas" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
-              i.bx.bx-receipt.me-2
-              | Facturas
+            li: a.sidebar-link(href="/app/finanzas") 
+              i.bx.bx-dollar-circle
+              span Cotizaciones
+            li: a.sidebar-link(href="/app/facturas") 
+              i.bx.bx-receipt
+              span Facturas
 
-          // 4. RRHH & CRM
-          p.nav-label(style="color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 20px; margin-bottom: 10px;") RRHH & CRM
+          // 4. SECCIÓN: CAPITAL HUMANO
+          p.nav-label Capital Humano
           ul.list-unstyled
-            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/personal" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
-              i.bx.bx-group.me-2
-              | Directorio y Carpetas
-            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/desempeno" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
-              i.bx.bx-trophy.me-2
-              | Desempeño
-            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/clientes" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
-              i.bx.bx-briefcase.me-2
-              | Clientes
+            li: a.sidebar-link(href="/app/rrhh") 
+              i.bx.bx-group
+              span Capital Humano
+            li: a.sidebar-link(href="/app/clientes") 
+              i.bx.bx-briefcase
+              span Clientes
 
-          // 5. ESTRATEGIA
-          p.nav-label(style="color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 20px; margin-bottom: 10px;") Estrategia
+          // 5. SECCIÓN: ESTRATEGIA (CONEXIÓN BI)
+          p.nav-label Estrategia
           ul.list-unstyled
-            li.mb-2: a.d-flex.align-items-center.text-secondary.py-2.px-3.rounded(href="/app/analytics" onmouseover="this.className='d-flex align-items-center text-light py-2 px-3 rounded bg-secondary bg-opacity-10'" onmouseout="this.className='d-flex align-items-center text-secondary py-2 px-3 rounded'") 
-              i.bx.bx-line-chart.me-2
-              | Inteligencia (BI)
+            //- CORRECCIÓN: Se cambia /app/analytics por /app/bi para sincronizar con Router
+            li: a.sidebar-link(href="/app/bi") 
+              i.bx.bx-line-chart
+              span Inteligencia (BI)
 
-        // BOTÓN SALIR
-        div.sidebar-bottom(style="padding: 20px;")
-           a.btn-logout-action.d-flex.align-items-center.text-danger.py-2.px-3(href="/logout" style="text-decoration:none;") 
-             i.bx.bx-log-out.me-2
-             | Cerrar Sesión
+        // BOTÓN FINALIZAR SESIÓN
+        div.sidebar-bottom.mt-auto(style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.05);")
+           a.sidebar-link.logout-link(href="/logout" id="btnLogout") 
+             i.bx.bx-log-out
+             span Finalizar Sesión
 
       // --- CONTENIDO PRINCIPAL ---
       main.app-content
-        header.app-header.d-flex.justify-content-between.align-items-center.mb-4
+        header.app-header.d-flex.justify-content-between.align-items-center.px-4.py-3
           div.header-left
-            h2.fw-bold.m-0 Workspace
-            p.text-muted.small.m-0 INYMO / Panel de Control
+            h4.fw-bold.m-0(style="color: var(--navy-sidebar);") Workspace
+            p.text-muted.small.m-0 INYMO Engineering & Management
           
           div.user-profile.d-flex.align-items-center
             div.user-info.text-end.me-3.d-none.d-md-block
-              span.d-block.fw-bold Ing. Ángel Velasco
-              span.d-block.small.text-muted Socio Director
-            div.user-badge.bg-primary.text-white.rounded-circle.d-flex.justify-content-center.align-items-center(style="width: 40px; height: 40px;") AV
+              span.d-block.fw-bold.text-dark Ing. Ángel Velasco
+              span.d-block.small.text-success.fw-bold Socio Director
+            // Badge de Usuario con borde verde corporativo
+            div.user-badge.bg-dark.text-white.rounded-circle.d-flex.justify-content-center.align-items-center.border.border-2.border-success(style="width: 46px; height: 46px; font-weight: 700; font-size: 0.9rem;") AV
         
         div.content-area
-          // AQUÍ SE INYECTAN TUS VISTAS (Repositorio, Dashboard, etc.)
+          // Inyección dinámica de vistas PUG
           block content
 
-    // --- SCRIPTS ---
-    // Bootstrap JS
+    // --- SCRIPTS DE FUNCIONAMIENTO ---
     script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js")
     
-    // Script de animación Logout
     script.
-      const logoutBtn = document.querySelector('.btn-logout-action');
+      // Manejo de Cierre de Sesión con Transición Fluida
+      const logoutBtn = document.getElementById('btnLogout');
       if(logoutBtn) {
         logoutBtn.addEventListener('click', function(e) {
           e.preventDefault();
-          document.body.style.transition = 'opacity 0.6s ease';
+          document.body.style.transition = 'opacity 0.5s ease';
           document.body.style.opacity = '0';
-          setTimeout(() => {
-            window.location.href = '/logout';
-          }, 600);
+          setTimeout(() => { 
+            window.location.href = '/login'; 
+          }, 450);
         });
       }
+
+      // Marcado Dinámico de la Pestaña Activa en el Sidebar
+      document.addEventListener('DOMContentLoaded', () => {
+        const path = window.location.pathname;
+        const links = document.querySelectorAll('.sidebar-link');
+        links.forEach(l => {
+          // Coincidencia exacta o parcial para subrutas
+          if(path.startsWith(l.getAttribute('href'))) {
+            l.classList.add('active');
+          }
+        });
+      });

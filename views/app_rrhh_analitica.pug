@@ -1,0 +1,446 @@
+extends layout_app
+
+block content
+  //- =========================================================================
+  //- INYMO PERFORMANCE ENGINE - DIVISIÓN 04: DESEMPEÑO Y ANALÍTICA
+  //- =========================================================================
+  //- Estándares: ISO 30414 (Human Capital Reporting) & Balanced Scorecard
+  //- Arquitectura: Diseño de Alta Rentabilidad para Ingeniería
+  
+  style.
+    /* --- NÚCLEO DE DISEÑO CORPORATIVO (INYMO LUX) --- */
+    :root {
+      --inymo-navy: #0f172a;
+      --inymo-green: #8cc63f;
+      --glass-bg: rgba(255, 255, 255, 0.98);
+      --card-border: #f1f5f9;
+      --text-muted: #64748b;
+      --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .analytics-master-container {
+      animation: slideUp 0.7s ease-out;
+      padding-bottom: 50px;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Tarjetas de Inteligencia de Negocio (BI) */
+    .bi-stat-card {
+      border: none;
+      border-radius: 32px;
+      background: white;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.03);
+      transition: var(--transition);
+      border: 1px solid var(--card-border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bi-stat-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.12);
+      border-color: var(--inymo-green);
+    }
+
+    .bi-stat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--inymo-navy);
+      opacity: 0.1;
+    }
+
+    .bi-stat-card:hover::after {
+      background: var(--inymo-green);
+      opacity: 1;
+    }
+
+    /* Iconografía de Rendimiento */
+    .metric-icon-box {
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+    }
+
+    /* Tabla de Rentabilidad Operativa */
+    .performance-table-wrapper {
+      background: white;
+      border-radius: 35px;
+      padding: 35px;
+      box-shadow: 0 4px 25px rgba(0,0,0,0.02);
+      border: 1px solid var(--card-border);
+    }
+
+    .table-performance {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 15px;
+    }
+
+    .table-performance th {
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 1.5px;
+      padding: 10px 20px;
+      border: none;
+    }
+
+    .table-performance tbody tr {
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .table-performance td {
+      background: #f8fafc;
+      padding: 20px;
+      border: none;
+      vertical-align: middle;
+    }
+
+    .table-performance td:first-child { border-radius: 20px 0 0 20px; }
+    .table-performance td:last-child { border-radius: 0 20px 20px 0; }
+
+    .table-performance tr:hover td {
+      background: #f1f5f9;
+      transform: scale(1.005);
+    }
+
+    /* Sistema de Avatares para Evaluaciones */
+    .eval-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: var(--inymo-navy);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      margin-right: 15px;
+    }
+
+    /* Score Progress Bars */
+    .score-bar-bg {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 10px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      background: var(--inymo-green);
+      border-radius: 10px;
+      transition: width 1s ease-in-out;
+    }
+
+    /* Modales de Alta Gama */
+    .modal-scorecard {
+      border-radius: 40px;
+      border: none;
+      box-shadow: 0 30px 70px rgba(0,0,0,0.3);
+    }
+
+    .lux-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--inymo-navy);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .lux-input {
+      border-radius: 18px;
+      padding: 15px 20px;
+      background: #f1f5f9;
+      border: 2px solid transparent;
+      transition: 0.3s;
+    }
+
+    .lux-input:focus {
+      background: white;
+      border-color: var(--inymo-green);
+      box-shadow: 0 0 0 5px rgba(140, 198, 63, 0.1);
+      outline: none;
+    }
+
+    /* Estilos de Botones Tácticos */
+    .btn-lux {
+      padding: 14px 30px;
+      border-radius: 20px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      transition: var(--transition);
+    }
+
+  .container-fluid.py-4.analytics-master-container
+    //- --- BREADCRUMB CORPORATIVO ---
+    nav.mb-4(aria-label="breadcrumb")
+      ol.breadcrumb.bg-transparent.p-0.small
+        li.breadcrumb-item: a.text-muted.text-decoration-none(href="/app/rrhh") 📂 Capital Humano
+        li.breadcrumb-item.active.fw-bold.text-dark(aria-current="page") 04. Desempeño y Analítica
+
+    //- --- ENCABEZADO DE ALTO IMPACTO ---
+    .d-flex.justify-content-between.align-items-start.mb-5
+      div
+        .d-flex.align-items-center.mb-2
+          span.p-3.bg-dark.text-white.rounded-4.me-4.shadow-lg
+            i.bx.bx-trending-up.fs-2
+          div
+            h1.fw-bold.text-dark.mb-1 Desempeño y Rentabilidad
+            p.text-muted.mb-0 
+              i.bx.bx-line-chart.text-success.me-1
+              | Evaluación periódica de cumplimiento de objetivos y optimización de costos FSR.
+      
+      div.d-flex.gap-3
+        button.btn.btn-outline-dark.shadow-sm.px-4.py-2.rounded-pill.fw-bold
+          i.bx.bx-download.me-2
+          | Exportar Analytics
+        button.btn.btn-dark.shadow-sm.px-4.py-2.rounded-pill.fw-bold(data-bs-toggle="modal" data-bs-target="#modalEvaluacion")
+          i.bx.bx-plus-circle.me-2
+          | Nueva Evaluación
+
+    //- --- DASHBOARD DE MÉTRICAS (KPIs DE RENDIMIENTO) ---
+    //- Nota: Usamos verificaciones '&&' para evitar el error de 'undefined' detectado
+    .row.g-4.mb-5
+      .col-md-4
+        .bi-stat-card.p-4
+          .metric-icon-box.bg-primary.bg-opacity-10.text-primary
+            i.bx.bx-target-lock
+          small.text-uppercase.fw-bold.text-muted Cobertura de Evaluación
+          .d-flex.justify-content-between.align-items-end.mt-2
+            h2.fw-bold.mb-0= (analytics && analytics.cobertura_evaluacion) ? analytics.cobertura_evaluacion : '0%'
+            span.badge.bg-success.rounded-pill.mb-1 +5.2% vs Q3
+          .score-bar-bg.mt-3
+            .score-bar-fill(style=`width: ${(analytics && analytics.cobertura_evaluacion) ? analytics.cobertura_evaluacion : '0%'}`)
+
+      .col-md-4
+        .bi-stat-card.p-4
+          .metric-icon-box.bg-success.bg-opacity-10.text-success
+            i.bx.bx-money-withdraw
+          small.text-uppercase.fw-bold.text-muted Promedio FSR Ponderado
+          .d-flex.justify-content-between.align-items-end.mt-2
+            h2.fw-bold.mb-0= (analytics && analytics.promedio_fsr) ? analytics.promedio_fsr : '$0.00'
+            span.text-muted.small.mb-1.fw-bold MXN/Hora
+          p.x-small.text-muted.mt-2.mb-0 Basado en carga social del 35% integrada.
+
+      .col-md-4
+        .bi-stat-card.p-4
+          .metric-icon-box.bg-dark.bg-opacity-10.text-dark
+            i.bx.bx-user-check
+          small.text-uppercase.fw-bold.text-muted Puntaje Global INYMO
+          .d-flex.justify-content-between.align-items-end.mt-2
+            h2.fw-bold.mb-0 92.4
+            span.badge.bg-dark.text-white.rounded-pill.mb-1 / 100
+          .score-bar-bg.mt-3
+            .score-bar-fill.bg-dark(style="width: 92.4%")
+
+    //- --- SECCIÓN MAESTRA: RENTABILIDAD POR PERFIL ---
+    .row.mb-5
+      .col-12
+        .performance-table-wrapper
+          .d-flex.justify-content-between.align-items-center.mb-4.px-3
+            div
+              h4.fw-bold.text-dark.mb-1 Análisis de Rentabilidad por Puesto
+              p.text-muted.small.mb-0 Relación de inversión salarial vs. capacidad de respuesta operativa.
+            span.badge.bg-light.text-dark.border.px-3.py-2.rounded-pill
+              i.bx.bx-info-circle.me-1
+              | Actualizado en tiempo real
+
+          .table-responsive
+            table.table-performance
+              thead
+                tr
+                  th.ps-4 Puesto / Perfil de Ingeniería
+                  th.text-center Plantilla
+                  th Promedio FSR/Hr
+                  th Inversión Mensual (MXN)
+                  th.text-center Estatus Desempeño
+                  th.text-end.pe-4 Acción
+              tbody
+                if rentabilidad && rentabilidad.length > 0
+                  each r in rentabilidad
+                    tr
+                      td.ps-4
+                        .fw-bold.text-dark= r.puesto
+                        small.text-muted.x-small Perfil Estructurado INYMO
+                      td.text-center
+                        span.badge.bg-white.text-dark.border.px-3.py-1= r.integrantes
+                      td
+                        span.fw-bold.text-primary= formatMXN(r.costo_promedio_fsr)
+                      td
+                        span.fw-bold.text-dark= formatMXN(r.inversion_area)
+                      td.text-center
+                        span.badge.bg-success.bg-opacity-10.text-success.px-3
+                          i.bx.bx-check.me-1
+                          | Óptimo
+                      td.text-end.pe-4
+                        button.btn.btn-light.btn-sm.rounded-pill
+                          i.bx.bx-right-arrow-alt
+                else
+                  tr: td.text-center.py-5(colspan="6")
+                    img(src="/images/empty-data.svg" style="width: 100px; opacity: 0.2")
+                    p.text-muted.mt-3 No hay perfiles con integrantes registrados para el análisis.
+
+    //- --- FILA INFERIOR: SCORECARDS Y FEEDBACK ---
+    .row.g-4
+      //- LADO IZQUIERDO: RECIENTES
+      .col-xl-7
+        .bi-stat-card.p-5
+          h4.fw-bold.mb-4 Historial de Evaluaciones Recientes
+          
+          if scorecards && scorecards.length > 0
+            each s in scorecards
+              .d-flex.justify-content-between.align-items-center.p-4.mb-3.rounded-4(style="background: #fdfdfd; border: 1px solid #f1f5f9;")
+                .d-flex.align-items-center
+                  .eval-avatar
+                    - var init = s.nombre_completo.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase()
+                    | #{init}
+                  div
+                    h6.fw-bold.mb-0= s.nombre_completo
+                    small.text-muted Evaluado el #{formatDate(s.fecha).split(' ')[0]}
+                
+                div.text-end
+                  .d-flex.align-items-center.justify-content-end.mb-1
+                    span.fw-bold.text-success.fs-5= s.puntaje
+                    span.text-muted.small.ms-1 / 100
+                  p.x-small.text-muted.mb-0.text-truncate(style="max-width: 250px;")= s.comentarios
+          else
+            .text-center.py-5
+              p.text-muted No se han registrado evaluaciones este trimestre.
+
+      //- LADO DERECHO: METAS Y CUMPLIMIENTO
+      .col-xl-5
+        .bi-stat-card.p-5.bg-dark.text-white
+          h4.fw-bold.mb-1 Metas Tácticas Q4
+          p.small.opacity-50 Objetivos de cumplimiento para el cierre de año.
+          
+          .mt-5
+            .mb-4
+              .d-flex.justify-content-between.mb-2
+                small.fw-bold Digitalización de Bitácoras
+                small.fw-bold 85%
+              .score-bar-bg(style="background: rgba(255,255,255,0.1)")
+                .score-bar-fill(style="width: 85%")
+            
+            .mb-4
+              .d-flex.justify-content-between.mb-2
+                small.fw-bold Reducción de Mermas de Acero
+                small.fw-bold 92%
+              .score-bar-bg(style="background: rgba(255,255,255,0.1)")
+                .score-bar-fill(style="width: 92%")
+
+            .mb-4
+              .d-flex.justify-content-between.mb-2
+                small.fw-bold Certificaciones ISO PMBOK
+                small.fw-bold 60%
+              .score-bar-bg(style="background: rgba(255,255,255,0.1)")
+                .score-bar-fill(style="width: 60%")
+
+          .mt-5.p-4.rounded-4(style="background: rgba(140, 198, 63, 0.15); border: 1px dashed var(--inymo-green);")
+            .d-flex
+              i.bx.bxs-bolt.text-success.fs-3.me-3
+              div
+                h6.fw-bold.text-success Tip del Socio Director
+                p.small.mb-0 "La rentabilidad de INYMO depende de la precisión técnica y el registro diario. Premia la constancia en bitácora."
+
+    //- =========================================================================
+    //- MODAL MAESTRO: REGISTRO DE SCORECARD DE DESEMPEÑO
+    //- =========================================================================
+    #modalEvaluacion.modal.fade(tabindex="-1" aria-hidden="true")
+      .modal-dialog.modal-lg.modal-dialog-centered
+        .modal-content.modal-scorecard
+          form(action="/app/rrhh/division/04/evaluacion/add" method="POST")
+            .modal-header.p-5.bg-dark.text-white.border-0
+              div
+                h3.fw-bold.mb-1 Nueva Evaluación de Desempeño
+                p.mb-0.opacity-50 Registro de métricas tácticas y feedback profesional.
+              button.btn-close.btn-close-white(data-bs-dismiss="modal")
+            
+            .modal-body.p-5
+              .row.g-4
+                .col-md-7
+                  label.lux-label Colaborador a Evaluar
+                  select.form-select.lux-input(name="colaborador_id" required)
+                    option(value="") Seleccionar de la plantilla activa...
+                    if colaboradores
+                      each c in colaboradores
+                        option(value=c.id)= c.nombre_completo
+                
+                .col-md-5
+                  label.lux-label Puntaje Global (Score)
+                  .input-group
+                    input.form-control.lux-input(type="number" name="puntaje" min="0" max="100" placeholder="0 - 100" required)
+                    span.input-group-text.bg-transparent.border-0.fw-bold / 100
+
+                .col-12
+                  label.lux-label Verificación de Metas Tácticas
+                  .p-4.rounded-4(style="background: #f8fafc; border: 1px solid #e2e8f0;")
+                    .row
+                      .col-md-6.mb-3
+                        .form-check.form-switch
+                          input.form-check-input(type="checkbox" name="m1" checked)
+                          label.form-check-label.small Registro diario de Bitácora
+                      .col-md-6.mb-3
+                        .form-check.form-switch
+                          input.form-check-input(type="checkbox" name="m2")
+                          label.form-check-label.small Entrega bajo presupuesto
+                      .col-md-6.mb-3
+                        .form-check.form-switch
+                          input.form-check-input(type="checkbox" name="m3")
+                          label.form-check-label.small Cumplimiento de Normas ISO
+                      .col-md-6.mb-3
+                        .form-check.form-switch
+                          input.form-check-input(type="checkbox" name="m4" checked)
+                          label.form-check-label.small Cero Incidentes de Seguridad
+
+                .col-12
+                  label.lux-label Comentarios y Retroalimentación Directiva
+                  textarea.form-control.lux-input(name="comentarios" rows="4" placeholder="Escribe aquí las observaciones sobre el rendimiento del colaborador en este periodo...")
+
+            .modal-footer.p-5.bg-light.border-0
+              button.btn.btn-link.text-muted.text-decoration-none.fw-bold(data-bs-dismiss="modal") Cancelar
+              button.btn.btn-dark.btn-lux.shadow-lg(type="submit")
+                i.bx.bx-save.me-2
+                | Guardar Evaluación Maestro
+
+    //- --- CAPA DE INTELIGENCIA VISUAL (SCRIPTS) ---
+    script.
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log("🚀 INYMO Performance Module initialized.");
+        
+        // Animación progresiva de las barras de score
+        const bars = document.querySelectorAll('.score-bar-fill');
+        setTimeout(() => {
+          bars.forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0';
+            setTimeout(() => bar.style.width = width, 100);
+          });
+        }, 300);
+      });
+
+      // Validación de Score en el Frontend
+      const scoreInput = document.querySelector('input[name="puntaje"]');
+      if(scoreInput) {
+        scoreInput.addEventListener('change', function() {
+          if(this.value > 100) this.value = 100;
+          if(this.value < 0) this.value = 0;
+        });
+      }

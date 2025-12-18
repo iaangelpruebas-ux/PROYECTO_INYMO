@@ -1,0 +1,371 @@
+extends layout_app
+
+block content
+  //- =========================================================================
+  //- INYMO STRATEGIC ENGINE - DIVISIÓN 01: GOBIERNO Y ESTRATEGIA
+  //- =========================================================================
+  //- Estándares: ISO 9001 (Calidad) y ISO 31000 (Riesgos)
+  
+  style.
+    /* --- ESTILOS EXCLUSIVOS DE GOBERNANZA --- */
+    :root {
+      --inymo-navy: #0f172a;
+      --inymo-green: #8cc63f;
+      --risk-low: #10b981;
+      --risk-med: #f59e0b;
+      --risk-high: #ef4444;
+      --risk-crit: #7f1d1d;
+    }
+
+    .strategic-card {
+      border: none;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    .strategic-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+    }
+
+    .identity-header {
+      background: linear-gradient(135deg, var(--inymo-navy) 0%, #1e293b 100%);
+      color: white;
+      padding: 30px;
+      position: relative;
+    }
+
+    .btn-edit-float {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      border-radius: 12px;
+      padding: 8px;
+      backdrop-filter: blur(5px);
+    }
+
+    .okr-item {
+      background: #f8fafc;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #f1f5f9;
+    }
+
+    /* Custom Range Styling */
+    .form-range::-webkit-slider-thumb { background: var(--inymo-green); }
+    .form-range::-moz-range-thumb { background: var(--inymo-green); }
+
+    .risk-badge {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-bajo { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .badge-medio { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+    .badge-alto { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+    .badge-critico { background: #7f1d1d; color: #fff; }
+
+    .kr-tag {
+      display: inline-block;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      padding: 4px 12px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      color: #64748b;
+    }
+
+    .section-title-hr {
+      display: flex;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+    .section-title-hr h5 { margin: 0 15px 0 0; white-space: nowrap; }
+    .section-title-hr div { flex-grow: 1; height: 1px; background: #e2e8f0; }
+
+    /* Toast Notification */
+    #saveToast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+
+  .container-fluid.py-4
+    //- --- NAVEGACIÓN ---
+    nav.mb-4(aria-label="breadcrumb")
+      ol.breadcrumb.bg-transparent.p-0.small
+        li.breadcrumb-item: a.text-muted.text-decoration-none(href="/app/rrhh") 📂 Capital Humano
+        li.breadcrumb-item.active.fw-bold.text-dark(aria-current="page") 01. Gobierno y Estrategia
+
+    //- --- CABECERA EJECUTIVA ---
+    .d-flex.justify-content-between.align-items-start.mb-5
+      div
+        .d-flex.align-items-center.mb-2
+          span.p-2.bg-dark.text-white.rounded-3.me-3
+            i.bx.bx-shield-quarter.fs-4
+          h2.fw-bold.text-dark.mb-0 Centro de Comando Estratégico
+        p.text-muted.ms-5.ps-2 Gestión de identidad corporativa, cumplimiento normativo y mitigación de riesgos de alto impacto.
+      
+      div.d-flex.gap-3
+        button.btn.btn-outline-dark.shadow-sm.px-4.rounded-pill(data-bs-toggle="modal" data-bs-target="#modalRiesgo")
+          i.bx.bx-error.me-2
+          | Reportar Riesgo
+        button.btn.btn-dark.shadow-sm.px-4.rounded-pill(data-bs-toggle="modal" data-bs-target="#modalOKR")
+          i.bx.bx-plus-circle.me-2
+          | Definir OKR
+
+    .row.g-4
+      //- --- COLUMNA 1: FILOSOFÍA ORGANIZACIONAL ---
+      .col-xl-4
+        .strategic-card.h-100
+          .identity-header
+            button.btn-edit-float(data-bs-toggle="modal" data-bs-target="#modalIdentidad")
+              i.bx.bx-pencil
+            h4.fw-bold.mb-1 ADN Corporativo
+            p.small.opacity-75 Propósito e Identidad de INYMO
+
+          .card-body.p-4
+            .mb-5
+              .d-flex.align-items-center.mb-3
+                i.bx.bx-target-lock.text-primary.me-2.fs-5
+                h6.fw-bold.text-uppercase.mb-0.letter-spacing-1 Misión
+              p.text-dark.line-height-lg= iden.mision || "Nuestra misión define el porqué existimos. Por favor, edita para establecer el propósito rector."
+            
+            .mb-5
+              .d-flex.align-items-center.mb-3
+                i.bx.bx-show-alt.text-success.me-2.fs-5
+                h6.fw-bold.text-uppercase.mb-0.letter-spacing-1 Visión 2030
+              p.text-dark.line-height-lg= iden.vision || "Nuestra visión es nuestra meta a largo plazo. Establece aquí dónde queremos estar en los próximos 5 a 10 años."
+            
+            .section-title-hr
+              h6.fw-bold.text-muted.small VALORES CLAVE
+              div
+
+            .d-flex.flex-wrap.gap-2
+              if iden.valores && iden.valores.length > 0
+                each val in iden.valores
+                  span.badge.bg-light.text-dark.border.px-3.py-2.rounded-pill
+                    i.bx.bx-check.text-success.me-1
+                    = val
+              else
+                p.small.text-muted No se han definido valores institucionales.
+
+      //- --- COLUMNA 2: OBJETIVOS Y RESULTADOS CLAVE (OKRs) ---
+      .col-xl-8
+        .strategic-card.p-4
+          .d-flex.justify-content-between.align-items-center.mb-4
+            div
+              h4.fw-bold.mb-1 Objetivos Estratégicos (OKRs)
+              p.small.text-muted Monitoreo dinámico del progreso trimestral.
+            span.badge.bg-success.bg-opacity-10.text-success Q4 - 2025
+
+          if okrs && okrs.length > 0
+            each okr in okrs
+              .okr-item
+                .d-flex.justify-content-between.align-items-start.mb-3
+                  div.pe-4
+                    h5.fw-bold.mb-1= okr.objetivo
+                    .d-flex.flex-wrap.mt-2
+                      each kr in okr.resultados_clave
+                        span.kr-tag= kr
+                  
+                  .dropdown
+                    button.btn.btn-link.text-muted.p-0(data-bs-toggle="dropdown")
+                      i.bx.bx-dots-vertical-rounded.fs-4
+                    ul.dropdown-menu.dropdown-menu-end.border-0.shadow-lg
+                      li: a.dropdown-item.text-danger(href=`/app/rrhh/division/01/okr/delete/${okr.id}` onclick="return confirm('¿Eliminar objetivo estratégico?')")
+                        i.bx.bx-trash.me-2
+                        | Eliminar OKR
+
+                .row.align-items-center.g-3
+                  .col
+                    .progress.rounded-pill(style="height: 10px; background: #e2e8f0;")
+                      .progress-bar.bg-success.progress-bar-striped.progress-bar-animated(id=`bar-${okr.id}` role="progressbar" style=`width: ${okr.progreso}%`)
+                  .col-auto
+                    span.fw-bold.text-dark(id=`val-${okr.id}`) #{okr.progreso}%
+                
+                input.form-range.mt-3(type="range" min="0" max="100" value=okr.progreso oninput=`syncProgress(${okr.id}, this.value)` onchange=`updateOKR(${okr.id}, this.value)`)
+          else
+            .text-center.py-5
+              img(src="/images/empty-state.svg" style="width: 120px; opacity: 0.3")
+              h6.text-muted.mt-3 No hay OKRs activos registrados.
+              button.btn.btn-sm.btn-primary.mt-2(data-bs-toggle="modal" data-bs-target="#modalOKR") Crear Primer Objetivo
+
+      //- --- FILA 2: MATRIZ DE RIESGOS (ISO 31000) ---
+      .col-12
+        .strategic-card
+          .card-header.bg-white.p-4.border-0
+            .row.align-items-center
+              .col
+                h4.fw-bold.mb-1 Matriz de Riesgos y Mitigación
+                p.small.text-muted Vigilancia proactiva bajo estándar internacional ISO 31000.
+              .col-auto
+                .d-flex.gap-2
+                   .text-center.px-3.border-end
+                     small.text-muted.d-block Detectados
+                     span.fw-bold= riesgos.length
+                   .text-center.px-3
+                     small.text-muted.d-block Críticos
+                     span.fw-bold.text-danger= riesgos.filter(r => r.nivel === 'Crítico').length
+
+          .table-responsive
+            table.table.table-hover.align-middle.mb-0
+              thead.bg-light
+                tr
+                  th.ps-4(style="width: 25%") Riesgo / Amenaza
+                  th Categoría Impacto
+                  th Nivel Severidad
+                  th Plan de Acción (Mitigación)
+                  th.text-center Fecha Det.
+                  th.text-end.pe-4 Gestión
+              tbody
+                each r in riesgos
+                  tr
+                    td.ps-4
+                      .fw-bold.text-dark= r.descripcion
+                      small.text-muted ID: R-#{r.id.toString().padStart(3, '0')}
+                    td
+                      span.badge.bg-secondary.bg-opacity-10.text-secondary.px-3= r.impacto
+                    td
+                      span.risk-badge(class=`badge-${r.nivel.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`)= r.nivel
+                    td
+                      p.small.mb-0.text-muted(style="max-width: 300px;")= r.mitigacion
+                    td.text-center
+                      small= formatDate(r.fecha_deteccion)
+                    td.text-end.pe-4
+                      a.btn.btn-light.btn-sm.rounded-pill.text-danger(href=`/app/rrhh/division/01/riesgo/delete/${r.id}` onclick="return confirm('¿Eliminar riesgo de la matriz?')")
+                        i.bx.bx-trash
+
+    //- =========================================================================
+    //- MODALES DE GESTIÓN (CRUD)
+    //- =========================================================================
+
+    //- 1. MODAL IDENTIDAD
+    #modalIdentidad.modal.fade(tabindex="-1" aria-hidden="true")
+      .modal-dialog.modal-lg.modal-dialog-centered
+        .modal-content.border-0.shadow-lg(style="border-radius: 20px;")
+          form(action="/app/rrhh/division/01/identidad/update" method="POST")
+            .modal-header.border-0.pt-4.px-4
+              h5.fw-bold Actualizar ADN Corporativo
+              button.btn-close(data-bs-dismiss="modal")
+            .modal-body.p-4
+              .mb-4
+                label.form-label.fw-bold Misión Institucional
+                textarea.form-control.rounded-3(name="mision" rows="3" required)= iden.mision
+              .mb-4
+                label.form-label.fw-bold Visión Estratégica
+                textarea.form-control.rounded-3(name="vision" rows="3" required)= iden.vision
+              .mb-0
+                label.form-label.fw-bold Valores (Separados por comas)
+                input.form-control.rounded-3(name="valores" placeholder="Integridad, Precisión, Innovación..." value=(iden.valores ? iden.valores.join(', ') : ''))
+            .modal-footer.border-0.pb-4.px-4
+              button.btn.btn-light(data-bs-dismiss="modal") Cancelar
+              button.btn.btn-dark.px-4(type="submit") Guardar Cambios
+
+    //- 2. MODAL OKR
+    #modalOKR.modal.fade(tabindex="-1" aria-hidden="true")
+      .modal-dialog.modal-dialog-centered
+        .modal-content.border-0.shadow-lg(style="border-radius: 20px;")
+          form(action="/app/rrhh/division/01/okr/add" method="POST")
+            .modal-header.border-0.pt-4.px-4
+              h5.fw-bold Definir Nuevo Objetivo (OKR)
+              button.btn-close(data-bs-dismiss="modal")
+            .modal-body.p-4
+              .mb-4
+                label.form-label.fw-bold Objetivo Maestro (¿Qué queremos lograr?)
+                input.form-control.rounded-3(name="objetivo" placeholder="Ej: Maximizar rentabilidad operativa" required)
+              .mb-0
+                label.form-label.fw-bold Resultados Clave (Separados por comas)
+                textarea.form-control.rounded-3(name="krs" rows="3" placeholder="Ej: Reducir merma 10%, Digitalizar bitácoras..." required)
+                small.text-muted Ingrese los indicadores métricos que validarán el éxito.
+            .modal-footer.border-0.pb-4.px-4
+              button.btn.btn-dark.w-100(type="submit") Registrar Estrategia
+
+    //- 3. MODAL RIESGO
+    #modalRiesgo.modal.fade(tabindex="-1" aria-hidden="true")
+      .modal-dialog.modal-dialog-centered
+        .modal-content.border-0.shadow-lg(style="border-radius: 20px;")
+          form(action="/app/rrhh/division/01/riesgo/add" method="POST")
+            .modal-header.border-0.pt-4.px-4
+              h5.fw-bold Detección de Riesgo Crítico
+              button.btn-close(data-bs-dismiss="modal")
+            .modal-body.p-4
+              .mb-3
+                label.form-label.fw-bold Descripción del Riesgo
+                input.form-control.rounded-3(name="descripcion" required)
+              .row
+                .col-md-6.mb-3
+                  label.form-label.fw-bold Impacto
+                  select.form-select.rounded-3(name="impacto" required)
+                    option(value="Financiero") Financiero
+                    option(value="Operativo") Operativo
+                    option(value="Legal") Legal
+                    option(value="Reputacional") Reputacional
+                .col-md-6.mb-3
+                  label.form-label.fw-bold Severidad
+                  select.form-select.rounded-3(name="nivel" required)
+                    option(value="Bajo") Bajo
+                    option(value="Medio") Medio
+                    option(value="Alto") Alto
+                    option(value="Crítico") Crítico
+              .mb-0
+                label.form-label.fw-bold Plan de Mitigación
+                textarea.form-control.rounded-3(name="mitigacion" rows="3" placeholder="Acciones preventivas...")
+            .modal-footer.border-0.pb-4.px-4
+              button.btn.btn-danger.w-100(type="submit") Registrar en Matriz
+
+  //- --- TOAST NOTIFICATION ---
+  #saveToast.toast.align-items-center.text-white.bg-success.border-0(role="alert" aria-live="assertive" aria-atomic="true")
+    .d-flex
+      .toast-body
+        i.bx.bx-check-circle.me-2
+        | Progreso actualizado correctamente.
+      button.btn-close.btn-close-white.me-2.m-auto(data-bs-dismiss="toast")
+
+  //- --- LÓGICA DE INTERACCIÓN (SCRIPTS) ---
+  script.
+    // 1. Sincronización Visual del Progreso (Frontend Only)
+    function syncProgress(id, val) {
+      document.getElementById(`bar-${id}`).style.width = val + '%';
+      document.getElementById(`val-${id}`).innerText = val + '%';
+    }
+
+    // 2. Persistencia de Datos vía AJAX
+    async function updateOKR(id, val) {
+      try {
+        const response = await fetch('/app/rrhh/division/01/okr/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, progreso: val })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          const toastEl = document.getElementById('saveToast');
+          const toast = new bootstrap.Toast(toastEl);
+          toast.show();
+        }
+      } catch (err) {
+        console.error("Error al actualizar OKR:", err);
+        alert("No se pudo conectar con el servidor para guardar el progreso.");
+      }
+    }
+
+    // 3. Inicialización de Tooltips y UI
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log("INYMO Strategic Module Loaded.");
+    });

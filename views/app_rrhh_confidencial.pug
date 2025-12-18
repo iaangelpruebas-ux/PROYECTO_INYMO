@@ -1,0 +1,249 @@
+extends layout_app
+
+block content
+  //- =========================================================================
+  //- INYMO CONFIDENTIAL VAULT - DIVISIÓN 10: ÁREA RESTRINGIDA
+  //- =========================================================================
+  //- Acceso: ROOT / SOCIO DIRECTOR SOLAMENTE
+  //- Versión: 2.5.0 - "Nivel de Encriptación Root"
+  
+  style.
+    /* --- ARQUITECTURA DE DISEÑO VAULT (INTERNAL CSS) --- */
+    :root {
+      --vault-dark: #020617;
+      --vault-gold: #fbbf24;
+      --vault-border: rgba(251, 191, 36, 0.1);
+      --vault-glow: 0 0 40px rgba(251, 191, 36, 0.05);
+    }
+
+    .vault-container {
+      animation: vaultEnter 1s cubic-bezier(0.23, 1, 0.32, 1);
+      background: #f8fafc;
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    @keyframes vaultEnter {
+      from { opacity: 0; filter: blur(10px) brightness(0.5); }
+      to { opacity: 1; filter: blur(0) brightness(1); }
+    }
+
+    /* Tarjetas de Bóveda */
+    .vault-card {
+      border: 1px solid var(--vault-border);
+      border-radius: 40px;
+      background: var(--vault-dark);
+      color: white;
+      box-shadow: var(--vault-glow);
+      transition: all 0.5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vault-card:hover {
+      border-color: var(--vault-gold);
+      box-shadow: 0 0 60px rgba(251, 191, 36, 0.1);
+    }
+
+    /* Log de Auditoría */
+    .log-table-wrapper {
+      background: white;
+      border-radius: 35px;
+      padding: 35px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .log-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .log-item:last-child { border-bottom: none; }
+
+    .ip-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      background: #f1f5f9;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+
+    /* Partner Portfolio System */
+    .partner-pill {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 25px;
+      padding: 30px;
+      margin-bottom: 20px;
+      transition: 0.3s;
+    }
+
+    .partner-pill:hover {
+      background: rgba(255,255,255,0.07);
+      border-color: var(--vault-gold);
+    }
+
+    .security-badge-top {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: var(--hse-red);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 0.7rem;
+      box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+    }
+
+  .container-fluid.py-4.vault-container
+    //- MARCADOR DE SEGURIDAD MÁXIMA
+    .security-badge-top.d-flex.align-items-center
+      i.bx.bx-shield-quarter.me-2.fs-5.bx-tada
+      | ACCESO NIVEL 10 - CONFIDENCIAL
+
+    nav.mb-4(aria-label="breadcrumb")
+      ol.breadcrumb.bg-transparent.p-0.small
+        li.breadcrumb-item: a.text-muted.text-decoration-none(href="/app/rrhh") 📂 Capital Humano
+        li.breadcrumb-item.active.fw-bold.text-dark(aria-current="page") 10. Bóveda de Socios
+
+    //- --- CABECERA DE BÓVEDA ---
+    .d-flex.justify-content-between.align-items-center.mb-5
+      div
+        h1.fw-bold.text-dark.mb-0 Vault de Gestión Patrimonial
+        p.text-muted Acceso monitoreado a la estructura de socios y actas constitutivas de INYMO.
+      
+      div.d-flex.gap-3
+        button.btn.btn-outline-danger.rounded-pill.fw-bold.px-4(onclick="location.href='/logout'") 
+          i.bx.bx-power-off.me-2
+          | Cerrar Sesión Segura
+
+    .row.g-5
+      //- --- COLUMNA IZQUIERDA: SOCIOS Y CAPITAL ---
+      .col-xl-7
+        .vault-card.p-5
+          .d-flex.justify-content-between.align-items-start.mb-5
+            div
+              h4.fw-bold.text-white Estructura de Capital Social
+              p.small.opacity-50 Distribución accionaria y roles directivos.
+            i.bx.bxs-key.text-warning.fs-1
+          
+          if socios && socios.length > 0
+            each s in socios
+              .partner-pill
+                .d-flex.justify-content-between.align-items-center
+                  .d-flex.align-items-center
+                    .avatar-vault.bg-white.bg-opacity-10.rounded-circle.me-4.d-flex.align-items-center.justify-content-center(style="width: 60px; height: 60px;")
+                      i.bx.bx-user.fs-3.text-warning
+                    div
+                      h5.fw-bold.mb-0= s.nombre
+                      small.text-warning.fw-bold= s.cargo || 'Socio Accionista'
+                  .text-end
+                    h3.fw-bold.mb-0 #{s.participacion}%
+                    small.opacity-50 Participación
+          else
+            //- Vista Socio Director (Default)
+            .partner-pill
+              .d-flex.justify-content-between.align-items-center
+                .d-flex.align-items-center
+                  .avatar-vault.bg-white.bg-opacity-10.rounded-circle.me-4.d-flex.align-items-center.justify-content-center(style="width: 60px; height: 60px;")
+                    i.bx.bx-crown.fs-3.text-warning
+                  div
+                    h5.fw-bold.mb-0 Ángel Velasco
+                    small.text-warning.fw-bold Socio Director General
+                .text-end
+                  h3.fw-bold.mb-0 100%
+                  small.opacity-50 Root Access
+
+          .mt-5.pt-4.border-top.border-white.border-opacity-10
+            h6.fw-bold.text-uppercase.small.letter-spacing-2 Documentación Privada
+            .row.g-3.mt-3
+              .col-md-6
+                button.btn.btn-outline-light.w-100.text-start.p-3.rounded-4
+                  i.bx.bx-file.me-2
+                  | Acta Constitutiva 2025.pdf
+              .col-md-6
+                button.btn.btn-outline-light.w-100.text-start.p-3.rounded-4
+                  i.bx.bx-lock-open.me-2
+                  | Declaración Fiscal Socios
+
+      //- --- COLUMNA DERECHA: AUDITORÍA DE ACCESO ---
+      .col-xl-5
+        .log-table-wrapper
+          .d-flex.justify-content-between.align-items-center.mb-4
+            h5.fw-bold.text-dark 🕵️ Log de Auditoría (Real-Time)
+            span.badge.bg-danger.rounded-pill.px-3 SECURED
+          
+          p.small.text-muted Registro cronológico de todos los intentos de acceso a esta división.
+
+          .mt-4
+            if logs && logs.length > 0
+              each log in logs
+                .log-item
+                  div
+                    span.small.fw-bold.d-block= log.usuario
+                    span.x-small.text-muted= log.accion
+                  .text-end
+                    span.ip-badge.d-block= log.ip_address
+                    span.x-small.text-muted= formatDate(log.fecha_acceso).split(',')[1]
+            else
+              .text-center.py-5
+                i.bx.bx-history.fs-1.text-muted.opacity-20
+                p.small.text-muted No se detectan accesos previos registrados.
+
+        .mt-4
+          .alert.alert-warning.border-0.rounded-5.p-4
+            .d-flex
+              i.bx.bx-info-circle.fs-3.me-3
+              div
+                h6.fw-bold Protocolo de Seguridad
+                p.x-small.mb-0 Todas las acciones en esta área son grabadas con dirección IP y MAC. Cualquier acceso no autorizado resultará en bloqueo inmediato de cuenta.
+
+    //- --- SECCIÓN INFERIOR: CONFIGURACIÓN ROOT ---
+    .row.mt-5
+      .col-12
+        .vault-card.p-5.bg-white.text-dark(style="border: 2px dashed #e2e8f0; background: #fff !important;")
+          h5.fw-bold Central de Control Maestro
+          p.text-muted Ajustes globales de seguridad del sistema.
+          
+          .row.mt-4.g-4
+            .col-md-3
+              .p-4.rounded-4.bg-light
+                small.fw-bold Bloqueo por Inactividad
+                h4.fw-bold 15 min
+            .col-md-3
+              .p-4.rounded-4.bg-light
+                small.fw-bold Encriptación de BD
+                h4.fw-bold AES-256
+            .col-md-3
+              .p-4.rounded-4.bg-light
+                small.fw-bold Backup Automático
+                h4.fw-bold Cada 6 hrs
+            .col-md-3
+              .p-4.rounded-4.bg-light
+                small.fw-bold Alertas al Celular
+                h4.fw-bold ACTIVAS
+
+  //- --- CAPA DE SEGURIDAD (SCRIPTS) ---
+  script.
+    document.addEventListener('DOMContentLoaded', () => {
+      console.warn("⚠️ ALERTA: Has ingresado a un área restringida de INYMO. Tu actividad está siendo grabada.");
+      
+      // Bloqueo de inspección de consola básico
+      document.addEventListener('keydown', function(e) {
+        if(e.keyCode == 123) return false;
+      });
+    });
+
+    // Función de autodestrucción de sesión (Simulada para UI)
+    let idleTime = 0;
+    setInterval(() => {
+      idleTime++;
+      if(idleTime > 15) {
+        // window.location.href = '/logout';
+      }
+    }, 60000);

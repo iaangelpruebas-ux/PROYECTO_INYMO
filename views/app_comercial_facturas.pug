@@ -1,0 +1,507 @@
+extends layout_app
+
+block content
+  //- =========================================================================
+  //- INYMO FINANCIAL SUITE - DASHBOARD DE FACTURACIÓN Y COBRANZA
+  //- =========================================================================
+  //- Autor: Ángel Velasco (Socio Director)
+  //- Versión: 2.5.0 - "Cash Flow Monitor"
+  //- Propósito: Control total de cuentas por cobrar y emisión fiscal.
+  //- =========================================================================
+
+  //- Integración de Chart.js para gráficos financieros
+  script(src="https://cdn.jsdelivr.net/npm/chart.js")
+
+  style.
+    /* --- ARQUITECTURA VISUAL FINANCIERA (INTERNAL CSS) --- */
+    :root {
+      --fin-navy: #0f172a;
+      --fin-green: #10b981;
+      --fin-red: #ef4444;
+      --fin-gold: #f59e0b;
+      --fin-bg: #f8fafc;
+      --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    }
+
+    .financial-wrapper {
+      background-color: var(--fin-bg);
+      min-height: 100vh;
+      animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Tarjetas de Flujo de Efectivo (KPIs) */
+    .cash-card {
+      background: white;
+      border-radius: 24px;
+      padding: 25px;
+      border: 1px solid #e2e8f0;
+      box-shadow: var(--card-shadow);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .cash-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      border-color: var(--fin-green);
+    }
+
+    .cash-icon-box {
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+    }
+
+    .trend-badge {
+      position: absolute;
+      top: 25px;
+      right: 25px;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    /* Tabla de Facturas Premium */
+    .invoice-table-container {
+      background: white;
+      border-radius: 30px;
+      padding: 0;
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+    }
+
+    .table-invoices {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .table-invoices thead {
+      background: #f1f5f9;
+    }
+
+    .table-invoices th {
+      padding: 20px 25px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #64748b;
+      font-weight: 800;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .table-invoices td {
+      padding: 20px 25px;
+      vertical-align: middle;
+      border-bottom: 1px solid #f1f5f9;
+      transition: 0.2s;
+    }
+
+    .table-invoices tr:hover td {
+      background: #f8fafc;
+    }
+
+    .table-invoices tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Badges de Estatus Fiscal */
+    .status-pill {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .st-emitida { background: #e0f2fe; color: #0284c7; }
+    .st-pagada { background: #dcfce7; color: #16a34a; }
+    .st-vencida { background: #fee2e2; color: #dc2626; }
+    .st-parcial { background: #fef3c7; color: #d97706; }
+
+    /* Componentes de Gráfica */
+    .chart-container-box {
+      background: white;
+      border-radius: 30px;
+      padding: 30px;
+      border: 1px solid #e2e8f0;
+      height: 400px;
+      position: relative;
+    }
+
+    /* Modal de Pagos (Tesorería) */
+    .modal-treasury {
+      border-radius: 35px;
+      overflow: hidden;
+      border: none;
+    }
+
+    .treasury-header {
+      background: var(--fin-navy);
+      color: white;
+      padding: 30px;
+    }
+
+    .input-treasury {
+      border-radius: 15px;
+      padding: 14px;
+      background: #f8fafc;
+      border: 2px solid transparent;
+      transition: 0.3s;
+    }
+
+    .input-treasury:focus {
+      background: white;
+      border-color: var(--fin-green);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+      outline: none;
+    }
+
+    /* Botón Flotante de Acción */
+    .fab-new-invoice {
+      position: fixed;
+      bottom: 40px;
+      right: 40px;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: var(--fin-navy);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.4);
+      transition: 0.3s;
+      z-index: 100;
+      border: none;
+    }
+
+    .fab-new-invoice:hover {
+      transform: scale(1.1) rotate(90deg);
+      background: var(--fin-green);
+    }
+
+    /* Top Clientes List */
+    .client-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px dashed #e2e8f0;
+    }
+    
+    .client-row:last-child { border-bottom: none; }
+
+  .container-fluid.py-4.financial-wrapper
+    //- BOTÓN FLOTANTE PARA EMISIÓN RÁPIDA
+    a.fab-new-invoice(href="/app/facturas/nueva" title="Nueva Factura")
+      i.bx.bx-plus
+
+    //- --- NAVEGACIÓN ---
+    nav.mb-4(aria-label="breadcrumb")
+      ol.breadcrumb.bg-transparent.p-0.small
+        li.breadcrumb-item: a.text-muted.text-decoration-none(href="/app") 🏦 Workspace
+        li.breadcrumb-item.active.fw-bold.text-dark(aria-current="page") Inteligencia Comercial y Cobranza
+
+    //- --- HEADER FINANCIERO ---
+    .d-flex.justify-content-between.align-items-end.mb-5
+      div
+        h1.fw-bold.text-dark.mb-1 Monitor de Flujo de Efectivo
+        p.text-muted.mb-0 Gestión de facturación 4.0, complementos de pago y cartera vencida.
+      
+      div.d-flex.gap-3
+        button.btn.btn-white.border.shadow-sm.rounded-pill.px-4.fw-bold(onclick="window.print()")
+          i.bx.bx-printer.me-2
+          | Estado de Cuenta
+        a.btn.btn-dark.shadow-sm.rounded-pill.px-4.fw-bold(href="/app/facturas/nueva")
+          i.bx.bx-file.me-2
+          | Emitir Factura
+
+    //- --- SECCIÓN 1: KPIs DE LIQUIDEZ ---
+    //- BLINDAJE: Verificamos 'stats' para evitar errores de renderizado
+    .row.g-4.mb-5
+      .col-md-3
+        .cash-card
+          .d-flex.justify-content-between
+            .cash-icon-box.bg-primary.bg-opacity-10.text-primary
+              i.bx.bx-bar-chart-alt-2
+            span.trend-badge.bg-success.bg-opacity-10.text-success +12% vs Mes Ant.
+          small.text-uppercase.fw-bold.text-muted Ventas Brutas Totales
+          h2.fw-bold.mt-2.mb-0= (stats && stats.venta_total) ? stats.venta_total : '$0.00'
+          p.x-small.text-muted.mt-2 Facturación acumulada histórica.
+
+      .col-md-3
+        .cash-card
+          .d-flex.justify-content-between
+            .cash-icon-box.bg-success.bg-opacity-10.text-success
+              i.bx.bx-check-shield
+            span.trend-badge.bg-success.bg-opacity-10.text-success Liquidez Alta
+          small.text-uppercase.fw-bold.text-muted Cobrado (Cash In)
+          h2.fw-bold.mt-2.mb-0= (stats && stats.cobrado) ? stats.cobrado : '$0.00'
+          p.x-small.text-muted.mt-2 Dinero ingresado a bancos.
+
+      .col-md-3
+        .cash-card
+          .d-flex.justify-content-between
+            .cash-icon-box.bg-danger.bg-opacity-10.text-danger
+              i.bx.bx-time-five
+            if stats && parseFloat(stats.por_cobrar.replace(/[^0-9.-]+/g,"")) > 0
+              span.trend-badge.bg-danger.bg-opacity-10.text-danger Acción Requerida
+            else
+              span.trend-badge.bg-success.bg-opacity-10.text-success Al día
+          small.text-uppercase.fw-bold.text-muted Cartera Vencida
+          h2.fw-bold.mt-2.mb-0= (stats && stats.por_cobrar) ? stats.por_cobrar : '$0.00'
+          p.x-small.text-muted.mt-2 Saldo pendiente de cobro.
+
+      .col-md-3
+        .cash-card
+          .d-flex.justify-content-between
+            .cash-icon-box.bg-warning.bg-opacity-10.text-warning
+              i.bx.bx-pie-chart-alt-2
+            span.trend-badge.bg-warning.bg-opacity-10.text-warning KPI Clave
+          small.text-uppercase.fw-bold.text-muted Efectividad Cobranza
+          h2.fw-bold.mt-2.mb-0 #{ (stats && stats.efectividad_cobro) ? stats.efectividad_cobro : 0 }%
+          .progress.mt-3(style="height: 6px;")
+            .progress-bar.bg-warning(style=`width: ${(stats && stats.efectividad_cobro) ? stats.efectividad_cobro : 0}%`)
+
+    //- --- SECCIÓN 2: ESTRUCTURA PRINCIPAL (TABLA Y GRÁFICOS) ---
+    .row.g-4
+      //- COLUMNA IZQUIERDA: LISTADO DE FACTURAS
+      .col-xl-8
+        .d-flex.justify-content-between.align-items-center.mb-4
+          h4.fw-bold.text-dark Últimos Movimientos Fiscales
+          .d-flex.gap-2
+            input.form-control.rounded-pill.border-0.bg-white.shadow-sm.px-4(placeholder="Buscar por folio o cliente..." style="width: 250px;")
+            button.btn.btn-light.shadow-sm.rounded-circle: i.bx.bx-filter-alt
+
+        .invoice-table-container
+          .table-responsive
+            table.table-invoices
+              thead
+                tr
+                  th Folio / Fecha
+                  th Cliente / Razón Social
+                  th Importe Total
+                  th Saldo
+                  th Estatus
+                  th.text-end Acciones
+              tbody
+                if facturas && facturas.length > 0
+                  each f in facturas
+                    tr
+                      td
+                        div.fw-bold.text-dark= f.folio_fiscal
+                        small.text-muted= new Date(f.fecha_emision).toLocaleDateString()
+                      td
+                        div.fw-bold.text-dark.text-truncate(style="max-width: 200px;")= f.razon_social
+                        small.text-muted= f.rfc
+                      td
+                        span.fw-bold= formatMoney(f.total)
+                      td
+                        if f.saldo_pendiente > 0
+                          span.text-danger.fw-bold= formatMoney(f.saldo_pendiente)
+                        else
+                          span.text-success.fw-bold $0.00
+                      td
+                        - var stClass = 'st-' + f.estatus.toLowerCase()
+                        span.status-pill(class=stClass)
+                          if f.estatus == 'Pagada'
+                            i.bx.bx-check.me-1
+                          else if f.estatus == 'Vencida'
+                            i.bx.bx-error.me-1
+                          | #{f.estatus}
+                      td.text-end
+                        .dropdown
+                          button.btn.btn-light.btn-sm.rounded-circle(data-bs-toggle="dropdown")
+                            i.bx.bx-dots-vertical-rounded
+                          ul.dropdown-menu.dropdown-menu-end.border-0.shadow-lg.rounded-4
+                            if f.saldo_pendiente > 0
+                              li: a.dropdown-item.py-2(href="#" onclick=`abrirModalPago('${f.id}', '${f.folio_fiscal}', '${f.saldo_pendiente}')`) 
+                                i.bx.bx-dollar-circle.text-success.me-2
+                                | Registrar Pago
+                            li: hr.dropdown-divider
+                            li: a.dropdown-item.py-2(href="#") 
+                              i.bx.bxs-file-pdf.text-danger.me-2
+                              | Descargar PDF
+                            li: a.dropdown-item.py-2(href="#") 
+                              i.bx.bx-code-alt.text-muted.me-2
+                              | Descargar XML
+                else
+                  tr: td.text-center.py-5(colspan="6")
+                    i.bx.bx-receipt.fs-1.text-muted.opacity-25
+                    p.text-muted.mt-3 No hay facturas registradas en el sistema.
+
+      //- COLUMNA DERECHA: GRÁFICO Y TOP CLIENTES
+      .col-xl-4
+        //- Gráfico de Flujo
+        .chart-container-box.mb-4
+          h5.fw-bold.mb-4.text-dark Flujo de Efectivo (6 Meses)
+          canvas#cashFlowChart
+        
+        //- Top Clientes
+        .cash-card
+          h5.fw-bold.mb-4 🏆 Clientes Top (Pareto)
+          if top_clientes && top_clientes.length > 0
+            each c, index in top_clientes
+              .client-row
+                .d-flex.align-items-center
+                  span.fw-bold.text-muted.me-3.fs-5 ##{index + 1}
+                  div
+                    h6.mb-0.fw-bold.text-dark.text-truncate(style="max-width: 150px;")= c.razon_social
+                    small.text-success Cliente Frecuente
+                .text-end
+                  span.fw-bold.text-dark= formatMoney(c.total_comprado)
+          else
+            p.text-muted.small.text-center Aún no hay data suficiente de clientes.
+
+    //- =========================================================================
+    //- MODALES DE TESORERÍA
+    //- =========================================================================
+    #modalRegistrarPago.modal.fade(tabindex="-1" aria-hidden="true")
+      .modal-dialog.modal-dialog-centered
+        .modal-content.modal-treasury
+          .treasury-header
+            h4.fw-bold.mb-1 Recepción de Pago
+            p.mb-0.opacity-75 Registro de ingreso a tesorería.
+          
+          .modal-body.p-5
+            form#formPago(onsubmit="procesarPago(event)")
+              input(type="hidden" name="factura_id" id="input_factura_id")
+              
+              .text-center.mb-4.p-3.bg-light.rounded-4.border
+                small.text-muted Aplicando pago a factura:
+                h3.fw-bold.text-primary.mb-0#display_folio F-0000
+                small.text-muted Saldo actual: 
+                span.fw-bold.text-danger#display_saldo $0.00
+
+              .mb-4
+                label.fw-bold.mb-2.small.text-uppercase Monto Recibido
+                .input-group
+                  span.input-group-text.bg-white.border-0: i.bx.bx-dollar
+                  input.form-control.input-treasury(type="number" step="0.01" name="monto" required)
+
+              .mb-4
+                label.fw-bold.mb-2.small.text-uppercase Método de Pago
+                select.form-select.input-treasury(name="metodo" required)
+                  option(value="Transferencia") Transferencia Electrónica (SPEI)
+                  option(value="Cheque") Cheque Nominativo
+                  option(value="Efectivo") Efectivo
+                  option(value="Tarjeta") Tarjeta de Crédito/Débito
+
+              .mb-4
+                label.fw-bold.mb-2.small.text-uppercase Referencia / Rastreo
+                input.form-control.input-treasury(type="text" name="referencia" placeholder="Ej: 12345678" required)
+
+              button.btn.btn-dark.w-100.py-3.rounded-pill.fw-bold.shadow-lg(type="submit")
+                i.bx.bx-save.me-2
+                | Contabilizar Ingreso
+
+  //- --- SCRIPTS DEL DASHBOARD FINANCIERO ---
+  script.
+    // 1. Inicialización de Chart.js
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log("🚀 INYMO Financial Module Loaded.");
+      
+      const ctx = document.getElementById('cashFlowChart').getContext('2d');
+      
+      // Obtener datos reales del backend
+      try {
+        const response = await fetch('/app/facturas/api/chart-data');
+        const data = await response.json();
+        
+        // Procesar datos para Chart.js
+        const labels = data.map(d => d.mes);
+        const facturado = data.map(d => parseFloat(d.facturado));
+        const cobrado = data.map(d => parseFloat(d.cobrado));
+
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Facturado',
+                data: facturado,
+                borderColor: '#0f172a',
+                backgroundColor: 'rgba(15, 23, 42, 0.1)',
+                tension: 0.4,
+                fill: true
+              },
+              {
+                label: 'Cobrado',
+                data: cobrado,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.4,
+                fill: true
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom' }
+            },
+            scales: {
+              y: { beginAtZero: true, grid: { display: false } },
+              x: { grid: { display: false } }
+            }
+          }
+        });
+      } catch (error) {
+        console.error("Error cargando gráfica:", error);
+      }
+    });
+
+    // 2. Lógica del Modal de Pagos
+    function abrirModalPago(id, folio, saldo) {
+      document.getElementById('input_factura_id').value = id;
+      document.getElementById('display_folio').innerText = folio;
+      document.getElementById('display_saldo').innerText = new Intl.NumberFormat('es-MX', {style: 'currency', currency: 'MXN'}).format(saldo);
+      const modal = new bootstrap.Modal(document.getElementById('modalRegistrarPago'));
+      modal.show();
+    }
+
+    // 3. Procesamiento AJAX del Pago (Sin recargar)
+    async function procesarPago(e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const res = await fetch('/app/facturas/pagar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        
+        const result = await res.json();
+        if (result.success) {
+          alert("✅ Pago registrado correctamente. Nuevo saldo: " + result.nuevo_saldo);
+          location.reload(); // Recargar para actualizar tabla y KPIs
+        } else {
+          alert("⚠️ Error: " + result.message);
+        }
+      } catch (err) {
+        alert("Error de conexión con el servidor.");
+      }
+    }

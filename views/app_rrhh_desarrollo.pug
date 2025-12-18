@@ -1,0 +1,579 @@
+extends layout_app
+
+block content
+  //- =========================================================================
+  //- INYMO LEARNING & DEVELOPMENT ENGINE - DIVISIÓN 06
+  //- =========================================================================
+  //- Autor: Ángel Velasco (Socio Director)
+  //- Estándares: ISO 9001:2015 (Sección 7.2 Competencia) & ISO 30414
+  //- Versión: 6.2.0 - "Escudo de Estabilidad y Crecimiento"
+  //- Propósito: Gestión de capital intelectual y seguimiento de carrera.
+  
+  style.
+    /* --- ARQUITECTURA VISUAL DE ALTO RENDIMIENTO (INTERNAL CSS) --- */
+    :root {
+      --inymo-navy: #0f172a;
+      --inymo-green: #8cc63f;
+      --learning-blue: #3b82f6;
+      --cert-gold: #fbbf24;
+      --card-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.07);
+      --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      --glass-white: rgba(255, 255, 255, 0.95);
+    }
+
+    .learning-container {
+      animation: academyFadeIn 0.8s ease-out;
+    }
+
+    @keyframes academyFadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Estilos Premium de Tarjetas de Mando */
+    .academy-stat-card {
+      border: none;
+      border-radius: 32px;
+      background: white;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition-smooth);
+      border: 1px solid #f1f5f9;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .academy-stat-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.15);
+      border-color: var(--inymo-green);
+    }
+
+    .academy-stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--inymo-green);
+      opacity: 0;
+      transition: 0.3s;
+    }
+
+    .academy-stat-card:hover::before {
+      opacity: 1;
+    }
+
+    .academy-icon-box {
+      width: 60px;
+      height: 60px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 25px;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+    }
+
+    /* Catálogo de Cursos Estructurales */
+    .course-card {
+      border: none;
+      border-radius: 28px;
+      background: white;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition-smooth);
+      border: 1px solid #f1f5f9;
+      height: 100%;
+      position: relative;
+    }
+
+    .course-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      z-index: 10;
+    }
+
+    .course-badge {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 7px 14px;
+      border-radius: 12px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    /* Skill Matrix / Tabla de Competencias */
+    .skill-matrix-wrapper {
+      background: white;
+      border-radius: 40px;
+      padding: 40px;
+      border: 1px solid #f1f5f9;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+    }
+
+    .table-skills {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 12px;
+    }
+
+    .table-skills thead th {
+      color: #94a3b8;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      padding: 15px 25px;
+      border: none;
+    }
+
+    .table-skills tbody tr {
+      transition: 0.3s;
+    }
+
+    .table-skills td {
+      padding: 22px 25px;
+      background: #f8fafc;
+      border: none;
+      vertical-align: middle;
+      transition: 0.2s;
+    }
+
+    .table-skills td:first-child { border-radius: 22px 0 0 22px; }
+    .table-skills td:last-child { border-radius: 0 22px 22px 0; }
+
+    .table-skills tr:hover td {
+      background: #f1f5f9;
+      color: var(--inymo-navy);
+    }
+
+    /* Indicadores de Progreso Lineales */
+    .progress-pill {
+      height: 10px;
+      border-radius: 20px;
+      background: #e2e8f0;
+      overflow: hidden;
+      width: 100%;
+      position: relative;
+    }
+
+    .progress-pill-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--inymo-green), #a3d95d);
+      border-radius: 20px;
+      transition: width 1.5s cubic-bezier(0.1, 0, 0, 1);
+    }
+
+    /* Modales Corporativos de Lujo */
+    .modal-lux {
+      border-radius: 45px;
+      border: none;
+      overflow: hidden;
+      box-shadow: 0 35px 80px rgba(0,0,0,0.2);
+    }
+
+    .modal-header-academy {
+      background: linear-gradient(135deg, var(--inymo-navy) 0%, #1e293b 100%);
+      color: white;
+      padding: 45px;
+      border: none;
+    }
+
+    .lux-label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--inymo-navy);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+      display: block;
+      margin-left: 5px;
+    }
+
+    .lux-input {
+      border-radius: 20px;
+      padding: 16px 24px;
+      background: #f1f5f9;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .lux-input:focus {
+      background: white;
+      border-color: var(--inymo-green);
+      box-shadow: 0 0 0 6px rgba(140, 198, 63, 0.1);
+      outline: none;
+    }
+
+    /* Filtros Rápidos */
+    .filter-chip {
+      padding: 10px 24px;
+      border-radius: 18px;
+      background: white;
+      color: #64748b;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: 0.3s;
+      border: 1px solid #e2e8f0;
+    }
+
+    .filter-chip:hover, .filter-chip.active {
+      background: var(--inymo-navy);
+      color: white;
+      border-color: var(--inymo-navy);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+    }
+
+    /* Alertas Estilo Vault */
+    .alert-vault {
+      background: #1e293b;
+      color: white;
+      border-radius: 30px;
+      padding: 30px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+  .container-fluid.py-4.learning-container
+    //- --- NAVEGACIÓN CORPORATIVA ---
+    nav.mb-4(aria-label="breadcrumb")
+      ol.breadcrumb.bg-transparent.p-0.small
+        li.breadcrumb-item: a.text-muted.text-decoration-none(href="/app/rrhh") 📂 Capital Humano
+        li.breadcrumb-item.active.fw-bold.text-dark(aria-current="page") 06. Desarrollo y Capacidad de Ingeniería
+
+    //- --- CABECERA MAESTRA ---
+    .d-flex.justify-content-between.align-items-end.mb-5
+      div
+        .d-flex.align-items-center.mb-2
+          span.p-3.bg-dark.text-white.rounded-4.me-4.shadow-lg
+            i.bx.bx-graduation.fs-1
+          div
+            h1.fw-bold.text-dark.mb-1 Academia de Ingeniería INYMO
+            p.text-muted.mb-0 
+              i.bx.bx-shield-check.text-success.me-1
+              | Gestión proactiva de competencias técnicas y cumplimiento normativo ISO.
+      
+      div.d-flex.gap-3
+        button.btn.btn-outline-dark.shadow-sm.px-4.py-3.rounded-pill.fw-bold(data-bs-toggle="modal" data-bs-target="#modalAsignar")
+          i.bx.bx-user-voice.me-2
+          | Plan de Carrera
+        button.btn.btn-dark.shadow-sm.px-4.py-3.rounded-pill.fw-bold(data-bs-toggle="modal" data-bs-target="#modalNuevoCurso")
+          i.bx.bx-plus-circle.me-2
+          | Alta de Especialidad
+
+    //- --- DASHBOARD DE MÉTRICAS (KPIs ACADÉMICOS) ---
+    //- CORRECCIÓN CLAVE: Usamos 'Shield Logic' para evitar el error de variable indefinida
+    .row.g-4.mb-5
+      .col-md-4.col-xl-3
+        .academy-stat-card.p-4
+          .academy-icon-box.bg-primary.bg-opacity-10.text-primary
+            i.bx.bx-money-withdraw
+          small.text-uppercase.fw-bold.text-muted Inversión en Talento
+          //- Validación para evitar el error image_e9a131.png
+          h2.fw-bold.mt-2.mb-0= (stats && stats.inversion) ? stats.inversion : '$0.00'
+          p.x-small.text-muted.mt-2.mb-0 Acumulado ejercicio fiscal 2025.
+
+      .col-md-4.col-xl-3
+        .academy-stat-card.p-4
+          .academy-icon-box.bg-success.bg-opacity-10.text-success
+            i.bx.bx-award
+          small.text-uppercase.fw-bold.text-muted Certificaciones Vigentes
+          h2.fw-bold.mt-2.mb-0= (stats && stats.certificaciones) ? stats.certificaciones : '0'
+          p.x-small.text-muted.mt-2.mb-0 Documentación oficial ante clientes.
+
+      .col-md-4.col-xl-3
+        .academy-stat-card.p-4
+          .academy-icon-box.bg-warning.bg-opacity-10.text-warning
+            i.bx.bx-stopwatch
+          small.text-uppercase.fw-bold.text-muted Horas de Capacitación
+          h2.fw-bold.mt-2.mb-0= (stats && stats.horas_formacion) ? stats.horas_formacion : '0'
+          p.x-small.text-muted.mt-2.mb-0 Productividad intelectual invertida.
+
+      .col-md-4.col-xl-3
+        .academy-stat-card.p-4
+          .academy-icon-box.bg-dark.bg-opacity-10.text-dark
+            i.bx.bx-bar-chart-alt-2
+          small.text-uppercase.fw-bold.text-muted Cobertura del Plan
+          h2.fw-bold.mt-2.mb-0 74%
+          .progress-pill.mt-3
+            .progress-pill-fill.bg-dark(style="width: 74%")
+
+    //- --- FILA 2: BIBLIOTECA DE CURSOS Y FILTROS ---
+    .row.mb-5
+      .col-12.mb-4
+        .d-flex.justify-content-between.align-items-center
+          h4.fw-bold.text-dark 📚 Biblioteca de Especialización Técnica
+          .d-flex.gap-3
+            .filter-chip.active Todos los Perfiles
+            .filter-chip Ingeniería Estructural
+            .filter-chip Normatividad STPS
+            .filter-chip Soft Skills
+
+      .col-12
+        .row.g-4
+          if cursos && cursos.length > 0
+            each c in cursos
+              .col-md-4.col-xl-3
+                .course-card.p-4
+                  span.course-badge(class=c.es_certificacion ? 'bg-warning text-dark' : 'bg-light text-muted')
+                    | #{c.es_certificacion ? 'Certificación' : 'Curso Técnico'}
+                  
+                  .d-flex.align-items-center.mb-4
+                    .p-3.bg-light.rounded-4.me-3
+                      i.bx(class=c.tipo == 'Tecnico' ? 'bx-bolt-circle' : 'bx-spreadsheet').fs-3.text-primary
+                    div
+                      small.text-muted.fw-bold.text-uppercase.letter-spacing-1= c.tipo
+                  
+                  h5.fw-bold.text-dark.mb-3= c.nombre
+                  p.small.text-muted.mb-4 Impartido por: <strong>#{c.proveedor}</strong>
+                  
+                  .d-flex.justify-content-between.align-items-center.border-top.pt-4.mt-auto
+                    div
+                      i.bx.bx-time-five.me-2.text-primary
+                      span.small.fw-bold= c.duracion_horas
+                      small.text-muted.ms-1 Hrs
+                    div
+                      span.fw-bold.text-success= formatMoney(c.costo_inscripcion)
+          else
+            .col-12.text-center.py-5.bg-white.rounded-5.border.border-dashed
+              img(src="https://cdn-icons-png.flaticon.com/512/7480/7480628.png" style="width: 120px; opacity: 0.2; filter: grayscale(1);")
+              h5.text-muted.mt-4 No hay cursos registrados en el catálogo institucional.
+              p.text-muted Inicie el registro de planes de formación para habilitar esta vista.
+
+    //- --- FILA 3: MATRIZ DE COMPETENCIAS (SKILL MATRIX) ---
+    .row.g-5
+      .col-xl-8
+        .skill-matrix-wrapper
+          .d-flex.justify-content-between.align-items-center.mb-5
+            div
+              h4.fw-bold.text-dark.mb-1 Matriz de Progreso de Ingeniería
+              p.small.text-muted Control de avance individual por colaborador.
+            span.badge.bg-success.bg-opacity-10.text-success.px-4.py-2.rounded-pill
+              i.bx.bx-check-double.me-2
+              | Actualizado Q4 2025
+
+          .table-responsive
+            table.table-skills
+              thead
+                tr
+                  th Colaborador / Especialidad
+                  th Rango
+                  th.text-center Cursos
+                  th.text-center Avance Académico
+                  th.text-end Detalle
+              tbody
+                if progreso && progreso.length > 0
+                  each p in progreso
+                    tr
+                      td
+                        .d-flex.align-items-center
+                          .avatar-mini.bg-dark.text-white.rounded-3.me-3.d-flex.align-items-center.justify-content-center(style="width: 42px; height: 42px; font-weight: 800; font-size: 0.9rem;")
+                            - var initial = p.nombre_completo.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase()
+                            | #{initial}
+                          div
+                            span.fw-bold.text-dark= p.nombre_completo
+                            small.d-block.text-muted= p.puesto
+                      td
+                        span.badge.bg-white.text-dark.border.px-3.py-2 Especialista
+                      td.text-center
+                        span.fw-bold.text-primary= p.total_cursos
+                      td
+                        .d-flex.align-items-center
+                          - var percentage = (p.completados / (p.total_cursos || 1)) * 100
+                          .progress-pill.flex-grow-1.me-3
+                            .progress-pill-fill(style=`width: ${percentage}%`)
+                          span.small.fw-bold.text-dark #{Math.round(percentage)}%
+                      td.text-end
+                        button.btn.btn-light.btn-sm.rounded-pill.p-2
+                          i.bx.bx-chevron-right.fs-5
+                else
+                  tr: td.text-center.py-5.text-muted(colspan="5") Pendiente de asignación de capacitaciones.
+
+      //- --- COLUMNA DERECHA: ALERTAS Y EVENTOS ---
+      .col-xl-4
+        .alert-vault.h-100
+          h5.fw-bold.mb-4 🛡️ Centro de Alertas Normativas
+          
+          .p-4.mb-3.rounded-4(style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);")
+            .d-flex.mb-2
+              i.bx.bx-error-alt.text-warning.fs-3.me-3
+              h6.fw-bold.mb-0 Próximo Vencimiento DC-3
+            p.x-small.mb-2 La certificación de **Trabajo en Alturas** de Roberto Martínez expira en 8 días hábiles.
+            .d-flex.justify-content-between.align-items-center
+              span.badge.bg-warning.text-dark Prioridad Alta
+              button.btn.btn-link.text-white.p-0.x-small Programar
+          
+          .p-4.mb-4.rounded-4(style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);")
+            .d-flex.mb-2
+              i.bx.bx-x-circle.text-danger.fs-3.me-3
+              h6.fw-bold.mb-0 Curso Crítico Pendiente
+            p.x-small.mb-0 12 Ingenieros de campo aún no completan el módulo de **Seguridad Estructural ISO 45001**.
+          
+          .mt-5.pt-2
+            h6.fw-bold.text-uppercase.small.letter-spacing-2 Calendario de Carrera
+            ul.list-unstyled.mt-4
+              li.d-flex.mb-4
+                .bg-success.bg-opacity-20.rounded-3.text-center.p-2.me-4(style="min-width: 60px;")
+                  span.d-block.fw-bold.fs-5 22
+                  span.d-block.x-small.fw-bold DIC
+                div
+                  h6.small.fw-bold.mb-0 Certificación PMP
+                  p.x-small.opacity-50 Sesión Presencial Sala A
+              li.d-flex
+                .bg-primary.bg-opacity-20.rounded-3.text-center.p-2.me-4(style="min-width: 60px;")
+                  span.d-block.fw-bold.fs-5 28
+                  span.d-block.x-small.fw-bold DIC
+                div
+                  h6.small.fw-bold.mb-0 Auditoría de Habilidades
+                  p.x-small.opacity-50 Evaluación Trimestral Q4
+
+    //- =========================================================================
+    //- MODALES DE GESTIÓN ACADÉMICA (ESTÁNDAR INYMO)
+    //- =========================================================================
+
+    //- 1. MODAL ALTA DE CURSO
+    #modalNuevoCurso.modal.fade(tabindex="-1" aria-hidden="true")
+      .modal-dialog.modal-lg.modal-dialog-centered
+        .modal-content.modal-lux
+          form(action="/app/rrhh/division/06/curso/add" method="POST")
+            .modal-header-academy
+              .d-flex.justify-content-between.align-items-start.w-100
+                div
+                  h3.fw-bold.mb-1 Registro de Especialidad Académica
+                  p.mb-0.opacity-75 Alta de nuevos programas de formación técnica.
+                button.btn-close.btn-close-white(data-bs-dismiss="modal")
+            
+            .modal-body.p-5
+              .mb-4
+                label.lux-label Nombre del Curso o Certificación Ofical
+                input.form-control.lux-input(name="nombre" placeholder="Ej: Diseño de Conexiones en Estructuras de Acero" required)
+              
+              .row.g-4.mb-4
+                .col-md-6
+                  label.lux-label Proveedor de Capacitación
+                  input.form-control.lux-input(name="proveedor" placeholder="Ej: AISC / CMIC / Interno" required)
+                .col-md-6
+                  label.lux-label Duración Total (Horas Efectivas)
+                  .input-group
+                    input.form-control.lux-input(type="number" name="horas" placeholder="Ej: 40" required)
+                    span.input-group-text.bg-transparent.border-0.fw-bold Hrs
+              
+              .row.g-4.mb-5
+                .col-md-6
+                  label.lux-label Inversión Corporativa (MXN)
+                  .input-group
+                    span.input-group-text.bg-white.border-0.rounded-start-4: i.bx.bx-dollar.text-success
+                    input.form-control.lux-input.border-start-0(type="number" name="costo" step="0.01" placeholder="0.00" required)
+                .col-md-6
+                  label.lux-label Categoría de Conocimiento
+                  select.form-select.lux-input(name="tipo" required)
+                    option(value="Tecnico") Especialidad Técnica
+                    option(value="Normativo") Normatividad y Legal
+                    option(value="Soft Skill") Liderazgo y Soft Skills
+              
+              .p-4.rounded-4.bg-light.border.border-dashed.mt-4
+                .form-check.form-switch
+                  input.form-check-input(type="checkbox" name="es_cert" id="switchCert" style="width: 50px; height: 25px;")
+                  label.form-check-label.fw-bold.ms-3(for="switchCert") ¿Este curso otorga un certificado con validez oficial?
+
+            .modal-footer.p-5.bg-light.border-0
+              button.btn.btn-link.text-muted.text-decoration-none.fw-bold(data-bs-dismiss="modal") Cancelar
+              button.btn.btn-dark.px-5.py-3.rounded-pill.fw-bold.shadow-lg(type="submit")
+                i.bx.bx-cloud-upload.me-2
+                | Vincular al Catálogo INYMO
+
+    //- 2. MODAL ASIGNACIÓN DE PLAN DE CARRERA
+    #modalAsignar.modal.fade(tabindex="-1" aria-hidden="true")
+      .modal-dialog.modal-dialog-centered
+        .modal-content.modal-lux
+          form(action="/app/rrhh/division/06/capacitacion/asignar" method="POST")
+            .modal-header-academy(style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);")
+              .d-flex.justify-content-between.align-items-start.w-100
+                div
+                  h3.fw-bold.mb-1 Asignación de Plan de Carrera
+                  p.mb-0.opacity-75 Desarrollo individual de capital humano.
+                button.btn-close.btn-close-white(data-bs-dismiss="modal")
+            
+            .modal-body.p-5
+              .mb-4
+                label.lux-label Seleccionar Colaborador
+                select.form-select.lux-input(name="colaborador_id" required)
+                  option(value="") Seleccionar activo...
+                  if colaboradores
+                    each col in colaboradores
+                      option(value=col.id)= col.nombre_completo
+              
+              .mb-4
+                label.lux-label Programa Académico
+                select.form-select.lux-input(name="curso_id" required)
+                  option(value="") Seleccionar del catálogo...
+                  if cursos
+                    each cur in cursos
+                      option(value=cur.id)= cur.nombre
+              
+              .mb-0
+                label.lux-label Fecha Programada de Inicio
+                input.form-control.lux-input(type="date" name="fecha_inicio" required)
+
+            .modal-footer.p-5.bg-light.border-0
+              button.btn.btn-dark.w-100.py-4.rounded-pill.fw-bold.shadow-lg(type="submit")
+                i.bx.bx-user-check.me-2
+                | Iniciar Proceso de Capacitación
+
+  //- --- CAPA DE INTELIGENCIA Y ANIMACIÓN (SCRIPTS) ---
+  script.
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log("🚀 INYMO Academy Hub: Engine Deployed Successfully.");
+      
+      // Animación progresiva de carga para la Matrix de Habilidades
+      const progressBars = document.querySelectorAll('.progress-pill-fill');
+      setTimeout(() => {
+        progressBars.forEach(bar => {
+          const targetWidth = bar.style.width;
+          bar.style.width = '0';
+          setTimeout(() => { bar.style.width = targetWidth; }, 150);
+        });
+      }, 400);
+
+      // Efecto Parallax suave en tarjetas al mover el mouse
+      const cards = document.querySelectorAll('.academy-stat-card');
+      cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          card.style.setProperty('--x', `${x}px`);
+          card.style.setProperty('--y', `${y}px`);
+        });
+      });
+    });
+
+    // Lógica de Filtrado Dinámico de Cursos (Client Side Optimization)
+    const filters = document.querySelectorAll('.filter-chip');
+    filters.forEach(filter => {
+      filter.addEventListener('click', function() {
+        filters.forEach(f => f.classList.remove('active'));
+        this.classList.add('active');
+        
+        const category = this.innerText.toLowerCase();
+        const courseCards = document.querySelectorAll('.course-card');
+        
+        courseCards.forEach(card => {
+          const type = card.querySelector('.text-uppercase').innerText.toLowerCase();
+          const container = card.closest('.col-md-4');
+          
+          if(category === 'todos los perfiles' || type.includes(category) || category.includes(type)) {
+            container.style.display = 'block';
+            container.style.animation = 'fadeIn 0.5s ease-out forwards';
+          } else {
+            container.style.display = 'none';
+          }
+        });
+      });
+    });

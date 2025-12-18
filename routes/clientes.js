@@ -644,7 +644,7 @@ router.get('/accion-cotizacion/ver/:id_cotizacion', verificarSesion, async funct
                     <style>
                         body { background: #525659; padding: 2rem; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
                         .paper { background: white; max-width: 800px; margin: 0 auto; padding: 3rem; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.5); position: relative; }
-                        .watermark { position: absolute; top: 30%; left: 20%; font-size: 8rem; color: rgba(0,0,0,0.05); transform: rotate(-45deg); font-weight: bold; pointer-events: none; z-index: 0; }
+                        .watermark { position: absolute; top: 30%; left: 20%; font-size: 8rem; color: rgba(0,0,0,0.1); transform: rotate(-45deg); font-weight: bold; pointer-events: none; z-index: 0; }
                     </style>
                 </head>
                 <body>

@@ -1,0 +1,517 @@
+extends layout_app
+
+block content
+  //- =========================================================================
+  //- INYMO STRATEGY WAR ROOM - INTELIGENCIA DE NEGOCIOS (BI)
+  //- =========================================================================
+  //- Autor: Ángel Velasco (Socio Director)
+  //- Versión: 1.0.0 - "C-Level Decision Engine"
+  //- Propósito: Tablero de control financiero y estratégico de alto nivel.
+  //- Estándares: EBITDA Tracking, Cash Flow Projection, Revenue Per Head.
+  //- =========================================================================
+
+  //- Librería de Gráficos (Chart.js)
+  script(src="https://cdn.jsdelivr.net/npm/chart.js")
+
+  style.
+    /* --- ARQUITECTURA VISUAL ESTRATÉGICA (CSS INTERNO) --- */
+    :root {
+      --bi-dark: #0f172a;
+      --bi-card-bg: #ffffff;
+      --bi-accent: #3b82f6;
+      --bi-success: #10b981;
+      --bi-warning: #f59e0b;
+      --bi-danger: #ef4444;
+      --bi-text-main: #1e293b;
+      --bi-text-muted: #64748b;
+      --glass-panel: rgba(255, 255, 255, 0.95);
+      --shadow-exec: 0 20px 40px -5px rgba(15, 23, 42, 0.1);
+    }
+
+    .bi-wrapper {
+      background-color: #f1f5f9;
+      min-height: 100vh;
+      animation: fadeInWarRoom 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+      padding-bottom: 80px;
+    }
+
+    @keyframes fadeInWarRoom {
+      from { opacity: 0; transform: scale(0.98); filter: blur(4px); }
+      to { opacity: 1; transform: scale(1); filter: blur(0); }
+    }
+
+    /* Tarjetas de Métricas Financieras (KPIs Maestros) */
+    .kpi-master-card {
+      background: var(--bi-card-bg);
+      border-radius: 24px;
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.5);
+      box-shadow: var(--shadow-exec);
+      transition: all 0.3s ease;
+      height: 100%;
+    }
+
+    .kpi-master-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 30px 60px -10px rgba(15, 23, 42, 0.15);
+      border-color: var(--bi-accent);
+    }
+
+    .kpi-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--bi-text-muted);
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .kpi-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--bi-dark);
+      margin-bottom: 5px;
+      letter-spacing: -1px;
+    }
+
+    .kpi-trend {
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .trend-up { color: var(--bi-success); }
+    .trend-down { color: var(--bi-danger); }
+    .trend-neutral { color: var(--bi-warning); }
+
+    /* Gráficos y Visualización */
+    .chart-panel-container {
+      background: var(--bi-card-bg);
+      border-radius: 30px;
+      padding: 35px;
+      box-shadow: var(--shadow-exec);
+      border: 1px solid #e2e8f0;
+      height: 450px;
+      position: relative;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    /* Tabla de Riesgo de Clientes (Pareto) */
+    .pareto-table-wrapper {
+      background: var(--bi-card-bg);
+      border-radius: 30px;
+      padding: 0;
+      overflow: hidden;
+      box-shadow: var(--shadow-exec);
+    }
+
+    .pareto-header {
+      padding: 25px 30px;
+      background: var(--bi-dark);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .table-risk {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table-risk th {
+      background: #f8fafc;
+      color: var(--bi-text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      padding: 15px 30px;
+      text-align: left;
+    }
+
+    .table-risk td {
+      padding: 20px 30px;
+      border-bottom: 1px solid #f1f5f9;
+      color: var(--bi-text-main);
+      font-weight: 600;
+    }
+
+    .table-risk tr:last-child td { border-bottom: none; }
+
+    .risk-bar-bg {
+      width: 100px;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .risk-bar-fill {
+      height: 100%;
+      background: var(--bi-accent);
+      border-radius: 10px;
+    }
+
+    /* Botón de Acción Estratégica (Floating) */
+    .fab-strategy {
+      position: fixed;
+      bottom: 40px;
+      right: 40px;
+      background: var(--bi-dark);
+      color: white;
+      width: 65px;
+      height: 65px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.4);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 100;
+      border: none;
+      cursor: pointer;
+    }
+
+    .fab-strategy:hover {
+      transform: scale(1.1) rotate(90deg);
+      background: var(--bi-accent);
+    }
+
+    /* Alerta de Margen Crítico */
+    .margin-alert-banner {
+      background: linear-gradient(90deg, #ef4444 0%, #b91c1c 100%);
+      color: white;
+      padding: 15px 30px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+      animation: pulseAlert 2s infinite;
+    }
+
+    @keyframes pulseAlert {
+      0% { box-shadow: 0 0 0 0px rgba(239, 68, 68, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0px rgba(239, 68, 68, 0); }
+    }
+
+    /* Modal de Metas */
+    .modal-strategy {
+      border-radius: 30px;
+      border: none;
+      overflow: hidden;
+    }
+
+    .modal-header-strategy {
+      background: var(--bi-dark);
+      color: white;
+      padding: 30px;
+    }
+
+    .input-strategy {
+      border-radius: 12px;
+      padding: 15px;
+      border: 2px solid #e2e8f0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--bi-dark);
+    }
+
+    .input-strategy:focus {
+      border-color: var(--bi-accent);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+      outline: none;
+    }
+
+  .container-fluid.py-4.bi-wrapper
+    //- BOTÓN FLOTANTE PARA AJUSTAR METAS
+    button.fab-strategy(data-bs-toggle="modal" data-bs-target="#modalMetas" title="Ajustar Metas Anuales")
+      i.bx.bx-target-lock
+
+    //- --- NAVEGACIÓN ---
+    nav.mb-4(aria-label="breadcrumb")
+      ol.breadcrumb.bg-transparent.p-0.small
+        li.breadcrumb-item: a.text-muted.text-decoration-none(href="/app") 🏦 Workspace
+        li.breadcrumb-item.active.fw-bold.text-dark(aria-current="page") Strategy War Room
+
+    //- --- ENCABEZADO DIRECTIVO ---
+    .d-flex.justify-content-between.align-items-end.mb-5
+      div
+        .d-flex.align-items-center.mb-2
+          span.badge.bg-dark.text-white.rounded-pill.px-3.py-2.me-3.shadow-sm
+            i.bx.bx-crown.me-2.text-warning
+            | Acceso Exclusivo Socios
+          small.text-muted.fw-bold Actualizado: #{new Date().toLocaleTimeString()}
+        h1.fw-bold.text-dark.display-5 Inteligencia de Negocios
+        p.text-muted.fs-5 Panorama financiero y operativo de #{periodo}.
+      
+      div
+        button.btn.btn-white.border.shadow-sm.rounded-pill.px-4.fw-bold.me-3(onclick="window.print()")
+          i.bx.bx-printer.me-2
+          | Reporte PDF
+        button.btn.btn-primary.shadow-sm.rounded-pill.px-4.fw-bold(onclick="location.reload()")
+          i.bx.bx-refresh.me-2
+          | Live Data
+
+    //- --- ALERTA DE RENTABILIDAD (CONDICIONAL) ---
+    if alerta_margen
+      .margin-alert-banner
+        .d-flex.align-items-center
+          i.bx.bx-error-circle.fs-1.me-4
+          div
+            h5.fw-bold.mb-0 ¡Alerta de Rentabilidad!
+            p.mb-0.small El margen operativo actual está por debajo del umbral seguro del 20%. Se recomienda revisar costos fijos.
+        button.btn.btn-light.text-danger.fw-bold.rounded-pill.px-4 Auditar Costos
+
+    //- --- SECCIÓN 1: KPIs FINANCIEROS (EL PULSO DEL NEGOCIO) ---
+    .row.g-4.mb-5
+      .col-md-4.col-xl-3
+        .kpi-master-card
+          span.kpi-label Ingresos Brutos (YTD)
+          h2.kpi-value= kpis.ingresos_ytd
+          div.kpi-trend
+            i.bx.bx-trending-up.trend-up
+            span.trend-up +15%
+            span.text-muted.small vs Año Anterior
+          div.mt-3.progress(style="height: 4px;")
+            .progress-bar.bg-success(style="width: 75%")
+
+      .col-md-4.col-xl-3
+        .kpi-master-card
+          span.kpi-label Nómina Proyectada (Anual)
+          h2.kpi-value= kpis.costo_nomina_proyectado
+          div.kpi-trend
+            i.bx.bx-info-circle.text-primary
+            span.text-muted.small Carga FSR: 1.35x
+          div.mt-3.progress(style="height: 4px;")
+            .progress-bar.bg-primary(style="width: 100%")
+
+      .col-md-4.col-xl-3
+        .kpi-master-card
+          span.kpi-label Utilidad Operativa Est.
+          h2.kpi-value(class=parseFloat(kpis.utilidad_operativa.replace(/[^0-9.-]+/g,"")) < 0 ? "text-danger" : "text-dark")= kpis.utilidad_operativa
+          div.kpi-trend
+            i.bx.bx-wallet.text-warning
+            span.text-muted.small EBIT Estimado
+          div.mt-3.progress(style="height: 4px;")
+            .progress-bar.bg-warning(style="width: 40%")
+
+      .col-md-4.col-xl-3
+        .kpi-master-card
+          span.kpi-label Margen Operativo
+          h2.kpi-value #{kpis.margen_porcentaje}%
+          div.kpi-trend
+            if parseFloat(kpis.margen_porcentaje) > 20
+              i.bx.bx-check-circle.trend-up
+              span.trend-up Saludable
+            else
+              i.bx.bx-error.trend-down
+              span.trend-down Crítico
+          div.mt-3.progress(style="height: 4px;")
+            - var colorMargen = parseFloat(kpis.margen_porcentaje) > 20 ? 'bg-success' : 'bg-danger'
+            .progress-bar(class=colorMargen style=`width: ${kpis.margen_porcentaje}%`)
+
+    //- --- SECCIÓN 2: GRÁFICOS DE TENDENCIA Y EFICIENCIA ---
+    .row.g-4.mb-5
+      .col-xl-8
+        .chart-panel-container
+          .chart-header
+            div
+              h4.fw-bold.text-dark.mb-1 Tendencia Financiera
+              p.small.text-muted Comparativo Ingresos vs Costos Fijos Mensuales.
+            .btn-group
+              button.btn.btn-sm.btn-outline-secondary.active 12M
+              button.btn.btn-sm.btn-outline-secondary 6M
+              button.btn.btn-sm.btn-outline-secondary YTD
+          
+          //- CANVAS PARA CHART.JS
+          canvas#revenueChart
+
+      .col-xl-4
+        .chart-panel-container
+          .chart-header
+            div
+              h4.fw-bold.text-dark.mb-1 Eficiencia Operativa
+              p.small.text-muted Productividad por Recurso.
+          
+          .text-center.mt-4
+            .d-inline-flex.align-items-center.justify-content-center.bg-primary.bg-opacity-10.rounded-circle(style="width: 80px; height: 80px; margin-bottom: 20px;")
+              i.bx.bx-user-voice.text-primary.fs-1
+            
+            h3.fw-bold.text-dark.mb-1= kpis.revenue_per_head
+            p.text-muted.small.text-uppercase.fw-bold.letter-spacing-1 Revenue Per Head
+            
+            hr.my-4.opacity-10
+
+            .row.g-2
+              .col-6.border-end
+                small.d-block.text-muted Headcount
+                h4.fw-bold= kpis.headcount
+              .col-6
+                small.d-block.text-muted Meta 2025
+                h4.fw-bold $2.5M
+
+    //- --- SECCIÓN 3: MATRIZ DE RIESGO DE CLIENTES (PARETO) ---
+    .row
+      .col-12
+        .pareto-table-wrapper
+          .pareto-header
+            div
+              h4.fw-bold.mb-1 Concentración de Riesgo (Top Clientes)
+              p.small.opacity-75.mb-0 Principio de Pareto (80/20) - Diversificación de Ingresos.
+            button.btn.btn-outline-light.btn-sm.rounded-pill Ver Cartera Completa
+
+          table.table-risk
+            thead
+              tr
+                th Cliente Estratégico
+                th Volumen Facturado (YTD)
+                th Participación (Share)
+                th Nivel de Dependencia
+            tbody
+              if riesgo_clientes && riesgo_clientes.length > 0
+                each c, index in riesgo_clientes
+                  tr
+                    td
+                      .d-flex.align-items-center
+                        span.badge.bg-light.text-dark.me-3 ##{index + 1}
+                        span= c.razon_social
+                    td= formatMoney(c.volumen)
+                    td
+                      .d-flex.align-items-center
+                        span.me-3.fw-bold(style="width: 40px") #{c.share}%
+                        .risk-bar-bg
+                          .risk-bar-fill(style=`width: ${c.share}%`)
+                    td
+                      if c.share > 30
+                        span.badge.bg-danger.bg-opacity-10.text-danger Riesgo Alto
+                      else if c.share > 15
+                        span.badge.bg-warning.bg-opacity-10.text-warning Riesgo Medio
+                      else
+                        span.badge.bg-success.bg-opacity-10.text-success Diversificado
+              else
+                tr: td.text-center.py-5(colspan="4") Datos insuficientes para análisis de riesgo.
+
+    //- =========================================================================
+    //- MODAL: AJUSTE DE METAS ESTRATÉGICAS
+    //- =========================================================================
+    #modalMetas.modal.fade(tabindex="-1" aria-hidden="true")
+      .modal-dialog.modal-dialog-centered
+        .modal-content.modal-strategy
+          form(action="/app/bi/metas/set" method="POST")
+            .modal-header-strategy
+              div
+                h4.fw-bold.mb-1 Definición de Objetivos
+                p.small.mb-0.opacity-75 Parámetros para evaluación de desempeño corporativo.
+              button.btn-close.btn-close-white(data-bs-dismiss="modal")
+            
+            .modal-body.p-5
+              .mb-4
+                label.fw-bold.mb-2 Año Fiscal
+                input.form-control.input-strategy(type="number" name="anio" value="2025" readonly)
+              
+              .mb-4
+                label.fw-bold.mb-2 Meta de Ventas Anuales (MXN)
+                .input-group
+                  span.input-group-text.bg-white.border-end-0 $
+                  input.form-control.input-strategy.border-start-0(type="number" name="meta_ventas" placeholder="Ej: 5000000" required)
+              
+              .mb-4
+                label.fw-bold.mb-2 Margen Operativo Objetivo (%)
+                .input-group
+                  input.form-control.input-strategy.border-end-0(type="number" step="0.1" name="meta_margen" placeholder="Ej: 25.0" required)
+                  span.input-group-text.bg-white.border-start-0 %
+
+            .modal-footer.border-0.p-4
+              button.btn.btn-light.fw-bold.rounded-pill(data-bs-dismiss="modal") Cancelar
+              button.btn.btn-primary.fw-bold.rounded-pill.px-4(type="submit") Guardar Estrategia
+
+  //- --- INTELIGENCIA DE DATOS (CLIENT SIDE) ---
+  script.
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log("🚀 INYMO Strategy Engine Online.");
+
+      const ctxRevenue = document.getElementById('revenueChart');
+      if (ctxRevenue) {
+        try {
+          // Fetch real data from BI API
+          const response = await fetch('/app/bi/api/finanzas-anuales');
+          const data = await response.json();
+
+          // Configuración Gráfica Profesional
+          new Chart(ctxRevenue, {
+            type: 'bar',
+            data: {
+              labels: data.labels,
+              datasets: [
+                {
+                  label: 'Ingresos Facturados',
+                  data: data.datasets[0].data,
+                  type: 'line',
+                  borderColor: '#3b82f6',
+                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                  borderWidth: 3,
+                  tension: 0.4,
+                  fill: true,
+                  pointRadius: 4,
+                  pointHoverRadius: 6
+                },
+                {
+                  label: 'Costo Operativo (Nómina FSR)',
+                  data: data.datasets[1].data,
+                  backgroundColor: '#0f172a',
+                  borderRadius: 4,
+                  barPercentage: 0.4
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { position: 'top', align: 'end' },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false,
+                  backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                  titleFont: { size: 14 },
+                  bodyFont: { size: 13 },
+                  padding: 12,
+                  cornerRadius: 8
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  grid: { color: '#f1f5f9' },
+                  ticks: {
+                    callback: function(value) {
+                      return '$' + value / 1000 + 'k';
+                    }
+                  }
+                },
+                x: {
+                  grid: { display: false }
+                }
+              }
+            }
+          });
+        } catch (error) {
+          console.error("Error cargando gráficos BI:", error);
+        }
+      }
+    });

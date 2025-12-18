@@ -1,0 +1,404 @@
+extends layout_app
+
+block content
+  //- =========================================================================
+  //- INYMO ACTION HUB - DIVISIÓN 07: PLANES DE ACCIÓN Y MEJORA CONTINUA
+  //- =========================================================================
+  //- Estándares: ISO 9001:2015 (Acciones Correctivas) & Ciclo Deming (PHVA)
+  //- Autor: Ángel Velasco (Socio Director)
+  //- Versión: 3.2.0 - Gestión de Alta Fidelidad Operativa
+  
+  style.
+    /* --- ARQUITECTURA DE DISEÑO TÁCTICO (INTERNAL CSS) --- */
+    :root {
+      --inymo-navy: #0f172a;
+      --inymo-green: #8cc63f;
+      --status-pending: #94a3b8;
+      --status-process: #3b82f6;
+      --status-done: #10b981;
+      --status-cancel: #f43f5e;
+      --priority-low: #e2e8f0;
+      --priority-med: #fbbf24;
+      --priority-high: #f97316;
+      --priority-crit: #dc2626;
+      --glass-surface: rgba(255, 255, 255, 0.95);
+      --card-shadow-lux: 0 20px 25px -5px rgba(0, 0, 0, 0.04), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .action-master-container {
+      animation: fadeInAction 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes fadeInAction {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Tarjetas de Mando KPI */
+    .kpi-action-card {
+      border: none;
+      border-radius: 35px;
+      background: white;
+      box-shadow: var(--card-shadow-lux);
+      transition: all 0.4s ease;
+      border: 1px solid #f1f5f9;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-action-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.12);
+    }
+
+    .kpi-icon-wrapper {
+      width: 65px;
+      height: 65px;
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 25px;
+    }
+
+    /* Listado de Planes (Task Layout) */
+    .plan-card-item {
+      background: white;
+      border-radius: 28px;
+      padding: 30px;
+      border: 1px solid #f1f5f9;
+      margin-bottom: 20px;
+      transition: 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+      display: flex;
+      align-items: center;
+    }
+
+    .plan-card-item:hover {
+      border-color: var(--inymo-green);
+      box-shadow: 0 10px 30px rgba(140, 198, 63, 0.1);
+    }
+
+    .priority-indicator {
+      width: 6px;
+      height: 60px;
+      border-radius: 10px;
+      margin-right: 25px;
+    }
+
+    /* Estatus Dinámicos (Badges Lux) */
+    .badge-status {
+      padding: 8px 16px;
+      border-radius: 14px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .st-pendiente { background: rgba(148, 163, 184, 0.1); color: #64748b; }
+    .st-proceso { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+    .st-completado { background: rgba(16, 185, 129, 0.1); color: #059669; }
+
+    /* Modal Design (Corporate Standard) */
+    .modal-lux-action {
+      border-radius: 45px;
+      border: none;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.25);
+    }
+
+    .lux-label-action {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--inymo-navy);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .lux-input-action {
+      border-radius: 20px;
+      padding: 16px 22px;
+      background: #f8fafc;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .lux-input-action:focus {
+      background: white;
+      border-color: var(--inymo-green);
+      box-shadow: 0 0 0 6px rgba(140, 198, 63, 0.1);
+      outline: none;
+    }
+
+    /* Avatar System for Responsibles */
+    .responsible-avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 15px;
+      background: var(--inymo-navy);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    /* Empty State Illustrations */
+    .empty-action-box {
+      border: 2px dashed #e2e8f0;
+      border-radius: 40px;
+      padding: 100px 40px;
+      text-align: center;
+    }
+
+  .container-fluid.py-4.action-master-container
+    //- --- NAVEGACIÓN BREADCRUMB ---
+    nav.mb-4(aria-label="breadcrumb")
+      ol.breadcrumb.bg-transparent.p-0.small
+        li.breadcrumb-item: a.text-muted.text-decoration-none(href="/app/rrhh") 📂 Capital Humano
+        li.breadcrumb-item.active.fw-bold.text-dark(aria-current="page") 07. Planes de Acción Operativos
+
+    //- --- HEADER ESTRATÉGICO ---
+    .d-flex.justify-content-between.align-items-start.mb-5
+      div
+        .d-flex.align-items-center.mb-2
+          span.p-3.bg-dark.text-white.rounded-4.me-4.shadow-lg
+            i.bx.bx-task.fs-1
+          div
+            h1.fw-bold.text-dark.mb-1 Centro de Mejora Continua
+            p.text-muted.mb-0 
+              i.bx.bx-shield-quarter.text-success.me-1
+              | Seguimiento a hallazgos, correctivos y acciones preventivas bajo ISO 9001.
+      
+      div.d-flex.gap-3
+        button.btn.btn-outline-dark.shadow-sm.px-4.py-3.rounded-pill.fw-bold(onclick="window.print()")
+          i.bx.bx-printer.me-2
+          | Reporte de Hallazgos
+        button.btn.btn-dark.shadow-sm.px-4.py-3.rounded-pill.fw-bold(data-bs-toggle="modal" data-bs-target="#modalNuevoPlan")
+          i.bx.bx-plus-circle.me-2
+          | Documentar Plan
+
+    //- --- DASHBOARD DE KPI'S (ESTADO DE MEJORA) ---
+    .row.g-4.mb-5
+      .col-md-4.col-xl-4
+        .kpi-action-card.p-4
+          .kpi-icon-wrapper.bg-primary.bg-opacity-10.text-primary
+            i.bx.bx-list-check
+          small.text-uppercase.fw-bold.text-muted Planes Registrados
+          h2.fw-bold.mt-2.mb-0= (kpis && kpis.total) ? kpis.total : '0'
+          p.x-small.text-muted.mt-2.mb-0 Crecimiento acumulado mensual.
+
+      .col-md-4.col-xl-4
+        .kpi-action-card.p-4
+          .kpi-icon-wrapper.bg-warning.bg-opacity-10.text-warning
+            i.bx.bx-loader-circle
+          small.text-uppercase.fw-bold.text-muted Acciones Abiertas
+          h2.fw-bold.mt-2.mb-0.text-warning= (kpis && kpis.abiertos) ? kpis.abiertos : '0'
+          .progress.mt-3(style="height: 6px; border-radius: 10px;")
+            .progress-bar.bg-warning(style="width: 45%")
+
+      .col-md-4.col-xl-4
+        .kpi-action-card.p-4
+          .kpi-icon-wrapper.bg-success.bg-opacity-10.text-success
+            i.bx.bx-check-double
+          small.text-uppercase.fw-bold.text-muted Resolución de Hallazgos
+          h2.fw-bold.mt-2.mb-0.text-success= (kpis && kpis.completados) ? kpis.completados : '0'
+          .progress.mt-3(style="height: 6px; border-radius: 10px;")
+            .progress-bar.bg-success(style="width: 85%")
+
+    //- --- SECCIÓN DE FILTROS Y BÚSQUEDA ---
+    .row.mb-4
+      .col-12
+        .d-flex.justify-content-between.align-items-center.p-4.bg-white.rounded-5.border.border-light.shadow-sm
+          .d-flex.gap-4.align-items-center
+            h5.fw-bold.mb-0.text-dark Filtros Tácticos:
+            select.form-select.border-0.bg-light.rounded-pill.px-4(style="min-width: 180px;")
+              option Todas las Prioridades
+              option Crítica
+              option Alta
+              option Media
+            select.form-select.border-0.bg-light.rounded-pill.px-4(style="min-width: 180px;")
+              option Todos los Estatus
+              option Pendientes
+              option En Proceso
+              option Finalizados
+          
+          .input-group.w-25
+            span.input-group-text.bg-light.border-0.rounded-start-pill: i.bx.bx-search-alt.text-muted
+            input.form-control.bg-light.border-0.rounded-end-pill(placeholder="Buscar por hallazgo...")
+
+    //- --- LISTADO MAESTRO DE PLANES ---
+    .row
+      .col-12
+        if planes && planes.length > 0
+          each p in planes
+            .plan-card-item
+              // Indicador de Prioridad Dinámico
+              .priority-indicator(style=`background-color: var(--priority-${p.prioridad.toLowerCase().substring(0,4)})`)
+              
+              .flex-grow-1
+                .d-flex.justify-content-between.align-items-start.mb-2
+                  div
+                    h5.fw-bold.text-dark.mb-1= p.titulo
+                    p.small.text-muted.mb-0= p.descripcion
+                  .text-end
+                    span.badge-status(class=`st-${p.estatus.toLowerCase().replace(' ', '')}`)
+                      i.bx.bx-circle.me-1.small
+                      | #{p.estatus}
+                
+                .d-flex.justify-content-between.align-items-center.mt-4.pt-3.border-top
+                  .d-flex.align-items-center.gap-4
+                    .d-flex.align-items-center
+                      i.bx.bx-calendar-event.text-muted.me-2
+                      small.fw-bold Finaliza: 
+                      small.ms-1= formatDate(p.fecha_limite).split(' ')[0]
+                    
+                    .d-flex.align-items-center
+                      i.bx.bx-error-circle.text-muted.me-2
+                      small.fw-bold Prioridad: 
+                      small.ms-1= p.prioridad
+
+                  .d-flex.align-items-center
+                    small.text-muted.me-3 Responsable: 
+                    .responsible-avatar(title=p.responsable)
+                      - var ini = p.responsable.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase()
+                      | #{ini}
+                    
+                    .dropdown.ms-4
+                      button.btn.btn-light.btn-sm.rounded-circle(data-bs-toggle="dropdown")
+                        i.bx.bx-dots-vertical-rounded
+                      ul.dropdown-menu.dropdown-menu-end.border-0.shadow-lg.rounded-4
+                        li: a.dropdown-item.py-2.small(href="#" onclick=`abrirModalUpdate(${p.id})`) 
+                          i.bx.bx-edit-alt.me-2
+                          | Actualizar Estatus
+                        li: a.dropdown-item.py-2.small.text-danger(href="#") 
+                          i.bx.bx-trash.me-2
+                          | Archivar
+        else
+          .empty-action-box
+            img(src="https://cdn-icons-png.flaticon.com/512/7480/7480628.png" style="width: 150px; opacity: 0.15; filter: grayscale(1);")
+            h3.fw-bold.text-muted.mt-4 No se detectan planes de acción
+            p.text-muted.mb-4 La infraestructura operativa de INYMO está operando sin hallazgos pendientes.
+            button.btn.btn-dark.rounded-pill.px-5.py-3(data-bs-toggle="modal" data-bs-target="#modalNuevoPlan")
+              | Documentar Primera Mejora
+
+    //- =========================================================================
+    //- MODALES DE GESTIÓN OPERATIVA
+    //- =========================================================================
+
+    //- 1. MODAL: ALTA DE PLAN DE ACCIÓN (HALLAZGO)
+    #modalNuevoPlan.modal.fade(tabindex="-1" aria-hidden="true")
+      .modal-dialog.modal-lg.modal-dialog-centered
+        .modal-content.modal-lux-action
+          form(action="/app/rrhh/division/07/add" method="POST")
+            .modal-header.p-5.bg-dark.text-white.border-0
+              div
+                h3.fw-bold.mb-1 Registro de Hallazgo y Mejora
+                p.mb-0.opacity-50 Protocolo de Gestión de Calidad INYMO.
+              button.btn-close.btn-close-white(data-bs-dismiss="modal")
+            
+            .modal-body.p-5
+              .row.g-4
+                .col-12
+                  label.lux-label-action Título del Hallazgo / Acción
+                  input.form-control.lux-input-action(name="titulo" placeholder="Ej: Falla en registro de bitácora estructural sector B" required)
+                
+                .col-12
+                  label.lux-label-action Descripción Detallada (Causa Raíz)
+                  textarea.form-control.lux-input-action(name="descripcion" rows="3" placeholder="Describa el problema detectado y la solución propuesta...")
+
+                .col-md-6
+                  label.lux-label-action Prioridad de Resolución
+                  select.form-select.lux-input-action(name="prioridad" required)
+                    option(value="Baja") 🟢 Baja - Mejora Estética
+                    option(value="Media") 🟡 Media - Operativa
+                    option(value="Alta") 🟠 Alta - Riesgo de Retraso
+                    option(value="Critica") 🔴 Crítica - Seguridad / Legal
+                
+                .col-md-6
+                  label.lux-label-action Fecha Límite de Ejecución
+                  input.form-control.lux-input-action(type="date" name="fecha_limite" required)
+
+                .col-12
+                  label.lux-label-action Responsable de Seguimiento
+                  select.form-select.lux-input-action(name="responsable_id" required)
+                    option(value="") Seleccionar colaborador activo...
+                    if colaboradores
+                      each c in colaboradores
+                        option(value=c.id)= c.nombre_completo
+
+              .mt-5.p-4.rounded-4(style="background: rgba(140, 198, 63, 0.1); border: 1px dashed var(--inymo-green);")
+                .d-flex
+                  i.bx.bx-info-circle.text-success.fs-3.me-3
+                  p.small.mb-0 Al registrar este plan, se notificará automáticamente al responsable y quedará registrado para la próxima auditoría de gestión.
+
+            .modal-footer.p-5.bg-light.border-0
+              button.btn.btn-link.text-muted.text-decoration-none.fw-bold(data-bs-dismiss="modal") Cancelar
+              button.btn.btn-dark.px-5.py-3.rounded-pill.fw-bold.shadow-lg(type="submit")
+                i.bx.bx-save.me-2
+                | Vincular Plan al Sistema
+
+    //- 2. MODAL: ACTUALIZAR ESTATUS (QUICK UPDATE)
+    #modalUpdateStatus.modal.fade(tabindex="-1")
+      .modal-dialog.modal-sm.modal-dialog-centered
+        .modal-content.modal-lux-action
+          form(action="/app/rrhh/division/07/update-status" method="POST")
+            input(type="hidden" name="plan_id" id="input_plan_id")
+            .modal-header.p-4.border-0
+              h5.fw-bold.mb-0 Cambiar Estatus
+              button.btn-close(data-bs-dismiss="modal")
+            .modal-body.p-4
+              label.lux-label-action Seleccionar Estatus
+              select.form-select.lux-input-action(name="nuevo_estatus")
+                option(value="Pendiente") Pendiente
+                option(value="En Proceso") En Proceso
+                option(value="Completado") Completado
+                option(value="Cancelado") Cancelado
+            .modal-footer.border-0
+              button.btn.btn-dark.w-100.py-3.rounded-pill.fw-bold(type="submit") Actualizar
+
+  //- --- CAPA DE INTELIGENCIA FRONTEND (SCRIPTS) ---
+  script.
+    /**
+     * MÓDULO DE CONTROL DE PLANES
+     * Manejo de modales dinámicos y validaciones ISO.
+     */
+    function abrirModalUpdate(id) {
+      document.getElementById('input_plan_id').value = id;
+      const myModal = new bootstrap.Modal(document.getElementById('modalUpdateStatus'));
+      myModal.show();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log("🚀 INYMO Action Plan Hub Deployed.");
+      
+      // Validación de fechas para evitar deadlines vencidos en el registro
+      const inputDate = document.querySelector('input[name="fecha_limite"]');
+      if(inputDate) {
+        const today = new Date().toISOString().split('T')[0];
+        inputDate.setAttribute('min', today);
+      }
+    });
+
+    // Filtro visual rápido para mejorar UX
+    const searchInput = document.querySelector('input[placeholder="Buscar por hallazgo..."]');
+    if(searchInput) {
+      searchInput.addEventListener('input', function(e) {
+        const term = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.plan-card-item');
+        
+        cards.forEach(card => {
+          const text = card.innerText.toLowerCase();
+          if(text.includes(term)) {
+            card.style.display = 'flex';
+            card.style.animation = 'fadeIn 0.4s ease-out';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    }

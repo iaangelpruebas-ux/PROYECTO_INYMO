@@ -1,0 +1,435 @@
+extends layout_app
+
+block content
+  //- =========================================================================
+  //- INYMO - CONTROL TÁCTICO DE CAPITAL HUMANO Y DESEMPEÑO
+  //- =========================================================================
+  //- Autor: Ángel Velasco (Socio Director)
+  //- Estándares: ISO 30414, ISO 9001:2015, NOM-035
+  //- Versión: 9.8.0 - "High Contrast Executive Edition"
+  //- Propósito: Consolidar la visión 360° con máxima legibilidad.
+  //- =========================================================================
+
+  style.
+    /* --- NÚCLEO DE DISEÑO INYMO PRESTIGE (CSS INTERNO) --- */
+    :root {
+      --inymo-navy: #0f172a;
+      --inymo-green: #8cc63f;
+      --glass-bg: rgba(255, 255, 255, 0.9);
+      --card-radius: 24px;
+      --accent-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+
+    .dashboard-wrapper {
+      animation: fadeInPage 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: 'Inter', sans-serif;
+    }
+
+    @keyframes fadeInPage {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Tarjetas de Mando (KPIs) */
+    .metric-card-lux {
+      border: none;
+      border-radius: var(--card-radius);
+      background: white;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      transition: all 0.4s ease;
+      border: 1px solid #f1f5f9;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card-lux:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.1);
+      border-color: var(--inymo-green);
+    }
+
+    .trend-indicator {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 50px;
+      font-weight: 700;
+    }
+
+    .icon-stat-circle {
+      width: 55px;
+      height: 55px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    /* Gráficos y Visualización Lateral */
+    .analytics-panel {
+      background: white;
+      border-radius: 30px;
+      padding: 35px;
+      border: 1px solid #f1f5f9;
+      height: 100%;
+    }
+
+    .budget-bar-group {
+      margin-bottom: 25px;
+    }
+
+    .budget-bar-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+
+    .custom-progress {
+      height: 10px;
+      border-radius: 20px;
+      background: #f1f5f9;
+      overflow: hidden;
+    }
+
+    .progress-fill-inymo {
+      height: 100%;
+      background: var(--inymo-green);
+      transition: width 1.5s cubic-bezier(0.1, 0, 0, 1);
+    }
+
+    /* Divisiones Grid (App Style) */
+    .division-app-card {
+      background: white;
+      border-radius: 24px;
+      padding: 28px;
+      border: 1px solid #f1f5f9;
+      transition: 0.3s;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      height: 100%;
+      position: relative;
+    }
+
+    .division-app-card:hover {
+      background: var(--inymo-navy);
+      border-color: var(--inymo-navy);
+      transform: scale(1.05);
+    }
+
+    .division-app-card .icon-wrapper {
+      width: 70px;
+      height: 70px;
+      border-radius: 22px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      transition: 0.3s;
+    }
+
+    .division-app-card:hover .icon-wrapper {
+      background: rgba(255,255,255,0.1) !important;
+      color: white !important;
+      transform: rotate(10deg);
+    }
+
+    .division-app-card:hover h6 { color: white !important; }
+    .division-app-card:hover small { color: rgba(255,255,255,0.6) !important; }
+
+    .lock-overlay {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      padding: 5px 10px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+    }
+
+    /* --- BARRA DE AUDITORÍA CORREGIDA (HIGH CONTRAST) --- */
+    .audit-footer-lux {
+      background: #0f172a; /* Fondo Navy Sólido */
+      border-radius: 25px;
+      padding: 30px;
+      color: white !important;
+      box-shadow: 0 20px 50px -10px rgba(15, 23, 42, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .audit-footer-lux .audit-item {
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      padding-left: 20px;
+    }
+
+    .audit-footer-lux .audit-item:last-child {
+      border-right: none;
+    }
+
+    .audit-footer-lux i {
+      color: var(--inymo-green); /* Iconos Verde Neón */
+      font-size: 2.2rem;
+      filter: drop-shadow(0 0 5px rgba(140, 198, 63, 0.4));
+    }
+
+    .audit-footer-lux .label-text {
+      color: rgba(255, 255, 255, 0.6) !important; /* Gris claro para etiquetas */
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .audit-footer-lux .value-text {
+      color: #ffffff !important; /* Blanco puro para datos */
+      font-weight: 800;
+      font-size: 1.1rem;
+      margin-bottom: 0;
+    }
+
+    /* Header Audit Bar */
+    .audit-bar-top {
+      background: var(--accent-gradient);
+      border-radius: 20px;
+      padding: 15px 30px;
+      color: white;
+    }
+
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--inymo-green);
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 0 rgba(140, 198, 63, 0.4);
+      animation: pulseGreen 2s infinite;
+    }
+
+    @keyframes pulseGreen {
+      0% { box-shadow: 0 0 0 0px rgba(140, 198, 63, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(140, 198, 63, 0); }
+      100% { box-shadow: 0 0 0 0px rgba(140, 198, 63, 0); }
+    }
+
+  .container-fluid.py-4.dashboard-wrapper
+    //- 1. BARRA DE STATUS SISTEMA (SUPERIOR)
+    .audit-bar-top.mb-5.d-flex.justify-content-between.align-items-center.shadow-sm
+      .d-flex.align-items-center
+        .pulse-dot.me-3
+        div
+          h6.fw-bold.mb-0 Monitor de Gestión en Tiempo Real
+          small.opacity-75 Última sincronización: #{new Date().toLocaleTimeString()}
+      .d-flex.gap-4
+        .text-center
+          small.d-block.opacity-50 SQL Status
+          span.badge.bg-success.rounded-pill Online
+        .text-center
+          small.d-block.opacity-50 Auditor
+          span.fw-bold.text-white Ángel Velasco
+    
+    //- 2. ENCABEZADO Y ACCIONES RÁPIDAS
+    .row.mb-5.align-items-end
+      .col-md-7
+        span.text-primary.fw-bold.text-uppercase.letter-spacing-1 Performance Analytics
+        h1.fw-bold.text-dark.mt-2 Inteligencia de Capital Humano
+        p.text-muted Control centralizado de ingeniería de costos, talento y cumplimiento normativo.
+      .col-md-5.text-end
+        .d-flex.justify-content-end.gap-3
+          button.btn.btn-white.border.shadow-sm.px-4.py-2.rounded-pill.fw-bold
+            i.bx.bx-cloud-download.me-2
+            | Exportar Reporte
+          button.btn.btn-dark.shadow-sm.px-4.py-2.rounded-pill.fw-bold(onclick="location.reload()")
+            i.bx.bx-refresh.me-2
+            | Actualizar KPIs
+
+    //- 3. BLOQUE DE MÉTRICAS EJECUTIVAS (KPIs BLINDADOS)
+    //- Nota: Usamos lógica (kpis && kpis.x) ? kpis.x : '0' para evitar errores de undefined
+    .row.g-4.mb-5
+      .col-md-3
+        .metric-card-lux.p-4
+          .d-flex.justify-content-between.mb-3
+            .icon-stat-circle.bg-primary.bg-opacity-10.text-primary
+              i.bx.bx-group
+            span.trend-indicator.bg-success.text-success +2 este mes
+          small.text-muted.text-uppercase.fw-bold Plantilla Total
+          h2.fw-bold.mt-1.mb-0= (kpis && kpis.total_colaboradores) ? kpis.total_colaboradores : 0
+          p.x-small.text-muted.mt-2 Activos operativos registrados.
+
+      .col-md-3
+        .metric-card-lux.p-4
+          .d-flex.justify-content-between.mb-3
+            .icon-stat-circle.bg-success.bg-opacity-10.text-success
+              i.bx.bx-bolt-circle
+            span.trend-indicator.bg-success.text-success +5% vs Q3
+          small.text-muted.text-uppercase.fw-bold Desempeño Global
+          h2.fw-bold.mt-1.mb-0 #{ (kpis && kpis.desempeno_global) ? kpis.desempeno_global : 0 }%
+          .progress.mt-3(style="height: 6px;")
+            .progress-bar.bg-success(style=`width: ${(kpis && kpis.desempeno_global) ? kpis.desempeno_global : 0}%`)
+
+      .col-md-3
+        .metric-card-lux.p-4
+          .d-flex.justify-content-between.mb-3
+            .icon-stat-circle.bg-info.bg-opacity-10.text-info
+              i.bx.bx-heart
+            span.trend-indicator.bg-primary.text-primary Estable
+          small.text-muted.text-uppercase.fw-bold Índice de Retención
+          h2.fw-bold.mt-1.mb-0 #{ (kpis && kpis.indice_retencion) ? kpis.indice_retencion : 0 }%
+          p.x-small.text-muted.mt-2 Basado en rotación anual.
+
+      .col-md-3
+        .metric-card-lux.p-4
+          .d-flex.justify-content-between.mb-3
+            .icon-stat-circle.bg-dark.bg-opacity-10.text-dark
+              i.bx.bx-wallet
+            span.trend-indicator.bg-warning.text-warning MXN
+          small.text-muted.text-uppercase.fw-bold Inversión en Nómina
+          h2.fw-bold.mt-1.mb-0= (kpis && kpis.costo_nomina_mensual) ? kpis.costo_nomina_mensual.toLocaleString('es-MX', {style: 'currency', currency: 'MXN'}) : '$0.00'
+          p.x-small.text-muted.mt-2 Sueldos base + carga patronal.
+
+    //- 4. SECCIÓN ANALÍTICA: DESGLOSE Y HSE
+    .row.g-4.mb-5
+      .col-xl-8
+        .analytics-panel
+          .d-flex.justify-content-between.align-items-center.mb-5
+            div
+              h4.fw-bold Distribución Presupuestal por Área
+              p.small.text-muted Inversión mensual en talento por unidad de negocio.
+            button.btn.btn-light.btn-sm.rounded-pill Detalles FSR
+          
+          .budget-bar-group
+            .budget-bar-meta
+              span.fw-bold Ingeniería Estructural
+              span.text-muted $95,000.00 (57%)
+            .custom-progress
+              .progress-fill-inymo(style="width: 57%")
+          
+          .budget-bar-group
+            .budget-bar-meta
+              span.fw-bold Dirección y Ventas
+              span.text-muted $45,000.00 (27%)
+            .custom-progress
+              .progress-fill-inymo(style="width: 27%; background: #3b82f6")
+          
+          .budget-bar-group
+            .budget-bar-meta
+              span.fw-bold Administración y RRHH
+              span.text-muted $25,000.00 (16%)
+            .custom-progress
+              .progress-fill-inymo(style="width: 16%; background: #0f172a")
+
+      .col-xl-4
+        .analytics-panel.bg-dark.text-white
+          h4.fw-bold.mb-4 Compliance & HSE
+          .text-center.py-4
+            .gauge-placeholder.mb-3
+              i.bx.bx-shield-quarter.display-1.text-success
+            h2.fw-bold 100%
+            p.opacity-50 Cumplimiento de Seguridad Industrial
+          
+          hr.opacity-10.my-4
+          
+          .d-flex.justify-content-between.align-items-center.mb-3
+            small Riesgos Detectados
+            span.badge.bg-success 0 Activos
+          .d-flex.justify-content-between.align-items-center.mb-3
+            small Auditorías LFT
+            span.badge.bg-white.text-dark Enero 2026
+          .d-flex.justify-content-between.align-items-center
+            small Incidentes HSE
+            span.badge.bg-success Sin Reportes
+
+    //- 5. GRID DE DIVISIONES ESTRATÉGICAS (EL ECOSISTEMA)
+    .d-flex.justify-content-between.align-items-center.mb-4
+      h4.fw-bold.text-dark Divisiones del Ecosistema de Talento
+      p.small.text-muted Haga clic para acceder a los módulos de gobernanza.
+
+    .row.row-cols-1.row-cols-md-3.row-cols-xl-5.g-4.mb-5
+      if divisiones && divisiones.length > 0
+        each div in divisiones
+          .col
+            a.division-app-card.shadow-sm(href=`/app/rrhh/division/${div.id}`)
+              if div.id === '10'
+                .lock-overlay
+                  i.bx.bx-lock-alt.me-1
+                  | Private
+              
+              .icon-wrapper(style=`background: ${div.color}15; color: ${div.color}`)
+                i.bx(class=div.icon)
+              
+              h6.fw-bold.text-dark.mb-1= div.nombre
+              small.text-muted.x-small= div.desc || 'Gestión especializada'
+              
+              .mt-3.w-100
+                .d-flex.justify-content-between.x-small.mb-1
+                  span Status
+                  span.text-success Activo
+                .progress(style="height: 3px;")
+                  .progress-bar.bg-success(style="width: 100%")
+      else
+        .col-12.text-center.py-5
+          i.bx.bx-loader-circle.bx-spin.fs-1.text-muted
+          p.mt-3 Cargando ecosistema de divisiones...
+
+    //- 6. PANEL DE CONTROL DE AUDITORÍA (FOOTER DASHBOARD - CORREGIDO)
+    //- Aquí está la corrección: Fondo Navy Oscuro (#0f172a) con texto blanco puro.
+    .row.mb-4
+      .col-12
+        .audit-footer-lux
+          .row.align-items-center
+            .col-md-3.audit-item
+              .d-flex.align-items-center
+                i.bx.bx-history.me-3
+                div
+                  span.label-text Último Acceso
+                  p.value-text Hace 12 minutos
+            .col-md-3.audit-item
+              .d-flex.align-items-center
+                i.bx.bx-file-blank.me-3
+                div
+                  span.label-text Expedientes
+                  p.value-text 1,245 Generados
+            .col-md-3.audit-item
+              .d-flex.align-items-center
+                i.bx.bx-user-check.me-3
+                div
+                  span.label-text Contratos Vigentes
+                  p.value-text 100% de la Plantilla
+            .col-md-3.audit-item
+              .d-flex.align-items-center
+                i.bx.bx-support.me-3
+                div
+                  span.label-text Soporte Técnico
+                  p.value-text IA Orange Enabled
+
+    //- 7. SCRIPTS DE INTELIGENCIA DE INTERFAZ
+    script.
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log("🚀 Dashboard INYMO: Inteligencia de Negocios Desplegada.");
+        
+        // Animación progresiva de las barras al cargar
+        const fills = document.querySelectorAll('.progress-fill-inymo');
+        setTimeout(() => {
+          fills.forEach(fill => {
+            const width = fill.style.width;
+            fill.style.width = '0%';
+            setTimeout(() => {
+              fill.style.width = width;
+            }, 100);
+          });
+        }, 500);
+
+        // Notificación de seguridad para División 10
+        const vaultCard = document.querySelector('a[href*="10"]');
+        if(vaultCard) {
+          vaultCard.addEventListener('click', (e) => {
+            const conf = confirm("⚠️ ATENCIÓN: Está entrando a la Bóveda Confidencial. Su acceso será registrado en el Log de Auditoría. ¿Desea continuar?");
+            if(!conf) e.preventDefault();
+          });
+        }
+      });

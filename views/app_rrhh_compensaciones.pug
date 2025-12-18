@@ -1,0 +1,418 @@
+extends layout_app
+
+block content
+  //- =========================================================================
+  //- INYMO FINANCIAL ENGINE - DIVISIÓN 05: COMPENSACIONES Y BENEFICIOS
+  //- =========================================================================
+  //- Estándares: ISO 30414 (Human Capital Reporting) & LFT Compliance 2025
+  //- Propósito: Control de masa salarial, FSR y retención de talento.
+  
+  style.
+    /* --- NÚCLEO DE DISEÑO FINANCIERO (INTERNAL CSS) --- */
+    :root {
+      --inymo-navy: #0f172a;
+      --inymo-green: #8cc63f;
+      --finance-gold: #fbbf24;
+      --glass-surface: rgba(255, 255, 255, 0.9);
+      --card-radius: 28px;
+    }
+
+    .finance-master-container {
+      animation: fadeInFinance 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes fadeInFinance {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Tarjetas de Métricas Críticas */
+    .stat-finance-card {
+      border: none;
+      border-radius: var(--card-radius);
+      background: white;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      border: 1px solid #f1f5f9;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-finance-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.1);
+    }
+
+    .icon-shape {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    /* Tabla de Masa Salarial por Área */
+    .finance-table-wrapper {
+      background: white;
+      border-radius: 32px;
+      padding: 30px;
+      border: 1px solid #f1f5f9;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.01);
+    }
+
+    .payroll-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 10px;
+    }
+
+    .payroll-table th {
+      color: #64748b;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 1.2px;
+      padding: 15px 20px;
+      border-bottom: 2px solid #f8fafc;
+    }
+
+    .payroll-table td {
+      padding: 20px;
+      background: #f8fafc;
+      vertical-align: middle;
+      border: none;
+    }
+
+    .payroll-table td:first-child { border-radius: 18px 0 0 18px; }
+    .payroll-table td:last-child { border-radius: 0 18px 18px 0; }
+
+    .payroll-table tr:hover td {
+      background: #f1f5f9;
+    }
+
+    /* Beneficios Visual Cards */
+    .benefit-card {
+      border-radius: 24px;
+      padding: 25px;
+      background: white;
+      border: 1px solid #f1f5f9;
+      transition: 0.3s;
+      height: 100%;
+    }
+
+    .benefit-card:hover {
+      border-color: var(--inymo-green);
+      background: #fafdf6;
+    }
+
+    .benefit-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 8px;
+      background: var(--inymo-green);
+    }
+
+    /* Financial Alert Box */
+    .fsr-alert {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      border-radius: 24px;
+      padding: 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .fsr-alert::before {
+      content: '\eb9a'; /* Boxicons icon */
+      font-family: 'boxicons';
+      position: absolute;
+      right: 20px;
+      top: 10px;
+      font-size: 8rem;
+      opacity: 0.05;
+      z-index: -1;
+    }
+
+    /* Modal Styling */
+    .modal-lux {
+      border-radius: 35px;
+      border: none;
+    }
+
+    .lux-input {
+      border-radius: 15px;
+      padding: 12px 18px;
+      background: #f8fafc;
+      border: 2px solid transparent;
+      transition: 0.3s;
+    }
+
+    .lux-input:focus {
+      background: white;
+      border-color: var(--inymo-green);
+      box-shadow: 0 0 0 4px rgba(140, 198, 63, 0.1);
+      outline: none;
+    }
+
+    .salary-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--inymo-navy);
+    }
+
+  .container-fluid.py-4.finance-master-container
+    //- --- NAVEGACIÓN ---
+    nav.mb-4(aria-label="breadcrumb")
+      ol.breadcrumb.bg-transparent.p-0.small
+        li.breadcrumb-item: a.text-muted.text-decoration-none(href="/app/rrhh") 📂 Capital Humano
+        li.breadcrumb-item.active.fw-bold.text-dark(aria-current="page") 05. Compensaciones y Beneficios
+
+    //- --- CABECERA EJECUTIVA ---
+    .d-flex.justify-content-between.align-items-start.mb-5
+      div
+        .d-flex.align-items-center.mb-2
+          span.p-3.bg-success.bg-opacity-10.text-success.rounded-4.me-4
+            i.bx.bx-money-withdraw.fs-2
+          div
+            h1.fw-bold.text-dark.mb-1 Estructura de Compensación
+            p.text-muted.mb-0 
+              i.bx.bx-calendar-event.me-1
+              | Periodo Actual: #{periodo_actual} | Control de nómina y beneficios institucionales.
+      
+      div.d-flex.gap-3
+        button.btn.btn-outline-dark.shadow-sm.px-4.rounded-pill.fw-bold(onclick="window.print()")
+          i.bx.bx-printer.me-2
+          | Reporte Financiero
+        button.btn.btn-dark.shadow-sm.px-4.rounded-pill.fw-bold(data-bs-toggle="modal" data-bs-target="#modalAjuste")
+          i.bx.bx-trending-up.me-2
+          | Ajuste Salarial
+
+    //- --- FILA 1: KPIs FINANCIEROS DE NÓMINA ---
+    .row.g-4.mb-5
+      .col-md-3
+        .stat-finance-card.p-4
+          .icon-shape.bg-primary.bg-opacity-10.text-primary.mb-3
+            i.bx.bx-wallet
+          small.text-uppercase.fw-bold.text-muted Sueldo Base Mensual
+          h2.fw-bold.salary-badge.mt-2.mb-0= stats.sueldo_base
+          p.x-small.text-muted.mt-2 Masa salarial bruta sin cargas.
+
+      .col-md-3
+        .stat-finance-card.p-4
+          .icon-shape.bg-dark.bg-opacity-10.text-dark.mb-3
+            i.bx.bx-buildings
+          small.text-uppercase.fw-bold.text-muted Inversión Total (FSR)
+          h2.fw-bold.salary-badge.mt-2.mb-0= stats.costo_patronal
+          p.x-small.text-muted.mt-2 Costo real empresa (Factor 1.35).
+
+      .col-md-3
+        .stat-finance-card.p-4
+          .icon-shape.bg-warning.bg-opacity-10.text-warning.mb-3
+            i.bx.bx-line-chart-down
+          small.text-uppercase.fw-bold.text-muted Carga Social (Diferencia)
+          h2.fw-bold.salary-badge.text-warning.mt-2.mb-0= stats.diferencia_fsr
+          p.x-small.text-muted.mt-2 Impuestos, IMSS e INFONAVIT.
+
+      .col-md-3
+        .stat-finance-card.p-4
+          .icon-shape.bg-success.bg-opacity-10.text-success.mb-3
+            i.bx.bx-user-voice
+          small.text-uppercase.fw-bold.text-muted Colaboradores Pagados
+          h2.fw-bold.mt-2.mb-0 #{stats.integrantes}
+          p.x-small.text-muted.mt-2 Activos en el periodo de nómina.
+
+    .row.g-4.mb-5
+      //- --- COLUMNA IZQUIERDA: GASTO POR DEPARTAMENTO ---
+      .col-xl-7
+        .finance-table-wrapper
+          .d-flex.justify-content-between.align-items-center.mb-4
+            div
+              h4.fw-bold.mb-1 Inversión por Departamento
+              p.small.text-muted Distribución del presupuesto de capital humano.
+            span.badge.bg-light.text-dark.border.rounded-pill.px-3 Operaciones 2025
+
+          .table-responsive
+            table.payroll-table
+              thead
+                tr
+                  th Departamento
+                  th.text-center Plantilla
+                  th Inversión Mensual
+                  th % Gasto
+                  th.text-end Acción
+              tbody
+                if departamentos && departamentos.length > 0
+                  each d in departamentos
+                    tr
+                      td
+                        .fw-bold.text-dark= d.nombre
+                        small.text-muted Centro de Costo: #{d.id || 'CC-01'}
+                      td.text-center
+                        span.badge.bg-white.text-dark.border.px-3.py-1 12
+                      td
+                        span.fw-bold.text-primary= formatMXN(d.monto)
+                      td
+                        .d-flex.align-items-center
+                          span.me-2 45%
+                          .progress(style="width: 50px; height: 4px;")
+                            .progress-bar.bg-primary(style="width: 45%")
+                      td.text-end
+                        button.btn.btn-light.btn-sm.rounded-circle
+                          i.bx.bx-chevron-right
+                else
+                  tr: td.text-center.py-5(colspan="5") No hay datos financieros por área disponibles.
+
+      //- --- COLUMNA DERECHA: ALERTA DE INTELIGENCIA FSR ---
+      .col-xl-5
+        .fsr-alert.h-100
+          h4.fw-bold.mb-4 📊 Análisis de Rentabilidad FSR
+          p.mb-4.opacity-75 El **Factor de Salario Real (FSR)** de INYMO está configurado actualmente en **1.35**. Este factor garantiza el cumplimiento de la Ley Federal del Trabajo y las cuotas patronales.
+          
+          .mb-4
+            .d-flex.justify-content-between.mb-2
+              span.small.fw-bold Sueldos Netos
+              span.small.fw-bold 74%
+            .progress(style="height: 8px; background: rgba(255,255,255,0.1);")
+              .progress-bar.bg-success(style="width: 74%")
+          
+          .mb-5
+            .d-flex.justify-content-between.mb-2
+              span.small.fw-bold Cargas Sociales / Provisiones
+              span.small.fw-bold 26%
+            .progress(style="height: 8px; background: rgba(255,255,255,0.1);")
+              .progress-bar.bg-warning(style="width: 26%")
+
+          .bg-white.bg-opacity-10.p-4.rounded-4.border.border-white.border-opacity-10
+            .d-flex.align-items-center
+              i.bx.bx-info-circle.fs-3.me-3.text-success
+              p.small.mb-0 
+                strong Nota del Socio Director: 
+                | Mantener el FSR bajo control asegura la competitividad de nuestras cotizaciones ante clientes industriales.
+
+    //- --- SECCIÓN: CATÁLOGO DE BENEFICIOS ---
+    .section-title.mb-4
+      h4.fw-bold.text-dark 🎁 Beneficios e Incentivos Corporativos
+      p.text-muted Gestión de prestaciones superiores a la ley para retención de ingenieros especialistas.
+
+    .row.g-4
+      if beneficios && beneficios.length > 0
+        each b in beneficios
+          .col-md-4.col-xl-3
+            .benefit-card
+              .d-flex.justify-content-between.mb-3
+                .icon-shape.bg-light.text-dark
+                  i.bx(class=b.icono || 'bx-star')
+                span.badge.bg-success.bg-opacity-10.text-success Activo
+              h5.fw-bold.mb-1= b.nombre
+              p.small.text-muted.mb-3= b.descripcion
+              .border-top.pt-3
+                span.text-muted.x-small Cobertura: 
+                span.fw-bold.small 100% de la plantilla
+      else
+        //- Placeholder Beneficios
+        .col-md-4.col-xl-3
+          .benefit-card
+            .d-flex.justify-content-between.mb-3
+              .icon-shape.bg-light.text-dark
+                i.bx.bx-plus-medical
+              span.badge.bg-success.bg-opacity-10.text-success Activo
+            h5.fw-bold.mb-1 Seguro de G.M.M.
+            p.small.text-muted.mb-3 Cobertura nacional para personal de campo y oficina.
+            .border-top.pt-3
+              span.text-muted.x-small Costo: 
+              span.fw-bold.small Corporativo
+        
+        .col-md-4.col-xl-3
+          .benefit-card
+            .d-flex.justify-content-between.mb-3
+              .icon-shape.bg-light.text-dark
+                i.bx.bx-credit-card
+              span.badge.bg-success.bg-opacity-10.text-success Activo
+            h5.fw-bold.mb-1 Vales de Despensa
+            p.small.text-muted.mb-3 10% del sueldo base para apoyo familiar.
+            .border-top.pt-3
+              span.text-muted.x-small Estatus: 
+              span.fw-bold.small Mensual
+
+    //- =========================================================================
+    //- MODALES DE GESTIÓN FINANCIERA (CRUD)
+    //- =========================================================================
+
+    //- 1. MODAL AJUSTE SALARIAL (MERIT INCREASE)
+    #modalAjuste.modal.fade(tabindex="-1" aria-hidden="true")
+      .modal-dialog.modal-dialog-centered
+        .modal-content.modal-lux
+          form(action="/app/rrhh/division/05/ajuste/add" method="POST")
+            .modal-header.p-4.px-5.border-0.bg-dark.text-white
+              div
+                h4.fw-bold.mb-0 Ajuste de Compensación
+                p.small.mb-0 Registro de incrementos por desempeño o mérito.
+              button.btn-close.btn-close-white(data-bs-dismiss="modal")
+            
+            .modal-body.p-5
+              .mb-4
+                label.lux-label Colaborador
+                select.form-select.lux-input(name="colaborador_id" required)
+                  option(value="") Seleccionar activo...
+                  //- Lógica de carga de empleados desde rrhh.js
+              
+              .row.g-4
+                .col-md-6
+                  label.lux-label Nuevo Sueldo Base (Mensual)
+                  .input-group
+                    span.input-group-text.bg-transparent.border-0: i.bx.bx-dollar.text-success
+                    input.form-control.lux-input(type="number" name="nuevo_sueldo" step="0.01" required)
+                
+                .col-md-6
+                  label.lux-label Motivo del Ajuste
+                  select.form-select.lux-input(name="motivo" required)
+                    option(value="Desempeño") Desempeño
+                    option(value="Promoción") Promoción
+                    option(value="Inflación") Ajuste Anual
+                    option(value="Competitividad") Competitividad Mercado
+
+              .mt-4
+                label.lux-label Justificación Técnica
+                textarea.form-control.lux-input(name="comentarios" rows="3" placeholder="Detalles sobre el incremento...")
+
+            .modal-footer.p-4.px-5.border-0.bg-light
+              button.btn.btn-link.text-muted.text-decoration-none.fw-bold(data-bs-dismiss="modal") Cancelar
+              button.btn.btn-dark.px-5.py-2.rounded-pill.fw-bold(type="submit") Aplicar Incremento
+
+  //- --- INTELIGENCIA DE INTERACCIÓN (SCRIPTS) ---
+  script.
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log("🚀 INYMO Financial Compensation Engine loaded.");
+      
+      // Animación de los KPIs monetarios
+      const animateNumbers = () => {
+        const salaryBadges = document.querySelectorAll('.salary-badge');
+        salaryBadges.forEach(badge => {
+          badge.style.transition = 'color 0.5s';
+          badge.addEventListener('mouseenter', () => badge.style.color = '#8cc63f');
+          badge.addEventListener('mouseleave', () => badge.style.color = '#0f172a');
+        });
+      };
+      
+      animateNumbers();
+    });
+
+    // Validación de Ajuste Salarial en Frontend
+    const ajusteForm = document.querySelector('form[action$="/ajuste/add"]');
+    if(ajusteForm) {
+      ajusteForm.addEventListener('submit', function(e) {
+        const monto = this.querySelector('input[name="nuevo_sueldo"]').value;
+        if(parseFloat(monto) <= 0) {
+          e.preventDefault();
+          alert("⚠️ ERROR: El nuevo sueldo debe ser mayor a cero.");
+        }
+        
+        const btn = this.querySelector('button[type="submit"]');
+        btn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-2"></i> Procesando...';
+        btn.classList.add('disabled');
+      });
+    }

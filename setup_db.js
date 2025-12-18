@@ -51,6 +51,23 @@ async function instalarBaseDeDatos() {
     `);
     console.log("🌱 Datos de Proyectos insertados.");
 
+
+
+    // Añadir dentro de instalarBaseDeDatos()
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS rrhh_colaboradores (
+        id SERIAL PRIMARY KEY,
+        nombre VARCHAR(150) NOT NULL,
+        puesto VARCHAR(100),
+        departamento VARCHAR(100),
+        sueldo_mensual DECIMAL(15,2) DEFAULT 0.00,
+        costo_hora DECIMAL(15,2) DEFAULT 0.00,
+        fecha_ingreso DATE DEFAULT CURRENT_DATE,
+        estatus VARCHAR(20) DEFAULT 'Activo'
+      );
+    `);
+
+
     // --- 4. INSERTAR DATOS DE PRUEBA EN BITACORA ---
     await client.query(`
       INSERT INTO bitacora (proyecto_id, titulo, descripcion, tipo_registro, autor)
