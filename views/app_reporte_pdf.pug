@@ -1,241 +1,223 @@
 doctype html
 html
   head
-    title Reporte de Proyecto | #{p.nombre}
+    title Reporte Ejecutivo | #{p.nombre}
+    meta(charset="utf-8")
     style.
-      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
       
       body {
-        padding: 30px 40px;
-        background: white !important;
         font-family: 'Poppins', sans-serif;
-        font-size: 9pt;
-        color: #334155;
-        -webkit-print-color-adjust: exact;
+        color: #1e293b;
+        font-size: 10pt;
+        padding: 40px;
+        background: #fff;
+        -webkit-print-color-adjust: exact; 
       }
 
-      /* HEADER MEJORADO */
-      .header-container {
+      /* --- HEADER --- */
+      .header {
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
         border-bottom: 2px solid #0f172a;
-        padding-bottom: 15px;
-        margin-bottom: 25px;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
       }
-      .logo-img { height: 45px; object-fit: contain; }
-      .header-title h1 { margin: 0; font-size: 18px; color: #0f172a; text-transform: uppercase; }
-      .header-meta { font-size: 0.85em; color: #64748b; margin-top: 4px; }
+      .brand h1 { margin: 0; font-size: 24px; color: #0f172a; text-transform: uppercase; letter-spacing: 1px; }
+      .brand p { margin: 2px 0 0; font-size: 9px; color: #64748b; text-transform: uppercase; }
       
-      /* NUEVO: Stats en el Header */
-      .main-stats {
-        display: inline-block;
-        margin-top: 8px;
-        font-size: 0.9em;
-        font-weight: 600;
-        background: #f1f5f9;
-        padding: 6px 12px;
-        border-radius: 4px;
-      }
+      .meta-box { text-align: right; font-size: 9px; color: #475569; }
+      .meta-box strong { color: #0f172a; }
 
-      /* CARDS */
-      .section-card {
-        margin-bottom: 20px;
-        border: 1px solid #e2e8f0;
-        border-radius: 6px;
-        padding: 15px;
-        page-break-inside: avoid;
+      /* --- PROYECTO HERO --- */
+      .project-title { font-size: 20px; font-weight: 700; margin-bottom: 5px; color: #0f172a; }
+      .project-status { 
+        display: inline-block; padding: 4px 10px; border-radius: 4px; 
+        font-size: 9px; font-weight: 700; text-transform: uppercase; margin-bottom: 20px;
       }
+      .status-green { background: #dcfce7; color: #166534; }
+      .status-red { background: #fee2e2; color: #991b1b; }
+
+      /* --- SECCIONES --- */
+      .section { margin-bottom: 25px; page-break-inside: avoid; }
       .section-title {
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: #475569;
-        border-bottom: 1px solid #f1f5f9;
-        padding-bottom: 8px;
-        margin-bottom: 10px;
-        margin-top: 0;
+        font-size: 10px; font-weight: 700; text-transform: uppercase; 
+        color: #64748b; border-bottom: 1px solid #e2e8f0; 
+        padding-bottom: 5px; margin-bottom: 12px;
       }
 
-      /* TABLAS */
-      table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
-      th { text-align: left; background: #f8fafc; padding: 6px 8px; color: #475569; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
+      /* --- TABLAS --- */
+      table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+      th { text-align: left; background: #f8fafc; color: #475569; padding: 8px; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
       td { padding: 8px; border-bottom: 1px solid #f1f5f9; color: #334155; }
       tr:last-child td { border-bottom: none; }
 
-      /* KPIs */
-      .kpi-row { display: flex; gap: 15px; margin-bottom: 10px; }
-      .kpi-box { 
-        flex: 1; 
-        background: #f8fafc; 
-        padding: 10px; 
-        border-radius: 6px; 
-        text-align: center; 
-        border: 1px solid #e2e8f0;
+      /* --- KPI CARDS (FINANZAS) --- */
+      .kpi-grid { display: flex; gap: 15px; margin-bottom: 15px; }
+      .kpi-card { 
+        flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; 
+        border-radius: 6px; padding: 12px; text-align: center; 
       }
-      .kpi-label { display: block; font-size: 0.75em; color: #64748b; margin-bottom: 4px; }
-      .kpi-value { display: block; font-size: 1.1em; font-weight: bold; color: #0f172a; }
+      .kpi-label { font-size: 8px; font-weight: 600; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 4px; }
+      .kpi-value { font-size: 12px; font-weight: 700; color: #0f172a; font-family: monospace; }
       
-      .text-red { color: #dc2626 !important; }
-      .text-green { color: #16a34a !important; }
+      .text-success { color: #16a34a !important; }
+      .text-danger { color: #dc2626 !important; }
 
-      /* BADGES */
-      .badge { padding: 2px 6px; border-radius: 4px; font-size: 0.7em; font-weight: 600; text-transform: uppercase; }
-      .bg-green { background: #dcfce7; color: #166534; }
-      .bg-red { background: #fee2e2; color: #991b1b; }
-      .bg-blue { background: #e0f2fe; color: #075985; }
+      /* --- BADGES --- */
+      .badge { padding: 2px 6px; border-radius: 3px; font-size: 8px; font-weight: 600; text-transform: uppercase; }
       .bg-gray { background: #f1f5f9; color: #475569; }
+      .bg-red { background: #fef2f2; color: #b91c1c; }
+      .bg-green { background: #f0fdf4; color: #15803d; }
+      .bg-blue { background: #eff6ff; color: #1e40af; }
 
-      /* LOGS LIST */
-      .log-item { display: flex; padding: 6px 0; border-bottom: 1px dashed #e2e8f0; font-size: 0.85em; }
-      .log-date { width: 80px; color: #64748b; font-size: 0.8em; }
-      .log-content { flex: 1; }
-      .log-type { font-weight: 600; margin-right: 5px; font-size: 0.8em; }
+      /* --- LISTAS --- */
+      .list-item { padding: 6px 0; border-bottom: 1px dashed #e2e8f0; display: flex; align-items: baseline; }
+      .list-bullet { margin-right: 8px; font-size: 10px; }
 
   body
-    // --- ENCABEZADO ---
-    div.header-container
-      div.header-title
+    //- 1. HEADER
+    .header
+      .brand
         if logo
-          img.logo-img(src=logo)
+           img(src=logo style="height:40px; margin-bottom:5px;")
         else
-          h2 INYMO
-      div(style="text-align: right;")
-        h1= p.nombre
-        div.header-meta
-          span COD: #{p.codigo} | 
-          span Lider: #{p.lider} | 
-          span #{new Date().toLocaleDateString('es-MX')}
-        
-        // --- NUEVO: DATOS CLAVE (AVANCE Y FECHA) ---
-        div.main-stats
-          span(style="color: #0f172a; margin-right: 15px;") Avance: #{p.progreso}%
-          span(style="color: #2563eb;") Cierre Est: #{p.fecha_fin_ajustada_f || 'Pendiente'}
-
-    // --- NUEVO: PRIORIDADES ESTRATÉGICAS ---
-    div.section-card(style="background: #f0f9ff; border-color: #bae6fd;")
-      h3.section-title(style="color: #0369a1; border-color: #bae6fd;") Prioridad Estratégica (Próximos Pasos)
-      p(style="font-size: 0.9em; line-height: 1.4; margin: 0; color: #0c4a6e; font-weight: 500;")= p.metas_proximos_pasos || 'No se han definido metas estratégicas para este periodo.'
-
-    // --- RESUMEN EJECUTIVO ---
-    div.section-card
-      h3.section-title Resumen Ejecutivo
-      p(style="font-size: 0.9em; line-height: 1.4; margin: 0;")= p.narrativa || 'Sin información ejecutiva disponible.'
-
-    // --- ESTADO FINANCIERO (KPIs) ---
-    div.section-card
-      h3.section-title Estado Financiero del Proyecto (EVM)
-      div.kpi-row
-        div.kpi-box
-          span.kpi-label Presupuesto Total (BAC)
-          span.kpi-value= p.bac_f
-        div.kpi-box
-          span.kpi-label Valor Ganado (EV)
-          span.kpi-value= p.ev_f
-        div.kpi-box
-          span.kpi-label Costo Real (AC)
-          span.kpi-value= p.ac_f
+           h1 INYMO
+        p Enterprise Project Management
       
-      div.kpi-row
-        div.kpi-box
-          span.kpi-label CPI (Costo)
-          span.kpi-value(class=parseFloat(p.cpi_v) < 1 ? 'text-red' : 'text-green')= p.cpi_v
-        div.kpi-box
-          span.kpi-label SPI (Tiempo)
-          span.kpi-value(class=parseFloat(p.spi_v) < 1 ? 'text-red' : 'text-green')= p.spi_v
-        div.kpi-box
-          span.kpi-label Estimado al Cierre (EAC)
-          span.kpi-value= p.eac_f
+      .meta-box
+        div REPORTE GENERADO: <strong>#{new Date().toLocaleDateString('es-MX', {weekday:'long', year:'numeric', month:'long', day:'numeric'})}</strong>
+        div PROYECTO ID: <strong>#{p.codigo}</strong>
+        div DIRECTOR (PM): <strong>#{p.lider}</strong>
 
-    // --- MATRIZ DE ALCANCE (ENTREGABLES) ---
-    div.section-card
-      h3.section-title Matriz de Alcance (Entregables)
+    //- 2. RESUMEN DE PROYECTO
+    .section
+      div(style="display:flex; justify-content:space-between; align-items:flex-end;")
+        div
+          .project-title= p.nombre
+          span.project-status(class=p.salud === 'En Tiempo' ? 'status-green' : 'status-red') ESTATUS: #{p.salud}
+        
+        div(style="text-align:right;")
+          div(style="font-size:9px; color:#64748b; font-weight:600;") AVANCE FÍSICO REAL
+          div(style="font-size:24px; font-weight:700; color:#0f172a;") #{p.progreso}%
+
+      //- Prioridad Estratégica
+      div(style="background:#f0f9ff; border:1px solid #bae6fd; padding:12px; border-radius:6px; margin-top:10px;")
+        strong(style="color:#0369a1; font-size:9px; text-transform:uppercase; display:block; margin-bottom:4px;") Objetivo Estratégico (Siguiente Hito):
+        div(style="color:#0c4a6e; font-size:10pt;")= p.metas_proximos_pasos || 'Definir objetivos inmediatos en plataforma.'
+
+    //- 3. ANÁLISIS FINANCIERO (EVM)
+    .section
+      h3.section-title Desempeño Financiero (Earned Value)
+      
+      //- Fila 1: Valores Monetarios
+      .kpi-grid
+        .kpi-card
+          span.kpi-label Presupuesto (BAC)
+          span.kpi-value= p.kpi.bac_f
+        .kpi-card
+          span.kpi-label Valor Planeado (PV)
+          span.kpi-value= p.kpi.pv_f
+        .kpi-card(style="border-bottom: 2px solid #16a34a;")
+          span.kpi-label Valor Ganado (EV)
+          span.kpi-value.text-success= p.kpi.ev_f
+        .kpi-card(style="border-bottom: 2px solid #dc2626;")
+          span.kpi-label Costo Real (AC)
+          span.kpi-value.text-danger= p.kpi.ac_f
+
+      //- Fila 2: Índices de Eficiencia
+      .kpi-grid
+        .kpi-card
+          span.kpi-label CPI (Costo)
+          span.kpi-value(class=parseFloat(p.kpi.cpi_v) < 1 ? 'text-danger' : 'text-success')= p.kpi.cpi_v
+        .kpi-card
+          span.kpi-label SPI (Cronograma)
+          span.kpi-value(class=parseFloat(p.kpi.spi_v) < 1 ? 'text-danger' : 'text-success')= p.kpi.spi_v
+        .kpi-card
+          span.kpi-label Variación Costo (CV)
+          span.kpi-value(class=p.kpi.cv_f.includes('-') ? 'text-danger' : 'text-success')= p.kpi.cv_f
+        .kpi-card
+          span.kpi-label Estimado Cierre (EAC)
+          span.kpi-value= p.kpi.eac_f
+
+    //- 4. MATRIZ DE ALCANCE
+    .section
+      h3.section-title Entregables Clave (WBS)
       if p.entregables && p.entregables.length > 0
         table
           thead
             tr
-              th Entregable
-              th Responsable
-              th Progreso
-              th Estado
+              th(width="40%") Entregable
+              th(width="25%") Responsable
+              th(width="15%") Entrega
+              th(width="10%") %
+              th(width="10%") Estado
           tbody
             each e in p.entregables
               tr
-                td= e.nombre
+                td(style="font-weight:600;")= e.nombre
                 td= e.responsable
+                td= new Date(e.fecha_entrega).toLocaleDateString('es-MX')
                 td 
-                  div(style="width: 100%; background: #e2e8f0; height: 6px; border-radius: 3px; display: inline-block; width: 60px; margin-right: 5px;")
-                    div(style=`width: ${e.progreso}%; background: #0f172a; height: 100%; border-radius: 3px;`)
-                  span(style="font-size: 0.8em;") #{e.progreso}%
+                  div(style="background:#e2e8f0; height:4px; width:100%; border-radius:2px; margin-bottom:2px;")
+                    div(style=`background:#0f172a; height:100%; width:${e.progreso}%; border-radius:2px;`)
+                  span(style="font-size:8px;") #{e.progreso}%
                 td
                   span.badge.bg-gray= e.estado
       else
-        p(style="font-size: 0.85em; color: #94a3b8;") No hay entregables registrados.
+        div(style="color:#94a3b8; font-style:italic; padding:10px;") No hay entregables registrados.
 
-    // --- DOS COLUMNAS: LECCIONES Y CAMBIOS (NUEVO DISEÑO) ---
-    div(style="display: flex; gap: 20px;")
+    //- 5. DOBLE COLUMNA: CAMBIOS Y RIESGOS
+    div(style="display:flex; gap:25px;")
       
-      // NUEVO: LECCIONES APRENDIDAS
-      div(style="flex: 1;")
-        div.section-card
-          h3.section-title Lecciones Aprendidas
-          if p.leccionesAprendidas && p.leccionesAprendidas.length > 0
-            ul(style="padding:0; margin:0; list-style:none;")
-              each l in p.leccionesAprendidas
-                li(style="margin-bottom: 8px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px;")
-                  strong(style="display: block; font-size: 0.85em; color: #334155;")= l.titulo
-                  span(style="font-size: 0.8em; color: #64748b;")= l.descripcion
-          else
-             p(style="font-size: 0.85em; color: #94a3b8;") No hay lecciones registradas.
-
-      // CONTROL DE CAMBIOS
-      div(style="flex: 1;")
-        div.section-card
-          h3.section-title Control de Cambios
+      //- Columna Izquierda: Control de Cambios
+      div(style="flex:1;")
+        .section
+          h3.section-title Gestión de Cambios
           if p.controlCambios && p.controlCambios.length > 0
-            table
-              tbody
-                each c in p.controlCambios
-                  tr
-                    td
-                      div(style="display:flex; justify-content: space-between;")
-                        strong= c.titulo
-                        span.badge(class=(c.estatus === 'Aprobado' ? 'bg-green' : (c.estatus === 'Rechazado' ? 'bg-red' : 'bg-gray')))= c.estatus
-                      div(style="font-size: 0.8em; margin-top: 4px;")
-                        if c.impacto_costo != 0
-                          span(class=c.impacto_costo > 0 ? 'text-red' : 'text-green') #{c.impacto_costo > 0 ? '+' : ''}$#{c.impacto_costo} 
-                        if c.impacto_tiempo != 0
-                          span(class=c.impacto_tiempo > 0 ? 'text-red' : 'text-green' style="margin-left: 8px;") #{c.impacto_tiempo > 0 ? '+' : ''}#{c.impacto_tiempo}d
+            each c in p.controlCambios
+              .list-item
+                div(style="flex:1;")
+                  strong(style="display:block; font-size:9pt;")= c.titulo
+                  span(style="font-size:8pt; color:#64748b;")= c.descripcion
+                div(style="text-align:right; margin-left:10px;")
+                  span.badge(class=c.estatus === 'Aprobado' ? 'bg-green' : (c.estatus === 'Rechazado' ? 'bg-red' : 'bg-gray'))= c.estatus
+                  if c.impacto_costo != 0
+                    div(style=`font-size:8px; font-weight:700; margin-top:2px; color:${c.impacto_costo > 0 ? '#dc2626' : '#16a34a'}`) #{c.impacto_costo > 0 ? '+' : ''}$#{c.impacto_costo}
           else
-            p(style="font-size: 0.85em; color: #94a3b8;") Sin cambios registrados.
+            div(style="color:#94a3b8; font-size:9pt;") Sin cambios solicitados.
 
-    // --- RIESGOS ---
-    div.section-card
-      h3.section-title Matriz de Riesgos
-      if p.riesgos && p.riesgos.length > 0
+      //- Columna Derecha: Riesgos
+      div(style="flex:1;")
+        .section
+          h3.section-title Matriz de Riesgos
+          if p.riesgos && p.riesgos.length > 0
+            each r in p.riesgos
+              .list-item
+                div(style="flex:1;")= r.descripcion
+                span.badge(class=r.impacto === 'Alto' ? 'bg-red' : (r.impacto === 'Medio' ? 'bg-blue' : 'bg-gray') style="margin-left:10px;")= r.impacto
+          else
+            div(style="color:#94a3b8; font-size:9pt;") Sin riesgos activos.
+
+    //- 6. BITÁCORA RECIENTE
+    .section(style="margin-top:20px;")
+      h3.section-title Bitácora de Obra (Últimos Eventos)
+      if p.bitacora && p.bitacora.length > 0
         table
           tbody
-            each r in p.riesgos
-              tr
-                td 
-                  strong(style="display: block; font-size: 0.9em;")= r.descripcion
-                  span.badge(class=(r.impacto === 'Alto' ? 'bg-red' : (r.impacto === 'Medio' ? 'bg-blue' : 'bg-green'))) Impacto: #{r.impacto}
+            each b, index in p.bitacora
+              if index < 5
+                tr
+                  td(width="15%" style="font-weight:600; color:#64748b;")= new Date(b.fecha_registro).toLocaleDateString('es-MX')
+                  td
+                    span.badge(class=b.tipo_registro === 'Incidente' ? 'bg-red' : (b.tipo_registro === 'Avance' ? 'bg-green' : 'bg-blue') style="margin-right:8px;")= b.tipo_registro
+                    span= b.titulo
+                  td(width="40%" style="color:#64748b; font-size:8pt;")= b.descripcion
       else
-        p(style="font-size: 0.85em; color: #94a3b8;") Sin riesgos activos.
+        div(style="color:#94a3b8; font-size:9pt;") Sin registros recientes.
 
-    // --- HISTORIAL DE BITÁCORA ---
-    div.section-card
-      h3.section-title Bitácora de Actividades Recientes
-      if p.bitacora && p.bitacora.length > 0
-        each b in p.bitacora
-          div.log-item
-            div.log-date= new Date(b.fecha_registro).toLocaleDateString('es-MX', {day: '2-digit', month: 'short'})
-            div.log-content
-              span.log-type(class=(b.tipo_registro === 'Incidente' ? 'text-red' : (b.tipo_registro === 'Avance' ? 'text-green' : 'text-blue')))= b.tipo_registro
-              span= b.titulo
-      else
-        p(style="font-size: 0.85em; color: #94a3b8;") No hay actividad reciente registrada.
-
-    // --- PIE DE PÁGINA ---
-    div(style="text-align: center; border-top: 1px solid #e2e8f0; padding-top: 10px; font-size: 0.7em; color: #94a3b8;")
-      p Reporte generado automáticamente por la plataforma INYMO. Información confidencial.
+    //- FOOTER
+    div(style="position:fixed; bottom:20px; left:40px; right:40px; border-top:1px solid #e2e8f0; padding-top:10px; display:flex; justify-content:space-between; font-size:8px; color:#94a3b8;")
+      div INYMO ENTERPRISE SYSTEMS - CONFIDENCIAL
+      div Página 1 de 1

@@ -745,38 +745,32 @@ router.get('/accion-cotizacion/ver/:id_cotizacion', verificarSesion, async funct
 // 6. RUTAS DE API INTERNA (PARA PREVENIR 404 EN AJAX)
 // ===============================================================================
 
-/**
- * API: Buscar Clientes JSON
- * Usado por select2 o autocompletar en el módulo de Cotizaciones.
- * Evita el error de "no encuentra cliente" al crear cotización.
- */
-router.get('/api/buscar-json', verificarSesion, async function(req, res) {
+// --- API DE BÚSQUEDA CORREGIDA PARA TU ESTRUCTURA DE BD ---
+router.get('/api/buscar-json', verificarSesion, async (req, res) => {
+    const term = req.query.term || '';
     let client;
     try {
         client = await pool.connect();
-        const q = req.query.term || ''; // Término de búsqueda
         
-        const query = `
+        // CORRECCIÓN CRÍTICA: 
+        // 1. Buscamos en 'nombre_comercial' porque es donde tienes los datos reales (angelito, zertuche)
+        // 2. Devolvemos explícitamente esa columna.
+        const sql = `
             SELECT id, nombre_comercial, rfc, contacto 
             FROM clientes 
             WHERE activo = true 
-            AND (nombre_comercial ILIKE $1 OR rfc ILIKE $1)
-            LIMIT 20
+              AND (nombre_comercial ILIKE $1 OR rfc ILIKE $1)
+            LIMIT 10
         `;
-        const result = await client.query(query, [`%${q}%`]);
         
-        // Formato estándar para librerías de UI (Select2)
-        const jsonResponse = result.rows.map(c => ({
-            id: c.id,
-            text: `${c.nombre_comercial} (${c.rfc || 'Sin RFC'})`
-        }));
-        
-        res.json(jsonResponse);
-    } catch(e) {
-        console.error("[API ERROR]", e);
+        const result = await client.query(sql, [`%${term}%`]);
+        res.json(result.rows); 
+
+    } catch (e) {
+        console.error("Error API Search:", e);
         res.status(500).json([]);
     } finally {
-        if(client) client.release();
+        if (client) client.release();
     }
 });
 

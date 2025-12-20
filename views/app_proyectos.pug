@@ -1,139 +1,827 @@
 extends layout_app
 
 block content
-  // Conectamos el CSS específico de este módulo
-  link(rel='stylesheet', href='/stylesheets/proyectos.css')
+  //- ==========================================================================================
+  //- I N Y M O   P O R T F O L I O   M A N A G E M E N T   S Y S T E M
+  //- ==========================================================================================
+  //- Versión: 115.0 "Diamond Visual Engine"
+  //- Vista Maestra de Portafolio: Tarjetas de Alta Densidad, Grid de 3 Columnas y Métricas.
+  //- ==========================================================================================
+  
+  //- 1. RECURSOS GRÁFICOS Y TIPOGRAFÍA
+  //- ==========================================================================================
+  link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css")
+  link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap")
 
-  // --- CABECERA DEL MÓDULO ---
-  div.module-header(style="margin-bottom: 25px;")
-    div.header-title
-      h1 Gestión de Portafolio Estratégico
-      p.subtitle Monitoreo de Desempeño y Gobernanza (PMO)
-    
-    // Botón de Acción Principal
-    a.btn-new-project(href="/app/proyectos/nuevo") 
-      i.bx.bx-plus 
-      | Nuevo Proyecto
-
-  // ==========================================================
-  // 🚀 PUNTO 1.1: COMMAND CENTER (KPIs GLOBALES)
-  // ==========================================================
-  div.command-center(style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px;")
-    div.kpi-card(style="background: #1e293b; color: white; padding: 20px; border-radius: 12px; border-left: 5px solid #38bdf8; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);")
-      div(style="display: flex; justify-content: space-between; align-items: start;")
-        span(style="font-size: 0.75em; font-weight: 600; color: #94a3b8; text-transform: uppercase;") SPI Global
-        i.bx.bx-time-five(style="color: #38bdf8; font-size: 1.2rem;")
-      h2(style="margin: 10px 0; font-size: 1.8rem;")= stats.spi
-      p(style="font-size: 0.7em; color: #cbd5e1;") Índice de desempeño cronograma
-
-    div.kpi-card(style="background: #1e293b; color: white; padding: 20px; border-radius: 12px; border-left: 5px solid #4ade80; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);")
-      div(style="display: flex; justify-content: space-between; align-items: start;")
-        span(style="font-size: 0.75em; font-weight: 600; color: #94a3b8; text-transform: uppercase;") CPI Global
-        i.bx.bx-trending-up(style="color: #4ade80; font-size: 1.2rem;")
-      h2(style="margin: 10px 0; font-size: 1.8rem;")= stats.cpi
-      p(style="font-size: 0.7em; color: #cbd5e1;") Eficiencia de costos del portafolio
-
-    div.kpi-card(style="background: #1e293b; color: white; padding: 20px; border-radius: 12px; border-left: 5px solid #fb7185; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);")
-      div(style="display: flex; justify-content: space-between; align-items: start;")
-        span(style="font-size: 0.75em; font-weight: 600; color: #94a3b8; text-transform: uppercase;") Exposición al Riesgo
-        i.bx.bx-error-circle(style="color: #fb7185; font-size: 1.2rem;")
-      h2(style="margin: 10px 0; font-size: 1.8rem;") #{stats.riesgo}%
-      p(style="font-size: 0.7em; color: #cbd5e1;") Proyectos con estatus crítico
-
-    div.kpi-card(style="background: #1e293b; color: white; padding: 20px; border-radius: 12px; border-left: 5px solid #fbbf24; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);")
-      div(style="display: flex; justify-content: space-between; align-items: start;")
-        span(style="font-size: 0.75em; font-weight: 600; color: #94a3b8; text-transform: uppercase;") Valor Ganado (EV)
-        i.bx.bx-dollar-circle(style="color: #fbbf24; font-size: 1.2rem;")
-      h2(style="margin: 10px 0; font-size: 1.8rem;")= stats.evTotal
-      p(style="font-size: 0.7em; color: #cbd5e1;") Capital devengado total (Acumulado)
-
-  // --- CONTENEDOR DE HERRAMIENTAS (DISEÑO LIMPIO) ---
-  div.tools-container(style="background: #fff; padding: 25px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);")
-    
-    // NIVEL 1: FILTROS Y TOTAL
-    div(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;")
-      div.filter-group(style="display: flex; gap: 10px; flex-wrap: wrap;")
-        a.filter-btn(href="/app/proyectos?filter=todos" class=activeFilter === 'todos' ? 'active' : '') Todos
-        a.filter-btn(href="/app/proyectos?filter=en-tiempo" class=activeFilter === 'en-tiempo' ? 'active' : '') En Tiempo
-        a.filter-btn(href="/app/proyectos?filter=retrasados" class=activeFilter === 'retrasados' ? 'active' : '') Retrasados
-        a.filter-btn(href="/app/proyectos?filter=en-riesgo" class=activeFilter === 'en-riesgo' ? 'active' : '') En Riesgo
-        a.filter-btn(href="/app/proyectos?filter=predictivos" class=activeFilter === 'predictivos' ? 'active' : '') Predictivo
-        a.filter-btn(href="/app/proyectos?filter=hibrido" class=activeFilter === 'hibrido' ? 'active' : '') Híbrido
-        a.filter-btn(href="/app/proyectos?filter=agiles" class=activeFilter === 'agiles' ? 'active' : '') Ágil
+  //- 2. ARQUITECTURA VISUAL (CSS MONOLÍTICO EXPANDIDO)
+  //- ==========================================================================================
+  style.
+    /* ----------------------------------------------------------------------
+       A. VARIABLES DE DISEÑO (DESIGN TOKENS)
+       ---------------------------------------------------------------------- */
+    :root {
+      /* COLORES CORPORATIVOS */
+      --navy-900: #0f172a;
+      --navy-800: #1e293b;
+      --navy-700: #334155;
+      --navy-600: #475569;
       
-      div.total-invested(style="text-align: right;")
-        span(style="color: #64748b; font-size: 0.8em; text-transform: uppercase; font-weight: 600;") Inversión Total: 
-        strong(style="color: #166534; font-size: 1.2rem; display: block;") $#{totalValorNegocio}
-
-    // --- BARRA DE BÚSQUEDA Y FILTROS ---
-    div.toolbar(style="display: flex; gap: 15px; margin-bottom: 25px; align-items: center;")
+      --gold-500: #d4af37;
+      --gold-400: #fbbf24;
       
-      // 1. EL BUSCADOR (Corregido con Flexbox)
-      form.search-box(action="/app/proyectos" method="GET" style="flex-grow: 1; display: flex; align-items: center; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 5px 5px 5px 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);")
+      /* SEMÁFORO DE SALUD (ALTO CONTRASTE) */
+      --status-ok: #10b981;
+      --status-ok-bg: #ecfdf5;
+      
+      --status-warning: #f59e0b;
+      --status-warning-bg: #fffbeb;
+      
+      --status-danger: #ef4444;
+      --status-danger-bg: #fef2f2;
+      
+      --status-blue: #3b82f6;
+      --status-blue-bg: #eff6ff;
+      
+      /* IDENTIDAD DE METODOLOGÍA */
+      --color-agil: #2563eb;
+      --color-predictivo: #7c3aed;
+      --color-hibrido: #ea580c;
+      
+      /* EFECTOS VISUALES Y SOMBRAS */
+      --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --glow-blue: 0 0 15px rgba(37, 99, 235, 0.3);
+      --glow-gold: 0 0 15px rgba(212, 175, 55, 0.3);
+      
+      /* TIPOGRAFÍA */
+      --font-main: 'Poppins', sans-serif;
+      --font-mono: 'Consolas', 'Monaco', monospace;
+      
+      /* DIMENSIONES */
+      --radius-card: 20px;
+      --radius-btn: 12px;
+    }
+
+    /* ----------------------------------------------------------------------
+       B. RESET GLOBAL Y LAYOUT
+       ---------------------------------------------------------------------- */
+    body {
+      background-color: #f8fafc;
+      font-family: var(--font-main);
+      color: var(--navy-900);
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .dashboard-container {
+      padding: 40px 50px 150px;
+      max-width: 2000px;
+      margin: 0 auto;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
+    }
+
+    /* ----------------------------------------------------------------------
+       C. HEADER DE MANDO
+       ---------------------------------------------------------------------- */
+    .command-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 50px;
+      padding-bottom: 25px;
+      border-bottom: 2px solid rgba(0,0,0,0.03);
+    }
+
+    .header-info h1 {
+      font-weight: 800;
+      font-size: 2.5rem;
+      margin: 0;
+      color: var(--navy-900);
+      letter-spacing: -1px;
+    }
+
+    .header-info p {
+      color: #64748b;
+      font-size: 1.1rem;
+      margin-top: 10px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-create-master {
+      background: var(--navy-900);
+      color: #ffffff;
+      padding: 16px 40px;
+      border-radius: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-create-master:hover {
+      background: var(--gold-500);
+      color: var(--navy-900);
+      transform: translateY(-5px);
+      box-shadow: 0 20px 30px -10px rgba(212, 175, 55, 0.5);
+    }
+
+    /* ----------------------------------------------------------------------
+       D. RIBBON DE KPIs (ESTILO VIDRIO)
+       ---------------------------------------------------------------------- */
+    .kpi-ribbon {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+
+    .kpi-card-glass {
+      padding: 30px;
+      border-radius: var(--radius-card);
+      color: #ffffff;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 15px 30px -5px rgba(0,0,0,0.15);
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: transform 0.3s ease;
+    }
+
+    .kpi-card-glass:hover {
+      transform: translateY(-8px);
+    }
+
+    .kpi-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.9;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .kpi-value-lg {
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin: 0;
+      line-height: 1.1;
+      font-family: var(--font-main);
+    }
+
+    .kpi-subtext {
+      font-size: 0.75rem;
+      font-weight: 500;
+      opacity: 0.8;
+      border-top: 1px solid rgba(255,255,255,0.2);
+      padding-top: 12px;
+      margin-top: 12px;
+      display: block;
+    }
+
+    .kpi-watermark {
+      position: absolute;
+      right: -20px;
+      bottom: -30px;
+      font-size: 10rem;
+      opacity: 0.12;
+      transform: rotate(-15deg);
+      pointer-events: none;
+    }
+
+    /* ----------------------------------------------------------------------
+       E. PANEL DE CONTROL Y FILTRADO
+       ---------------------------------------------------------------------- */
+    .control-panel {
+      background: #ffffff;
+      padding: 40px;
+      border-radius: var(--radius-card);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+      border: 1px solid #e2e8f0;
+      margin-bottom: 60px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 35px;
+      border-bottom: 2px solid #f8fafc;
+      padding-bottom: 25px;
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .total-invest-badge {
+      background: #ecfdf5;
+      color: #065f46;
+      padding: 15px 30px;
+      border-radius: 14px;
+      text-align: right;
+      border: 2px solid #a7f3d0;
+    }
+
+    .total-invest-badge small {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 5px;
+      opacity: 0.8;
+    }
+
+    .total-invest-badge strong {
+      font-size: 2.2rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 35px;
+    }
+
+    .btn-filter-pill {
+      padding: 12px 24px;
+      border-radius: 12px;
+      background: #f1f5f9;
+      color: #64748b;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+      font-size: 0.9rem;
+    }
+
+    .btn-filter-pill:hover {
+      background: #e2e8f0;
+      color: var(--navy-900);
+      transform: translateY(-2px);
+    }
+
+    .btn-filter-pill.active {
+      background: var(--navy-900);
+      color: #ffffff;
+      box-shadow: 0 8px 15px rgba(15, 23, 42, 0.2);
+    }
+
+    .search-bar-row {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .search-input-box {
+      flex-grow: 1;
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 0 25px;
+      display: flex;
+      align-items: center;
+      transition: border-color 0.3s;
+    }
+
+    .search-input-box:focus-within {
+      border-color: var(--status-blue);
+      background: #ffffff;
+    }
+
+    .search-input-box i {
+      font-size: 1.5rem;
+      color: #94a3b8;
+      margin-right: 15px;
+    }
+
+    .search-input-box input {
+      border: none;
+      background: transparent;
+      width: 100%;
+      padding: 18px 0;
+      font-size: 1.1rem;
+      font-weight: 500;
+      outline: none;
+      color: var(--navy-900);
+    }
+
+    .btn-exec-search {
+      background: var(--navy-900);
+      color: white;
+      border: none;
+      padding: 0 40px;
+      border-radius: 14px;
+      font-weight: 700;
+      height: 60px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn-exec-search:hover {
+      background: var(--navy-800);
+      transform: translateY(-2px);
+    }
+
+    .btn-archive-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #64748b;
+      font-weight: 700;
+      text-decoration: none;
+      padding: 0 20px;
+      transition: 0.2s;
+    }
+    
+    .btn-archive-link:hover { color: var(--status-danger); }
+
+    /* ----------------------------------------------------------------------
+       F. GRID DE PROYECTOS (ESTRUCTURA DE 3 COLUMNAS GARANTIZADA)
+       ---------------------------------------------------------------------- */
+    .project-grid-system {
+      display: grid;
+      /* AJUSTE CLAVE PARA 3 COLUMNAS: Bajamos el minmax a 340px */
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 40px;
+      margin-bottom: 100px;
+    }
+
+    /* DISEÑO DE TARJETA MEJORADO */
+    .project-card-ultra {
+      background: #ffffff;
+      border-radius: 24px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      /* Borde lateral de estatus */
+      border-left: 8px solid #e2e8f0;
+      box-shadow: var(--shadow-card);
+    }
+
+    .project-card-ultra:hover {
+      transform: translateY(-12px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    /* COLORES SEMÁNTICOS FORZADOS */
+    .project-card-ultra.status-en-tiempo { border-left-color: var(--status-ok) !important; }
+    .project-card-ultra.status-retrasado { border-left-color: var(--status-warning) !important; }
+    .project-card-ultra.status-en-riesgo { border-left-color: var(--status-danger) !important; }
+    .project-card-ultra.status-finalizado { border-left-color: var(--status-blue) !important; }
+
+    .card-header-zone {
+      padding: 25px 30px;
+      background: #fcfcfc;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .project-code {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #64748b;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+    }
+
+    /* BADGES DE METODOLOGÍA NEÓN */
+    .badge-method {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+    }
+    .badge-method.agil { background: var(--color-agil); color: white; box-shadow: var(--glow-blue); }
+    .badge-method.predictivo { background: var(--color-predictivo); color: white; }
+    .badge-method.hibrido { background: var(--color-hibrido); color: white; }
+
+    .card-body-zone {
+      padding: 35px 30px;
+      flex-grow: 1;
+    }
+
+    /* TITULO DEL PROYECTO EN NEGRO */
+    .project-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #000000 !important;
+      margin: 0 0 8px 0;
+      line-height: 1.2;
+    }
+
+    .client-name {
+      font-size: 1rem;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    /* SECCIÓN DE RESPONSABLE (PM) CON AVATAR */
+    .pm-info-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 25px;
+      padding: 12px;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 1px solid #f1f5f9;
+    }
+    
+    .pm-avatar-icon {
+      width: 35px; height: 35px;
+      background: var(--navy-900);
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+    
+    .pm-details-box {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .pm-label-small {
+        font-size: 0.65rem;
+        color: #94a3b8;
+        font-weight: 800;
+        text-transform: uppercase;
+        line-height: 1;
+        margin-bottom: 2px;
+    }
+    
+    .pm-name-val {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--navy-800);
+      line-height: 1.2;
+    }
+
+    /* MICRO DASHBOARD DE TARJETA (ICONOS) */
+    .stats-grid-icons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 30px;
+    }
+
+    .stat-box {
+      text-align: center;
+      padding: 12px 5px;
+      background: #ffffff;
+      border: 1px solid #f1f5f9;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+      transition: transform 0.2s;
+    }
+    
+    .stat-box:hover {
+        transform: translateY(-3px);
+        border-color: #e2e8f0;
+    }
+
+    .stat-box i {
+      font-size: 1.4rem;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .stat-box span {
+      display: block;
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .stat-box strong {
+      font-size: 1rem;
+      color: var(--navy-900);
+      font-weight: 800;
+      font-family: var(--font-mono);
+    }
+
+    /* COLORES DE ICONOS ESPECÍFICOS */
+    .icon-docs { color: var(--navy-700); }
+    .icon-risk { color: var(--status-danger); }
+    .icon-spi { color: var(--status-blue); }
+    .icon-cpi { color: var(--status-ok); }
+
+    .progress-zone { margin-top: 20px; }
+    
+    .progress-text {
+      display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; color: #475569;
+    }
+    
+    .progress-rail {
+      height: 10px; background: #e2e8f0; border-radius: 20px; overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%; border-radius: 20px; background: var(--navy-800); transition: width 1s ease;
+    }
+
+    .card-footer-zone {
+      padding: 25px 30px;
+      border-top: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fdfdfd;
+    }
+
+    .val-label { font-size: 0.65rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; display: block; margin-bottom: 3px; }
+    .val-number { font-weight: 800; color: #059669; font-size: 1.3rem; font-family: var(--font-mono); }
+
+    .status-pill {
+      font-size: 0.85rem;
+      font-weight: 800;
+      padding: 10px 20px;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-transform: capitalize;
+    }
+    .status-pill.en-tiempo { background: var(--status-ok-bg); color: #166534; }
+    .status-pill.retrasado { background: var(--status-warning-bg); color: #92400e; }
+    .status-pill.en-riesgo { background: var(--status-danger-bg); color: #991b1b; }
+
+    /* PAGINACIÓN */
+    .pagination-controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 60px;
+    }
+    
+    .page-btn {
+      width: 55px; height: 55px;
+      display: flex; align-items: center; justify-content: center;
+      background: white; border: 2px solid #e2e8f0; border-radius: 16px;
+      color: var(--navy-900); text-decoration: none; font-weight: 700; font-size: 1.1rem;
+      transition: all 0.2s;
+    }
+    
+    .page-btn.active {
+      background: var(--navy-900); color: white; border-color: var(--navy-900);
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.2);
+    }
+    
+    .page-btn:hover:not(.active) { transform: translateY(-3px); border-color: var(--gold-500); }
+
+    /* PANEL RECUPERACIÓN */
+    .recovery-bar {
+      background: #ecfdf5; padding: 15px; text-align: center; border-top: 1px solid #a7f3d0; margin-top: -5px;
+    }
+    .recovery-btn {
+      color: #047857; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    /* MEDIA QUERIES (ADAPTACIÓN MÓVIL) */
+    @media (max-width: 1400px) {
+      .kpi-ribbon { grid-template-columns: repeat(2, 1fr); }
+    }
+    
+    @media (max-width: 900px) {
+      .command-header { flex-direction: column; align-items: flex-start; gap: 25px; }
+      .kpi-ribbon { grid-template-columns: 1fr; }
+      .panel-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+      .search-bar-row { flex-direction: column; width: 100%; }
+      .total-invest-badge { width: 100%; text-align: center; }
+      .project-grid-system { grid-template-columns: 1fr; }
+    }
+
+    /* ESTILOS DE IMPRESIÓN */
+    @media print {
+      .control-panel, .pagination-controls, .btn-create-master { display: none !important; }
+      .dashboard-container { padding: 0; width: 100%; }
+      body { background: white; }
+    }
+
+  //- =========================================================================
+  //- 3. ESTRUCTURA HTML (CONTENIDO)
+  //- =========================================================================
+  div.dashboard-container
+    
+    //- HEADER
+    header.command-header
+      div.header-info
+        h1 Portafolio Estratégico
+        p 
+          i.bx.bx-shield-quarter.text-warning(style="font-size: 1.4rem;")
+          | Centro de Control de Misión PMO | INYMO
+      
+      a.btn-create-master(href="/app/proyectos/nuevo")
+        i.bx.bx-plus-circle(style="font-size: 1.5rem")
+        span Iniciar Nuevo Proyecto
+
+    //- 🧠 FUNCIÓN DE FORMATO MILLONES
+    - 
+      function formatMoneyCompact(amount) {
+        if (!amount) return "$0";
+        if (amount >= 1000000) return "$" + (amount / 1000000).toFixed(2) + "M";
+        if (amount >= 1000) return "$" + (amount / 1000).toFixed(1) + "K";
+        return "$" + amount.toLocaleString('es-MX');
+      }
+
+    //- RIBBON DE KPIS (DESCIPCIONES TÉCNICAS)
+    section.kpi-ribbon
+      // SPI
+      div.kpi-card-glass(style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);")
+        i.bx.bx-time-five.kpi-watermark
+        span.kpi-label SPI Global
+        h2.kpi-value-lg= stats.spi
+        small.kpi-subtext Eficiencia del Cronograma vs Línea Base
+      
+      // CPI
+      div.kpi-card-glass(style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);")
+        i.bx.bx-line-chart.kpi-watermark
+        span.kpi-label CPI Global
+        h2.kpi-value-lg= stats.cpi
+        small.kpi-subtext Eficiencia de Costos (Gasto Real)
+      
+      // RIESGO
+      div.kpi-card-glass(style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);")
+        i.bx.bx-shield-x.kpi-watermark
+        span.kpi-label Exposición Riesgo
+        h2.kpi-value-lg #{stats.riesgo}%
+        small.kpi-subtext Proyectos en Estado Crítico
+      
+      // EV
+      div.kpi-card-glass(style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);")
+        i.bx.bx-coin-stack.kpi-watermark
+        span.kpi-label Valor Ganado (EV)
+        h2.kpi-value-lg= stats.evTotal
+        small.kpi-subtext Capital Devengado Acumulado
+
+    //- PANEL DE CONTROL
+    div.control-panel
+      div.panel-header
+        div
+          span.section-title Segmentación de Radar Operativo
+          p(style="margin:0; font-size:0.9rem; color:#64748b;") Filtros dinámicos por estatus y metodología de trabajo.
         
-        // Icono Lupa
-        i.bx.bx-search(style="font-size: 1.2em; color: #94a3b8; margin-right: 10px;")
+        div.total-invest-badge
+          small INVERSIÓN TOTAL ACTIVA
+          strong #{totalValorNegocio}
+
+      div.filter-group
+        a.btn-filter-pill(href="/app/proyectos?filter=todos" class=activeFilter==='todos'?'active':'') Todos
+        a.btn-filter-pill(href="/app/proyectos?filter=en-tiempo" class=activeFilter==='en-tiempo'?'active':'') En Tiempo
+        a.btn-filter-pill(href="/app/proyectos?filter=retrasados" class=activeFilter==='retrasados'?'active':'') Retrasados
+        a.btn-filter-pill(href="/app/proyectos?filter=en-riesgo" class=activeFilter==='en-riesgo'?'active':'') En Riesgo
+        a.btn-filter-pill(href="/app/proyectos?filter=predictivos" class=activeFilter==='predictivos'?'active':'') Predictivo
+        a.btn-filter-pill(href="/app/proyectos?filter=hibrido" class=activeFilter==='hibrido'?'active':'') Híbrido
+        a.btn-filter-pill(href="/app/proyectos?filter=agiles" class=activeFilter==='agiles'?'active':'') Ágil
+
+      div.search-bar-row
+        form(action="/app/proyectos" method="GET" style="flex-grow:1; display:flex;")
+          div.search-input-box
+            i.bx.bx-search
+            input(type="text" name="q" placeholder="Buscar por código de obra, nombre o cliente..." value=searchTerm)
+          button.btn-exec-search(type="submit") Filtrar
+
+        a.btn-archive-link(href="/app/proyectos?filter=archivados" class=activeFilter==='archivados'?'active':'')
+          i.bx.bx-trash.fs-4
+          span Papelera
+
+    //- GRID DE PROYECTOS (ESTRUCTURA DE 3 COLUMNAS)
+    div.project-grid-system
+      each p in proyectos
+        //- Lógica de Estatus
+        - var isRisky = (p.riesgo === 'Alto') || (parseInt(p.real_riesgos) > 0);
+        - var visualStatus = isRisky ? 'En Riesgo' : p.salud;
+        - var statusClass = visualStatus.toLowerCase().replace(/\s+/g, '-');
+        - var methodClass = p.tipo_entrega.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+        div(style="display:flex; flex-direction:column;")
+          a.project-card-ultra(href=`/app/proyectos/${p.id}` class=`status-${statusClass}`)
+            
+            //- Header Tarjeta
+            div.card-header-zone
+              span.project-code= p.codigo
+              span.badge-method(class=methodClass)= p.tipo_entrega
+            
+            //- Cuerpo Tarjeta
+            div.card-body-zone
+              h3.project-title= p.nombre
+              div.client-name
+                i.bx.bxs-business
+                span= p.cliente
+              
+              //- RESPONSABLE DEL PROYECTO (PM SECTION)
+              div.pm-info-row
+                div.pm-avatar-icon: i.bx.bxs-user
+                div.pm-details-box
+                  span.pm-label-small LÍDER DE PROYECTO
+                  span.pm-name-val= p.lider || 'Sin Asignar'
+
+              //- DASHBOARD DE ICONOS (CON BX)
+              div.stats-grid-icons
+                div.stat-box
+                  i.bx.bxs-folder-open.icon-docs
+                  span Docs
+                  strong #{p.real_docs || '0'}
+                div.stat-box
+                  i.bx.bxs-shield-x.icon-risk
+                  span Riesgos
+                  strong(style=isRisky?"color:#ef4444":"") #{p.real_riesgos || '0'}
+                div.stat-box
+                  i.bx.bxs-time-five.icon-spi
+                  span SPI
+                  strong #{p.spi || '1.00'}
+                div.stat-box
+                  i.bx.bxs-pie-chart-alt-2.icon-cpi
+                  span CPI
+                  strong #{p.cpi || '1.00'}
+
+              //- Barra de Progreso
+              div.progress-zone
+                div.progress-text
+                  span Avance General
+                  span #{p.progreso}%
+                div.progress-rail
+                  div.progress-bar(style=`width: ${p.progreso}%`)
+
+            //- Footer Tarjeta
+            div.card-footer-zone
+              div
+                span.val-label Valor Negocio
+                span.val-number= formatMoneyCompact(p.valor_negocio)
+              
+              div.status-pill(class=statusClass)
+                i.bx.bxs-circle(style="font-size:0.6rem;")
+                span= visualStatus
+
+          //- Botón Restaurar (Solo Archivados)
+          if activeFilter === 'archivados'
+            div.recovery-bar
+              a.recovery-btn(href=`/app/proyectos/recuperar/${p.id}`)
+                i.bx.bx-undo.fs-4
+                | Restaurar
+
+    //- PAGINACIÓN
+    if totalPages > 1
+      div.pagination-controls
+        if currentPage > 1
+          a.page-btn(href=`/app/proyectos?page=${currentPage - 1}&filter=${activeFilter}&q=${searchTerm || ''}`)
+            i.bx.bx-chevron-left
         
-        // Input (ocupa todo el espacio disponible)
-        input(
-          type="text" 
-          name="q" 
-          placeholder="Buscar por nombre, código o cliente..." 
-          value=searchTerm 
-          style="border: none; outline: none; flex-grow: 1; font-size: 0.95em; color: #334155; background: transparent;"
-        )
+        - var n = 1;
+        while n <= totalPages
+          a.page-btn(href=`/app/proyectos?page=${n}&filter=${activeFilter}&q=${searchTerm || ''}` class=currentPage === n ? 'active' : '')= n++
         
-        // Botón Buscar (No se encoge)
-        button(type="submit" style="background: #1e293b; color: #fff; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; flex-shrink: 0; margin-left: 10px;") Buscar
+        if currentPage < totalPages
+          a.page-btn(href=`/app/proyectos?page=${currentPage + 1}&filter=${activeFilter}&q=${searchTerm || ''}`)
+            i.bx.bx-chevron-right
 
-      // 2. BOTÓN ARCHIVADOS (Al lado)
-      a.btn-secondary(href="/app/proyectos?filter=archivados" style="background: #fff; border: 1px solid #cbd5e1; color: #475569; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: 500; white-space: nowrap;")
-        i.bx.bx-archive
-        | Archivados
-
-  // --- GRID DE PROYECTOS (PORTAFOLIO) ---
-  div.projects-grid
-    each p in proyectos
-      a.project-card(href=`/app/proyectos/${p.id}` class=p.riesgo === 'Alto' ? 'risk-alert' : '')
-        div.card-header
-          span.project-code= p.codigo
-          span.badge-type(class=p.tipo_entrega.toLowerCase())= p.tipo_entrega
-        
-        div.card-body
-          h3= p.nombre
-          p.client-name
-            i.bx.bx-building 
-            |  #{p.cliente}
-          
-          div.meta-info
-            div.meta-item
-              span.label Fase
-              span.value= p.fase
-            div.meta-item
-              span.label Líder
-              span.value= p.lider
-
-          div.progress-container
-            div.progress-labels
-              span Avance Técnico
-              span #{p.progreso}%
-            div.progress-bar-bg
-              div.progress-bar-fill(style=`width: ${p.progreso}%`)
-
-        div.card-footer
-          div.finance-data
-            div
-              span.label Presupuesto
-              //- Usamos 'es-MX' para asegurar formato de pesos mexicanos con comas
-              strong $#{p.presupuesto.toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-            div
-              span.label Valor Negocio
-              strong.value-green $#{p.valor_negocio.toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-          
-          div.status-pill(class=p.salud.toLowerCase().replace(' ', '-'))
-            i.bx.bxs-circle
-            |  #{p.salud}
-
-  // --- FOOTER PMO ---
-  div(style="text-align: center; margin-top: 40px; color: #94a3b8; font-size: 0.8em; border-top: 1px solid #e2e8f0; padding-top: 20px;")
-    p Sistema de Inteligencia de Proyectos INYMO © 2025 | Datos calculados en tiempo real.
+    //- FOOTER
+    div(style="text-align:center; margin-top:80px; color:#94a3b8; border-top:1px solid #e5e7eb; padding-top:30px;")
+      img(src="/images/logo-inymo-white.png" style="height:35px; opacity:0.6; margin-bottom:10px;")
+      p(style="font-size:0.8rem; font-weight:600; letter-spacing:1px;") INYMO INTELLIGENCE PORTFOLIO SYSTEM © 2025

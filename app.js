@@ -33,7 +33,8 @@ var usersRouter = require('./routes/users');
 
 // --- Nivel 1: Ingeniería y Operaciones (Campo) ---
 var proyectosRouter = require('./routes/proyectos');
-var proyectosDetalleRouter = require('./routes/proyectos_detalles');
+var proyectosDetallesRouter = require('./routes/proyectos_detalles');
+var proyectosDetallesSeccion2Router = require('./routes/proyectos_detalles_2seccion');
 var bitacoraRouter = require('./routes/bitacora');
 var repositorioRouter = require('./routes/repositorio');
 var clientesRouter = require('./routes/clientes');
@@ -132,7 +133,9 @@ app.use('/users', usersRouter);
 
 // --- Operaciones ---
 app.use('/app/proyectos', proyectosRouter);
-app.use('/app/proyectos', proyectosDetalleRouter); 
+// IMPORTANTE: El orden importa. Primero las operaciones específicas, luego el detalle general.
+//app.use('/app/proyectos', proyectosDetallesSeccion2Router); // Para editar, actualizar, gastos, etc.
+app.use('/app/proyectos', proyectosDetallesRouter);         // Para visualizar el detalle
 app.use('/app/bitacora', bitacoraRouter);
 app.use('/app/repositorio', repositorioRouter);
 app.use('/app/clientes', clientesRouter);

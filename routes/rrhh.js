@@ -394,6 +394,37 @@ router.get('/division/07', verificarSesion, (req, res) => res.render('app_rrhh_p
 router.get('/division/08', verificarSesion, verificarRangoSocio, (req, res) => res.render('app_rrhh_reportes', { title: 'Reportes de Gestión | INYMO' }));
 router.get('/division/09', verificarSesion, (req, res) => res.render('app_rrhh_cumplimiento', { title: 'Legal y HSE | INYMO' }));
 
+// --- API: BUSCADOR DE TALENTO (CORREGIDO) ---
+router.get('/api/buscar-colaborador', async (req, res) => {
+    const term = req.query.term || '';
+    let client;
+    try {
+        client = await pool.connect();
+        
+        // CORRECCIÓN: 
+        // 1. Quitamos 'puesto' del WHERE porque no existe la columna de texto.
+        // 2. Buscamos solo por 'nombre_completo'.
+        // 3. Agregamos un texto fijo 'puesto' para que el frontend no marque error.
+        
+        const sql = `
+            SELECT id, nombre_completo, 'Líder de Proyecto' as puesto 
+            FROM rrhh_colaboradores 
+            WHERE estatus = 'Activo' 
+              AND (nombre_completo ILIKE $1)
+            LIMIT 10
+        `;
+        
+        const result = await client.query(sql, [`%${term}%`]);
+        res.json(result.rows);
+
+    } catch (e) {
+        console.error("Error API RRHH:", e.message);
+        res.json([]);
+    } finally {
+        if (client) client.release();
+    }
+});
+
 /* ==========================================================================
    10. BÓVEDA CONFIDENCIAL (INYMO ROOT)
    ========================================================================== */

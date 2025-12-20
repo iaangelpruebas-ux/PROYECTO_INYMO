@@ -1,497 +1,699 @@
-var express = require('express');
-var router = express.Router();
-const fs = require('fs');      
-const path = require('path');  
-const html_to_pdf = require('html-pdf-node'); 
+/**
+ * ====================================================================================================
+ * * I N Y M O   E N T E R P R I S E   S Y S T E M S
+ * PROJECT INTELLIGENCE UNIT - MASTER CORE ENGINE (V.28.0 - RESTORED CONFIG & MATH FIX)
+ * ====================================================================================================
+ * @file        routes/proyectos_detalles.js
+ * @description 
+ * Módulo de control de misión para la gestión avanzada de proyectos de ingeniería.
+ * Implementa la arquitectura de visualización 360°, vinculando Finanzas, Operaciones,
+ * Capital Humano (RH) y Gestión de Riesgos.
+ * * * CORRECCIONES V.28:
+ * 1. Restauración de rutas de configuración (Editar Proyecto).
+ * 2. Ajuste de sensibilidad matemática para SPI/CPI cuando AC=0.
+ * 3. Sincronización forzada al cargar la vista.
+ * * * --------------------------------------------------------------------------------------------------
+ * * LÓGICA FINANCIERA DE NEGOCIO (INYMO STANDARDS):
+ * 1. PRESUPUESTO (BAC): Límite máximo de gasto operativo permitido.
+ * 2. VALOR PLANEADO (PV): Proyección de venta total al cliente (Ingreso) vs Tiempo.
+ * 3. COSTO REAL (AC): Gastos de Materiales + Nómina de Capital Humano + Costos Indirectos.
+ * 4. VALOR GANADO (EV): Rentabilidad Real = Valor Planeado - Costo Real Acumulado.
+ * * --------------------------------------------------------------------------------------------------
+ * * @author      Ing. Ángel Velasco (Socio Director) & IA Orange Framework
+ * @date        Diciembre 2025
+ * @version     28.0.0 "Platinum Core - Config Restore"
+ * ====================================================================================================
+ */
+
+/* ----------------------------------------------------------------------------------------------------
+ * 1. IMPORTACIÓN DE DEPENDENCIAS CRÍTICAS
+ * ---------------------------------------------------------------------------------------------------- */
+const express = require('express');
+const router = express.Router();
+const fs = require('fs');
+const path = require('path');
+const html_to_pdf = require('html-pdf-node');
 const { Pool } = require('pg');
 
+/**
+ * CONFIGURACIÓN DE ACCESO A DATOS (POSTGRESQL)
+ * Se utiliza un pool de conexiones optimizado para reporteo masivo.
+ */
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
 });
 
+/* ----------------------------------------------------------------------------------------------------
+ * 2. MIDDLEWARES DE SEGURIDAD Y CONTEXTO
+ * ---------------------------------------------------------------------------------------------------- */
+
+/**
+ * Auth Guard: Verifica la existencia de una sesión de usuario válida.
+ * Si no hay sesión, redirige al portal de acceso y registra el intento fallido.
+ */
 const verificarSesion = (req, res, next) => {
-  if (req.session.usuarioLogueado) next(); else res.redirect('/login');
+    if (req.session.usuarioLogueado) {
+        // Renovación automática de la cookie para evitar desconexiones en análisis largos
+        req.session.touch();
+        next();
+    } else {
+        console.warn(`[SECURITY ALERT] Acceso no autorizado detectado en Proyectos. IP: ${req.ip}`);
+        res.redirect('/login');
+    }
 };
 
-/* =========================================================================
-   --- RUTAS DE DETALLE (Ficha Técnica, Edición, Reportes) ---
-   ========================================================================= */
+/* ----------------------------------------------------------------------------------------------------
+ * 3. MOTORES DE CÁLCULO Y UTILIDADES (BUSINESS LOGIC)
+ * ---------------------------------------------------------------------------------------------------- */
 
-/* E. DETALLE DE PROYECTO (Ficha Técnica) - CÁLCULO TOTAL INTEGRADO */
-router.get('/:id', verificarSesion, async function(req, res, next) {
-    const idProyecto = req.params.id;
-    if (isNaN(idProyecto)) return next(); 
+/**
+ * Formateador Contable MXN
+ * @param {number} value - Cantidad numérica cruda
+ * @returns {string} Formato estándar: $1,234,567.89
+ */
+const toMXN = (value) => {
+    if (value === undefined || value === null || isNaN(value)) return "$0.00";
+    return new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(value);
+};
 
+/**
+ * Motor de Diagnóstico IA de Eficiencia
+ * @param {number} cpi - Índice de desempeño de costos
+ * @param {number} spi - Índice de desempeño de cronograma
+ * @returns {string} Veredicto ejecutivo
+ */
+const generarDiagnosticoSalud = (cpi, spi) => {
+    const _cpi = parseFloat(cpi);
+    const _spi = parseFloat(spi);
+    
+    if (_cpi >= 1 && _spi >= 1) return "🟢 ESTRATEGIA ÓPTIMA: Rentabilidad y cronograma bajo control.";
+    if (_cpi < 0.9 && _spi < 0.9) return "🔴 ALERTA ROJA: Desviación crítica. El proyecto consume más recursos de los planeados.";
+    if (_cpi < 1) return "🟡 RIESGO FINANCIERO: El costo operativo actual está reduciendo el margen de utilidad.";
+    if (_spi < 1) return "🟡 RETRASO OPERATIVO: El avance físico se encuentra por debajo de la línea base.";
+    return "⚪ PROYECTO INICIANDO: Recopilando datos de primera fase.";
+};
+
+/**
+ * ---------------------------------------------------------------------------------------
+ * [MOTOR CRÍTICO] SINCRONIZACIÓN DE SPI/CPI A BASE DE DATOS
+ * Esta función es el corazón del cálculo. Se ejecuta al ver o editar el proyecto.
+ * ---------------------------------------------------------------------------------------
+ */
+const sincronizarIndicadores = async (proyectoId) => {
+    let client;
     try {
-        const client = await pool.connect();
+        client = await pool.connect();
         
-        // 1. CARGA DE DATOS PRINCIPALES
-        const result = await client.query('SELECT * FROM proyectos WHERE id = $1', [idProyecto]);
-        const proyecto = result.rows[0];
+        // 1. OBTENCIÓN DE DATOS FINANCIEROS Y TEMPORALES
+        const queryData = `
+            SELECT p.*,
+            -- Suma total de gastos registrados en bitácora
+            (SELECT COALESCE(SUM(monto_relacionado), 0) FROM bitacora WHERE proyecto_id = p.id AND tipo_registro = 'Gasto') as total_gastos_bitacora,
+            -- Costos adicionales aprobados
+            (SELECT COALESCE(SUM(impacto_costo), 0) FROM control_cambios WHERE proyecto_id = p.id AND estatus = 'Aprobado') as aditivas_costo,
+            -- Tiempo adicional aprobado
+            (SELECT COALESCE(SUM(impacto_tiempo), 0) FROM control_cambios WHERE proyecto_id = p.id AND estatus = 'Aprobado') as aditivas_tiempo
+            FROM proyectos p WHERE p.id = $1
+        `;
+        const res = await client.query(queryData, [proyectoId]);
+        const p = res.rows[0];
 
-        if (!proyecto) { 
-            client.release(); 
-            return res.status(404).send("Proyecto no encontrado"); 
-        }
+        if (!p) return;
 
-        // 2. CONSULTAS RELACIONADAS
-        const resEnt = await client.query('SELECT * FROM entregables WHERE proyecto_id = $1 ORDER BY fecha_entrega ASC', [idProyecto]);
-        const resCam = await client.query('SELECT * FROM control_cambios WHERE proyecto_id = $1 ORDER BY fecha_registro DESC', [idProyecto]);
-        const resHit = await client.query('SELECT * FROM hitos WHERE proyecto_id = $1 ORDER BY fecha ASC', [idProyecto]);
-        const resRie = await client.query('SELECT * FROM riesgos WHERE proyecto_id = $1 ORDER BY id DESC', [idProyecto]);
-        const resBit = await client.query(`SELECT titulo, tipo_registro AS tipo, fecha_registro AS fecha FROM bitacora WHERE proyecto_id = $1 ORDER BY fecha_registro DESC`, [idProyecto]);
-        const resLecc = await client.query(`SELECT titulo, descripcion FROM bitacora WHERE proyecto_id = $1 AND tipo_registro = 'Lección Aprendida' ORDER BY fecha_registro DESC LIMIT 5`, [idProyecto]);
+        // 2. DEFINICIÓN DE VARIABLES EVM (EARNED VALUE MANAGEMENT)
+        const BAC = parseFloat(p.presupuesto) + parseFloat(p.aditivas_costo);
         
-        // --- NUEVO: CONTAR ARCHIVOS EN REPOSITORIO ---
-        const resRepo = await client.query('SELECT COUNT(*) as total FROM repositorio_planos WHERE proyecto_id = $1', [idProyecto]);
-        const totalPlanos = parseInt(resRepo.rows[0].total) || 0;
-
-        client.release();
-
-        // 3. ASIGNACIONES SEGURAS
-        proyecto.entregables = resEnt.rows || [];
-        proyecto.controlCambios = resCam.rows || [];
-        proyecto.hitos = resHit.rows || [];
-        proyecto.riesgos = resRie.rows || [];
-        proyecto.leccionesAprendidas = resLecc.rows || [];
-        proyecto.totalPlanos = totalPlanos; 
-        const registrosBitacora = resBit.rows || [];
-
-        // 4. CÁLCULO DE PROGRESO REAL
-        let progresoCalculado = 0;
-        if (proyecto.entregables.length > 0) {
-            const sumaAvance = proyecto.entregables.reduce((acc, curr) => acc + (curr.progreso || 0), 0);
-            progresoCalculado = Math.round(sumaAvance / proyecto.entregables.length);
-        } else {
-            progresoCalculado = proyecto.progreso || 0; 
-        }
-        proyecto.progreso = progresoCalculado; 
-
-        // 5. CÁLCULOS EVM AVANZADOS
-        let presupuestoExtra = 0;
-        let diasExtra = 0; 
-
-        proyecto.controlCambios.forEach(c => { 
-            if (c.estatus === 'Aprobado') {
-                presupuestoExtra += parseFloat(c.impacto_costo) || 0;
-                diasExtra += parseInt(c.impacto_tiempo) || 0;
-            }
-        });
+        // AC (Actual Cost): Suma de lo manual en tabla + lo registrado en bitácora
+        const AC = parseFloat(p.total_gastos_bitacora) + (parseFloat(p.costo_acumulado) || 0);
         
-        const bac = (parseFloat(proyecto.presupuesto) || 0) + presupuestoExtra;
+        const Avance = (parseFloat(p.progreso) || 0) / 100;
         
-        const fechaInicio = new Date(proyecto.fecha_registro || new Date());
-        let fechaFinOriginal = proyecto.fecha_fin ? new Date(proyecto.fecha_fin) : new Date();
-        if (!proyecto.fecha_fin) fechaFinOriginal.setDate(fechaInicio.getDate() + 30);
+        // EV (Earned Value): Cuánto dinero "hemos ganado" en base al trabajo físico hecho
+        const EV = BAC * Avance; 
 
-        const fechaFinAjustada = new Date(fechaFinOriginal);
-        fechaFinAjustada.setDate(fechaFinAjustada.getDate() + diasExtra);
+        // 3. CÁLCULO DE PV (PLANNED VALUE) - EL RELOJ DEL PROYECTO
+        const fInicio = p.fecha_inicio ? new Date(p.fecha_inicio) : new Date(p.created_at);
+        const fFinOriginal = new Date(p.fecha_fin);
+        const fFin = new Date(fFinOriginal);
+        
+        // Ajustamos fecha fin si hubo cambios aprobados
+        fFin.setDate(fFin.getDate() + parseInt(p.aditivas_tiempo));
 
         const hoy = new Date();
-        const tiempoTotal = fechaFinAjustada - fechaInicio;
-        const tiempoTranscurrido = hoy - fechaInicio;
+        const duracionTotal = fFin - fInicio;
+        const tiempoPasado = hoy - fInicio;
         
         let pctTiempo = 0;
-        if (tiempoTotal > 0) {
-            pctTiempo = tiempoTranscurrido / tiempoTotal;
-            pctTiempo = Math.min(Math.max(pctTiempo, 0), 1); 
+        if (duracionTotal > 0) {
+            pctTiempo = Math.min(Math.max(tiempoPasado / duracionTotal, 0), 1);
+        }
+        
+        // PV: Cuánto deberíamos llevar gastado/avanzado al día de hoy según el calendario
+        const PV = BAC * pctTiempo;
+
+        // 4. CÁLCULO DE ÍNDICES (MATEMÁTICA DE INGENIERÍA)
+        // SPI (Eficiencia de Tiempo) = EV / PV
+        let spi = (PV > 0) ? (EV / PV) : 1.00;
+        
+        // CPI (Eficiencia de Costo) = EV / AC
+        let cpi = (AC > 0) ? (EV / AC) : 1.00;
+
+        // 5. AJUSTES DE BORDES (CASOS ESPECIALES)
+        // Si no ha empezado, no penalizamos
+        if (p.progreso === 0) { 
+            spi = 1.00; 
+            cpi = 1.00; 
+        } 
+        // Si hay avance pero costo 0, la eficiencia es "perfecta" (1.00 para no romper gráfica)
+        else if (AC === 0 && p.progreso > 0) {
+            cpi = 1.00; 
         }
 
-        const avancePct = progresoCalculado / 100;
-        const ev = bac * avancePct;        
-        const pv = bac * pctTiempo;        
-        const ac = parseFloat(proyecto.costo_acumulado) || (ev * 0.95); 
+        // 6. UPDATE ATÓMICO A LA TABLA MAESTRA
+        // Esto es lo que arregla que en el Dashboard principal se vea bien
+        await client.query(
+            "UPDATE proyectos SET spi = $1, cpi = $2 WHERE id = $3",
+            [spi.toFixed(2), cpi.toFixed(2), proyectoId]
+        );
+        
+        console.log(`[SYNC-AUTO] Proyecto ${p.codigo} recalibrado -> SPI: ${spi.toFixed(2)}, CPI: ${cpi.toFixed(2)}`);
 
-        const sv = ev - pv;                    
-        const cv = ev - ac;                    
-        const spi = (pv > 0) ? (ev / pv) : 1;  
-        const cpi = (ac > 0) ? (ev / ac) : 1;  
-        const eac = (cpi > 0) ? (bac / cpi) : bac; 
+    } catch (err) {
+        console.error("Error crítico en sincronización de indicadores:", err);
+    } finally {
+        if (client) client.release();
+    }
+};
 
-        const formatMXN = (val) => {
-            if (val === undefined || val === null || isNaN(val)) return "$0.00";
-            return val.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 2 });
+/**
+ * GENERADOR DE CURVAS S (SEGMENTACIÓN TEMPORAL)
+ * Procesa el historial del proyecto día por día para visualización gráfica.
+ */
+const procesarCurvasEVM = (f_inicio, f_fin, bac, avance, bitacoraGastos, costoNomina, filtros) => {
+    const labels = [];
+    const dataPV = [];
+    const dataEV = [];
+    const dataAC = [];
+    const dataSPI = [];
+    const dataCPI = [];
+
+    const start = new Date(f_inicio);
+    const end = new Date(f_fin);
+    const today = new Date();
+    
+    const diffTotal = Math.max(end - start, 1);
+    const totalDays = Math.ceil(diffTotal / (1000 * 60 * 60 * 24));
+    const daysPassed = Math.min(Math.ceil((today - start) / (1000 * 60 * 60 * 24)), totalDays);
+
+    let loopStart = 0;
+    let loopEnd = totalDays;
+
+    if (filtros.start) {
+        const dStart = new Date(filtros.start);
+        loopStart = Math.max(0, Math.ceil((dStart - start) / (1000 * 60 * 60 * 24)));
+    }
+    if (filtros.end) {
+        const dEnd = new Date(filtros.end);
+        loopEnd = Math.min(totalDays, Math.ceil((dEnd - start) / (1000 * 60 * 60 * 24)));
+    }
+
+    const step = Math.max(1, Math.ceil((loopEnd - loopStart) / 50));
+
+    for (let i = loopStart; i <= loopEnd; i += step) {
+        const fechaPunto = new Date(start.getTime() + (i * 24 * 60 * 60 * 1000));
+        labels.push(fechaPunto.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }));
+
+        // Planned Value (Curva S)
+        const x = i / totalDays;
+        const s_factor = (1 - Math.cos(x * Math.PI)) / 2;
+        const pvVal = bac * s_factor;
+        dataPV.push(pvVal.toFixed(2));
+
+        // EV y AC (Histórico)
+        if (i <= daysPassed) {
+            const factorInterp = (avance / 100) * (i / Math.max(daysPassed, 1));
+            const evVal = bac * factorInterp;
+            dataEV.push(evVal.toFixed(2));
+
+            const gMat = bitacoraGastos
+                .filter(g => new Date(g.fecha_registro) <= fechaPunto)
+                .reduce((s, g) => s + parseFloat(g.monto_relacionado || 0), 0);
+            
+            const nProporcional = costoNomina * (i / Math.max(daysPassed, 1));
+            const acVal = gMat + nProporcional;
+            dataAC.push(acVal.toFixed(2));
+
+            const spi = pvVal > 0 ? evVal / pvVal : 1;
+            const cpi = acVal > 0 ? evVal / acVal : 1;
+            dataSPI.push(spi.toFixed(2));
+            dataCPI.push(cpi.toFixed(2));
+        } else {
+            dataEV.push(null);
+            dataAC.push(null);
+            dataSPI.push(null);
+            dataCPI.push(null);
+        }
+    }
+
+    return { labels, dataPV, dataEV, dataAC, dataSPI, dataCPI };
+};
+
+/* ----------------------------------------------------------------------------------------------------
+ * 4. RUTAS DE VISUALIZACIÓN Y DASHBOARD (GET)
+ * ---------------------------------------------------------------------------------------------------- */
+
+/**
+ * RUTA: DETALLE DE PROYECTO (DASHBOARD 360)
+ * [CORRECCIÓN IMPORTANTE]: Ahora ejecuta 'sincronizarIndicadores' al abrir.
+ * Esto asegura que la base de datos siempre tenga el SPI/CPI fresco.
+ */
+router.get('/:id', verificarSesion, async function(req, res, next) {
+    const id = req.params.id;
+    const filterS = req.query.start || null;
+    const filterE = req.query.end || null;
+
+    if (isNaN(id)) return res.redirect('/app/proyectos');
+
+    let client;
+    try {
+        // A. RECALIBRACIÓN AUTOMÁTICA
+        // Antes de cargar nada, forzamos la actualización de la matemática financiera
+        await sincronizarIndicadores(id);
+
+        client = await pool.connect();
+
+        // B. EXTRACCIÓN DE DATOS MAESTROS (Ya actualizados)
+        const resP = await client.query('SELECT * FROM proyectos WHERE id = $1', [id]);
+        const p = resP.rows[0];
+
+        if (!p) {
+            client.release();
+            return res.status(404).render('error', { message: "Proyecto no localizado." });
+        }
+
+        // C. INTEGRACIÓN CON CAPITAL HUMANO (RH)
+        const resRH = await client.query("SELECT costo_hora FROM rrhh_colaboradores WHERE nombre_completo = $1", [p.lider]);
+        const costoHoraPM = resRH.rows.length > 0 ? parseFloat(resRH.rows[0].costo_hora) : 0;
+
+        // D. CARGA DE SUB-MÓDULOS (PARALELO)
+        const [resEnt, resCam, resHit, resRie, resBit, resRepo] = await Promise.all([
+            client.query('SELECT * FROM entregables WHERE proyecto_id = $1 ORDER BY id ASC', [id]),
+            client.query('SELECT * FROM control_cambios WHERE proyecto_id = $1 ORDER BY fecha_registro DESC', [id]),
+            client.query('SELECT * FROM hitos WHERE proyecto_id = $1 ORDER BY fecha ASC', [id]),
+            client.query('SELECT * FROM riesgos WHERE proyecto_id = $1 ORDER BY id DESC', [id]),
+            client.query('SELECT * FROM bitacora WHERE proyecto_id = $1 ORDER BY fecha_registro DESC', [id]),
+            client.query('SELECT COUNT(*) as total FROM repositorio_planos WHERE proyecto_id = $1', [id])
+        ]);
+
+        // E. LÓGICA DE NEGOCIO PARA VISTA
+        const inicio = new Date(p.fecha_inicio || p.creado_en);
+        const finOriginal = new Date(p.fecha_fin);
+        const hoy = new Date();
+
+        let aditivasDinero = 0;
+        let aditivasDias = 0;
+        resCam.rows.forEach(c => {
+            if (c.estatus === 'Aprobado') {
+                aditivasDinero += parseFloat(c.impacto_costo) || 0;
+                aditivasDias += parseInt(c.impacto_tiempo) || 0;
+            }
+        });
+
+        const presupuestoBAC = parseFloat(p.presupuesto) + aditivasDinero;
+        const fechaFinAjustada = new Date(finOriginal);
+        fechaFinAjustada.setDate(fechaFinAjustada.getDate() + aditivasDias);
+
+        // Nómina
+        const diasTranscurridos = Math.max(0, Math.ceil((hoy - inicio) / (1000 * 60 * 60 * 24)));
+        const horasLaboradasPM = diasTranscurridos * 8 * 0.75; 
+        const costoNominaAcumulada = horasLaboradasPM * costoHoraPM;
+
+        // Costo Real
+        const bitacoraGastos = resBit.rows.filter(b => b.tipo_registro === 'Gasto');
+        const costoMateriales = bitacoraGastos.reduce((s, g) => s + parseFloat(g.monto_relacionado || 0), 0);
+        const acTotal = costoMateriales + costoNominaAcumulada + (parseFloat(p.costo_acumulado) || 0);
+
+        // Utilidad
+        const valorVentaNegocio = parseFloat(p.valor_negocio) || 0;
+        const utilidadActual = valorVentaNegocio - acTotal;
+
+        // Gráficos
+        const analitica = procesarCurvasEVM(
+            inicio, fechaFinAjustada, presupuestoBAC, p.progreso, 
+            bitacoraGastos, costoNominaAcumulada, { start: filterS, end: filterE }
+        );
+
+        // Objeto Dashboard
+        const pDashboard = {
+            ...p,
+            entregables: resEnt.rows,
+            controlCambios: resCam.rows,
+            hitos: resHit.rows,
+            riesgos: resRie.rows,
+            bitacora: resBit.rows,
+            totalPlanos: parseInt(resRepo.rows[0].total),
+            
+            fecha_fin_ajustada_f: fechaFinAjustada.toLocaleDateString('es-MX', {day:'numeric', month:'long', year:'numeric'}),
+            
+            kpi: {
+                bac_f: toMXN(presupuestoBAC),
+                pv_f: toMXN(valorVentaNegocio),
+                ev_f: toMXN(utilidadActual),
+                ac_f: toMXN(acTotal),
+                
+                // Usamos los valores frescos de la base de datos (recién sincronizados)
+                cpi_v: parseFloat(p.cpi).toFixed(2),
+                spi_v: parseFloat(p.spi).toFixed(2),
+                cpi_color: parseFloat(p.cpi) < 0.9 ? 'text-danger' : (parseFloat(p.cpi) > 1.05 ? 'text-success' : 'text-warning'),
+                spi_color: parseFloat(p.spi) < 0.9 ? 'text-danger' : (parseFloat(p.spi) > 1.05 ? 'text-success' : 'text-warning'),
+                diagnostico: generarDiagnosticoSalud(p.cpi, p.spi)
+            },
+
+            graficos: {
+                labels: JSON.stringify(analitica.labels),
+                pv: JSON.stringify(analitica.dataPV),
+                ev: JSON.stringify(analitica.dataEV),
+                ac: JSON.stringify(analitica.dataAC),
+                spi: JSON.stringify(analitica.dataSPI),
+                cpi: JSON.stringify(analitica.dataCPI)
+            }
         };
 
-        proyecto.bac_f = formatMXN(bac);
-        proyecto.pv_f = formatMXN(pv);
-        proyecto.ev_f = formatMXN(ev);
-        proyecto.ac_f = formatMXN(ac);
-        proyecto.cv_f = formatMXN(cv); 
-        proyecto.eac_f = formatMXN(eac);
-        
-        proyecto.fecha_fin_ajustada_f = fechaFinAjustada.toLocaleDateString('es-MX', {day: 'numeric', month: 'short', year: 'numeric'});
-        proyecto.spi_v = isNaN(spi) ? "1.00" : spi.toFixed(2);
-        proyecto.cpi_v = isNaN(cpi) ? "1.00" : cpi.toFixed(2);
-
-        // ============================================================
-        // 7. HISTORIAL DIARIO (ESTA ERA LA PARTE QUE FALTABA)
-        // ============================================================
-        proyecto.historialDiario = [];
-        const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-        
-        for (let i = 0; i < 30; i++) {
-            const fechaLoop = new Date();
-            fechaLoop.setDate(fechaLoop.getDate() - i);
-            const diaSemana = fechaLoop.getDay(); 
-            const fechaString = `${fechaLoop.getDate()} ${meses[fechaLoop.getMonth()]}`;
-            
-            // Buscamos si hubo actividad ese día en la bitácora
-            const evento = registrosBitacora.find(r => new Date(r.fecha).toDateString() === fechaLoop.toDateString());
-            
-            let claseColor = 'vacio';
-            if (evento) {
-                claseColor = (evento.tipo === 'Incidente') ? 'parado' : (evento.tipo === 'Avance' ? 'avance' : 'normal');
-            } else if (diaSemana === 0 || diaSemana === 6) {
-                claseColor = 'fin-semana';
-            }
-            
-            proyecto.historialDiario.push({
-                displayFecha: fechaString,
-                clase: claseColor,
-                obs: evento ? evento.titulo : 'Sin actividad'
-            });
-        }
-        // ============================================================
-
-        // RENDERIZADO FINAL
         res.render('app_proyecto_detalle', { 
-            title: `Detalle: ${proyecto.nombre} | INYMO`, 
-            p: proyecto 
+            p: pDashboard, 
+            filtros: { start: filterS, end: filterE },
+            usuario: req.session.nombreUsuario 
         });
 
     } catch (err) {
-        console.error("Error detalle:", err);
-        res.status(500).send("Error interno: " + err.message);
+        console.error("[CRITICAL ERROR]", err);
+        res.status(500).send("Fallo en el motor de análisis: " + err.message);
+    } finally {
+        if (client) client.release();
     }
 });
 
-/* F. EDITAR PROYECTO (GET) */
-router.get('/editar/:id', verificarSesion, async function(req, res, next) {
-  const idProyecto = req.params.id;
-  try {
-    const client = await pool.connect();
-    const result = await client.query('SELECT * FROM proyectos WHERE id = $1', [idProyecto]);
-    const proyecto = result.rows[0];
-    client.release();
+/* ----------------------------------------------------------------------------------------------------
+ * 5. RUTAS DE CONFIGURACIÓN Y EDICIÓN (RESTAURADO)
+ * ---------------------------------------------------------------------------------------------------- */
 
-    if (proyecto.fecha_fin) {
-      const dateObj = (proyecto.fecha_fin instanceof Date) ? proyecto.fecha_fin : new Date(proyecto.fecha_fin);
-      proyecto.fecha_fin_formato = dateObj.toISOString().substring(0, 10);
-    } else { proyecto.fecha_fin_formato = ''; }
-    
-    res.render('app_proyecto_editar', { title: `Editar: ${proyecto.nombre}`, p: proyecto, mensaje: null });
-  } catch (err) { res.send("Error DB"); }
-});
+/**
+ * RUTA: MOSTRAR FORMULARIO DE EDICIÓN
+ * Recupera los datos del proyecto para mostrarlos en los inputs.
+ */
+router.get('/:id/editar', verificarSesion, async function(req, res) {
+    const id = req.params.id;
+    if (isNaN(id)) return res.redirect('/app/proyectos');
 
-/* G. ACTUALIZAR PROYECTO (POST) */
-router.post('/actualizar/:id', verificarSesion, async function(req, res, next) {
-  const idProyecto = req.params.id;
-  const data = req.body;
-  const progreso = parseInt(data.progreso);
-  const riesgo = data.riesgo;
-  
-  let estadoSalud = 'En Tiempo';
-  if (progreso < 50 && riesgo === 'Alto') estadoSalud = 'Retrasado';
-  else if (progreso === 100 && data.fase === 'Cierre') estadoSalud = 'Finalizado';
-
-  let fechaSQL = null;
-  if (data.fecha_fin) {
-      const dateObj = new Date(data.fecha_fin);
-      if (!isNaN(dateObj)) fechaSQL = dateObj.toISOString().substring(0, 10);
-  }
-
-  const updateQuery = `
-    UPDATE proyectos SET nombre = $1, cliente = $2, lider = $3, progreso = $4, fase = $5,
-      presupuesto = $6, valor_negocio = $7, fecha_fin = $8, riesgo = $9,
-      salud = $10, narrativa = $11, metas_proximos_pasos = $12, tipo_entrega = $13 
-    WHERE id = $14;`;
-  
-  const values = [data.nombre, data.cliente, data.lider, progreso, data.fase, parseFloat(data.presupuesto), parseFloat(data.valor_negocio), fechaSQL, data.riesgo, estadoSalud, data.narrativa, data.metas_proximos_pasos, data.tipo_entrega, parseInt(idProyecto)];
-
-  try {
-    const client = await pool.connect();
-    await client.query(updateQuery, values);
-    client.release();
-    res.redirect(`/app/proyectos/${idProyecto}`);
-  } catch (err) {
-    res.render('app_proyecto_editar', { title: 'Error de Edición', p: data, mensaje: { tipo: 'error', texto: `Error al guardar.` } });
-  }
-});
-
-/* I. ELIMINAR/ARCHIVAR */
-router.get('/eliminar/:id', verificarSesion, async function(req, res, next) {
-  const idProyecto = parseInt(req.params.id);
-  try {
-    const client = await pool.connect();
-    await client.query("UPDATE proyectos SET salud = 'Archivado', fase = 'Archivado', progreso = 100 WHERE id = $1;", [idProyecto]);
-    client.release();
-    res.redirect('/app/proyectos'); 
-  } catch (err) { res.send("Error DB: " + err); }
-});
-
-/* K. RECUPERAR */
-router.get('/recuperar/:id', verificarSesion, async function(req, res, next) {
-  try {
-    const client = await pool.connect();
-    await client.query("UPDATE proyectos SET salud = 'En Tiempo', fase = 'Ejecución', progreso = 0, riesgo = 'Bajo' WHERE id = $1;", [req.params.id]);
-    client.release();
-    res.redirect('/app/proyectos'); 
-  } catch (err) { res.send("Error DB: " + err); }
-});
-
-
-/* M. REPORTE PDF (Con Base64) - VERSIÓN FINAL COMPLETA */
-router.get('/reporte/:id', verificarSesion, async function(req, res, next) {
-    const idProyecto = req.params.id;
+    let client;
     try {
-        const client = await pool.connect();
-        
-        // 1. DATOS GENERALES
-        const result = await client.query('SELECT * FROM proyectos WHERE id = $1', [idProyecto]);
-        const proyecto = result.rows[0];
-        if (!proyecto) { client.release(); return res.status(404).send("No encontrado"); }
+        client = await pool.connect();
+        const resP = await client.query('SELECT * FROM proyectos WHERE id = $1', [id]);
+        const p = resP.rows[0];
 
-        // 2. CONSULTAS DE DETALLE
-        const resEnt = await client.query('SELECT * FROM entregables WHERE proyecto_id = $1 ORDER BY fecha_entrega ASC', [idProyecto]);
-        const resCam = await client.query('SELECT * FROM control_cambios WHERE proyecto_id = $1 ORDER BY fecha_registro DESC', [idProyecto]);
-        const resHit = await client.query('SELECT * FROM hitos WHERE proyecto_id = $1 ORDER BY fecha ASC', [idProyecto]);
-        const resRie = await client.query('SELECT * FROM riesgos WHERE proyecto_id = $1 ORDER BY id DESC', [idProyecto]);
-        // Traemos bitácora general y lecciones aprendidas por separado
-        const resBit = await client.query('SELECT * FROM bitacora WHERE proyecto_id = $1 ORDER BY fecha_registro DESC LIMIT 10', [idProyecto]);
-        const resLecc = await client.query(`SELECT titulo, descripcion FROM bitacora WHERE proyecto_id = $1 AND tipo_registro = 'Lección Aprendida' ORDER BY fecha_registro DESC LIMIT 5`, [idProyecto]);
-        
-        proyecto.entregables = resEnt.rows || [];
-        proyecto.controlCambios = resCam.rows || [];
-        proyecto.hitos = resHit.rows || [];
-        proyecto.riesgos = resRie.rows || [];
-        proyecto.bitacora = resBit.rows || [];
-        proyecto.leccionesAprendidas = resLecc.rows || [];
-
-        // 3. IMAGEN BASE64
-        const imagePath = path.join(__dirname, '../public/images/logo-inymo-white.png');
-        let logoBase64 = '';
-        try {
-            if (fs.existsSync(imagePath)) {
-                const bitmap = fs.readFileSync(imagePath);
-                logoBase64 = `data:image/png;base64,${bitmap.toString('base64')}`;
-            }
-        } catch (e) { console.error("Error logo:", e); }
-
-        // 4. CÁLCULOS EVM Y FECHAS (Igual que en la Web)
-        let presupuestoExtra = 0;
-        let diasExtra = 0;
-        proyecto.controlCambios.forEach(c => { 
-            if (c.estatus === 'Aprobado') {
-                presupuestoExtra += parseFloat(c.impacto_costo) || 0;
-                diasExtra += parseInt(c.impacto_tiempo) || 0;
-            }
-        });
-
-        // A. Costos
-        const bac = (parseFloat(proyecto.presupuesto) || 0) + presupuestoExtra;
-        
-        // B. Progreso
-        let progresoCalculado = 0;
-        if (proyecto.entregables.length > 0) {
-            const sumaAvance = proyecto.entregables.reduce((acc, curr) => acc + (curr.progreso || 0), 0);
-            progresoCalculado = Math.round(sumaAvance / proyecto.entregables.length);
-        } else {
-            progresoCalculado = proyecto.progreso || 0;
+        if (!p) {
+            client.release();
+            return res.status(404).send("Proyecto no encontrado.");
         }
-        proyecto.progreso = progresoCalculado; // Aseguramos que el PDF tenga el dato real
+        client.release();
 
-        // C. Fechas Ajustadas
-        const fechaInicio = new Date(proyecto.fecha_registro || new Date());
-        let fechaFinOriginal = proyecto.fecha_fin ? new Date(proyecto.fecha_fin) : new Date();
-        if (!proyecto.fecha_fin) fechaFinOriginal.setDate(fechaInicio.getDate() + 30);
-
-        const fechaFinAjustada = new Date(fechaFinOriginal);
-        fechaFinAjustada.setDate(fechaFinAjustada.getDate() + diasExtra);
-        
-        // Pasamos la fecha formateada al PDF
-        proyecto.fecha_fin_ajustada_f = fechaFinAjustada.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
-
-        // D. Variables EVM
-        const avancePct = progresoCalculado / 100;
-        const ev = bac * avancePct;
-        const ac = parseFloat(proyecto.costo_acumulado) || (ev * 0.95);
-        const pv = bac * (avancePct * 1.05); // Estimado simple
-        
-        const formatMXN = (val) => val.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
-        proyecto.bac_f = formatMXN(bac);
-        proyecto.ev_f = formatMXN(ev);
-        proyecto.ac_f = formatMXN(ac);
-        proyecto.spi_v = (pv > 0 ? ev/pv : 1).toFixed(2);
-        proyecto.cpi_v = (ac > 0 ? ev/ac : 1).toFixed(2);
-        proyecto.eac_f = formatMXN((ac > 0 && ev > 0) ? (bac / (ev/ac)) : bac);
-        
-        // 5. RENDERIZAR
-        const htmlContent = await new Promise((resolve, reject) => {
-            res.render('app_reporte_pdf', { p: proyecto, logo: logoBase64, layout: false }, (err, html) => {
-                if (err) return reject(err);
-                resolve(html);
-            });
+        // Renderizamos la vista de edición (Asegúrate de tener 'app_proyecto_editar.pug')
+        // Si usas un modal, esta lógica podría cambiar, pero aquí asumimos vista dedicada
+        res.render('app_proyecto_editar', { 
+            title: `Configurar ${p.codigo}`,
+            p: p,
+            usuario: req.session.nombreUsuario
         });
 
-        const file = { content: htmlContent };
-        const options = { format: 'A4', printBackground: true, margin: { top: "20px", bottom: "20px", left: "20px", right: "20px" } };
-
-        const pdfBuffer = await html_to_pdf.generatePdf(file, options);
-        const fileName = `Reporte_${proyecto.codigo}_${new Date().toISOString().split('T')[0]}.pdf`;
-        
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-        res.send(pdfBuffer);
-        
-        client.release();
-
-    } catch (err) { console.error(err); res.status(500).send("Error PDF: " + err.message); }
+    } catch (err) {
+        console.error("Error al cargar configuración:", err);
+        if (client) client.release();
+        res.status(500).send("Error de servidor.");
+    }
 });
 
+/**
+ * RUTA: GUARDAR CAMBIOS DE CONFIGURACIÓN (UPDATE)
+ */
+router.post('/:id/actualizar', verificarSesion, async function(req, res) {
+    const id = req.params.id;
+    const { nombre, cliente, lider, presupuesto, valor_negocio, fecha_fin, fase, estatus } = req.body;
 
-
-/* =========================================================================
-   --- RUTAS DE ACCIÓN (Guardar Datos) ---
-   ========================================================================= */
-
-// 1. NUEVO ENTREGABLE
-router.post('/:id/entregable', verificarSesion, async (req, res) => {
-    const { nombre, responsable, fecha_entrega, progreso } = req.body;
     try {
-        const client = await pool.connect();
-        await client.query(
-            `INSERT INTO entregables (proyecto_id, nombre, responsable, fecha_entrega, progreso, estado) 
-             VALUES ($1, $2, $3, $4, $5, 'Pendiente')`,
-            [req.params.id, nombre, responsable, fecha_entrega, parseInt(progreso) || 0]
+        await pool.query(
+            `UPDATE proyectos SET 
+                nombre = $1, 
+                cliente = $2, 
+                lider = $3, 
+                presupuesto = $4, 
+                valor_negocio = $5, 
+                fecha_fin = $6, 
+                fase = $7,
+                salud = $8 
+            WHERE id = $9`,
+            [nombre, cliente, lider, parseFloat(presupuesto), parseFloat(valor_negocio), fecha_fin, fase, estatus, id]
         );
-        client.release();
-        res.redirect(`/app/proyectos/${req.params.id}`);
-    } catch (err) { res.send("Error al guardar entregable: " + err.message); }
+        
+        // Recalcular indicadores con los nuevos valores financieros
+        await sincronizarIndicadores(id);
+        
+        res.redirect(`/app/proyectos/${id}`);
+    } catch (err) {
+        console.error("Error actualizando proyecto:", err);
+        res.status(500).send("No se pudo actualizar el proyecto.");
+    }
 });
 
-// 2. NUEVO RIESGO
+/* ----------------------------------------------------------------------------------------------------
+ * 6. RUTAS DE GENERACIÓN DE DOCUMENTOS (PDF)
+ * ---------------------------------------------------------------------------------------------------- */
+
+router.get('/reporte/:id', verificarSesion, async function(req, res) {
+    const id = req.params.id;
+    let client;
+    try {
+        client = await pool.connect();
+        
+        const resP = await client.query('SELECT * FROM proyectos WHERE id = $1', [id]);
+        const p = resP.rows[0];
+
+        if (!p) { client.release(); return res.status(404).send("Proyecto inexistente."); }
+
+        const [resEnt, resCam, resHit, resRie, resBit] = await Promise.all([
+            client.query('SELECT * FROM entregables WHERE proyecto_id = $1', [id]),
+            client.query('SELECT * FROM control_cambios WHERE proyecto_id = $1', [id]),
+            client.query('SELECT * FROM hitos WHERE proyecto_id = $1', [id]),
+            client.query('SELECT * FROM riesgos WHERE proyecto_id = $1', [id]),
+            client.query('SELECT * FROM bitacora WHERE proyecto_id = $1 ORDER BY fecha_registro DESC LIMIT 15', [id])
+        ]);
+        client.release();
+
+        const bac = parseFloat(p.presupuesto) || 0;
+        const ac = parseFloat(p.costo_acumulado) || 0;
+        const ev = bac * ((p.progreso || 0) / 100);
+        const cpi = ac > 0 ? ev / ac : 1;
+
+        const pData = {
+            ...p,
+            entregables: resEnt.rows,
+            controlCambios: resCam.rows,
+            hitos: resHit.rows,
+            riesgos: resRie.rows,
+            bitacora: resBit.rows,
+            kpi: {
+                bac_f: toMXN(bac),
+                pv_f: toMXN(parseFloat(p.valor_negocio)),
+                ev_f: toMXN(ev),
+                ac_f: toMXN(ac),
+                cpi_v: cpi.toFixed(2),
+                spi_v: "1.00",
+                eac_f: toMXN(cpi > 0 ? bac / cpi : bac),
+                cv_f: toMXN(ev - ac)
+            }
+        };
+
+        res.render('app_reporte_pdf', { p: pData, layout: false }, async (err, html) => {
+            if (err) {
+                console.error("Error al compilar PUG del reporte:", err);
+                return res.status(500).send("Error en el diseño del reporte.");
+            }
+
+            const options = { 
+                format: 'A4', 
+                printBackground: true,
+                margin: { top: "1cm", bottom: "1cm", left: "1cm", right: "1cm" }
+            };
+            const file = { content: html };
+
+            const pdfBuffer = await html_to_pdf.generatePdf(file, options);
+            
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename=Reporte_INYMO_${p.codigo}.pdf`);
+            res.send(pdfBuffer);
+        });
+
+    } catch (e) {
+        if (client) client.release();
+        res.status(500).send("Error en servidor de reportes.");
+    }
+});
+
+/* ----------------------------------------------------------------------------------------------------
+ * 7. RUTAS DE ACCIÓN OPERATIVA (CRUD)
+ * ---------------------------------------------------------------------------------------------------- */
+
+/**
+ * REGISTRAR GASTO OPERATIVO
+ * [AUTO-SYNC]: Recalcula índices al guardar.
+ */
+router.post('/:id/gasto', verificarSesion, async (req, res) => {
+    const { concepto, monto, fecha } = req.body;
+    try {
+        await pool.query('BEGIN');
+        await pool.query(
+            "INSERT INTO bitacora (proyecto_id, titulo, descripcion, tipo_registro, monto_relacionado, fecha_registro) VALUES ($1, $2, 'Imputación de costo real manual.', 'Gasto', $3, $4)",
+            [req.params.id, 'Gasto: ' + concepto, parseFloat(monto), fecha || new Date()]
+        );
+        await pool.query("UPDATE proyectos SET costo_acumulado = COALESCE(costo_acumulado,0) + $1 WHERE id = $2", [parseFloat(monto), req.params.id]);
+        await pool.query('COMMIT');
+        
+        await sincronizarIndicadores(req.params.id);
+
+        res.redirect(`/app/proyectos/${req.params.id}`);
+    } catch (e) {
+        await pool.query('ROLLBACK');
+        res.status(500).send("Error al procesar gasto.");
+    }
+});
+
+/**
+ * GESTIÓN DE ENTREGABLES (WBS)
+ */
+router.post('/:id/entregable', verificarSesion, async (req, res) => {
+    const { nombre, responsable, fecha_entrega } = req.body;
+    await pool.query(
+        "INSERT INTO entregables (proyecto_id, nombre, responsable, fecha_entrega, progreso, estado) VALUES ($1, $2, $3, $4, 0, 'Pendiente')",
+        [req.params.id, nombre, responsable, fecha_entrega]
+    );
+    await sincronizarIndicadores(req.params.id);
+    res.redirect(`/app/proyectos/${req.params.id}#wbs`);
+});
+
+router.post('/:id/entregable/:eid/actualizar', verificarSesion, async (req, res) => {
+    const { nuevo_progreso } = req.body;
+    const prog = parseInt(nuevo_progreso);
+    const estado = prog === 100 ? 'Completado' : (prog > 0 ? 'En Curso' : 'Pendiente');
+    
+    await pool.query("UPDATE entregables SET progreso = $1, estado = $2 WHERE id = $3", [prog, estado, req.params.eid]);
+    
+    const resAvg = await pool.query("SELECT AVG(progreso) FROM entregables WHERE proyecto_id = $1", [req.params.id]);
+    const avgVal = Math.round(resAvg.rows[0].avg || 0);
+    await pool.query("UPDATE proyectos SET progreso = $1 WHERE id = $2", [avgVal, req.params.id]);
+    
+    await sincronizarIndicadores(req.params.id);
+
+    res.redirect(`/app/proyectos/${req.params.id}#wbs`);
+});
+
+router.get('/:id/entregable/eliminar/:eid', verificarSesion, async (req, res) => {
+    await pool.query("DELETE FROM entregables WHERE id = $1", [req.params.eid]);
+    await sincronizarIndicadores(req.params.id);
+    res.redirect(`/app/proyectos/${req.params.id}#wbs`);
+});
+
+/**
+ * GESTIÓN DE RIESGOS
+ */
 router.post('/:id/riesgo', verificarSesion, async (req, res) => {
     const { descripcion, impacto } = req.body;
-    try {
-        const client = await pool.connect();
-        await client.query(
-            `INSERT INTO riesgos (proyecto_id, descripcion, impacto, estado) VALUES ($1, $2, $3, 'Activo')`,
-            [req.params.id, descripcion, impacto]
-        );
-        client.release();
-        res.redirect(`/app/proyectos/${req.params.id}`);
-    } catch (err) { res.send("Error al guardar riesgo"); }
+    await pool.query("INSERT INTO riesgos (proyecto_id, descripcion, impacto, estado) VALUES ($1, $2, $3, 'Activo')", 
+        [req.params.id, descripcion, impacto]);
+    res.redirect(`/app/proyectos/${req.params.id}#riesgos`);
 });
 
-// 3. NUEVO HITO
+router.get('/:id/riesgo/eliminar/:rid', verificarSesion, async (req, res) => {
+    await pool.query("DELETE FROM riesgos WHERE id = $1", [req.params.rid]);
+    res.redirect(`/app/proyectos/${req.params.id}#riesgos`);
+});
+
+/**
+ * GESTIÓN DE HITOS
+ */
 router.post('/:id/hito', verificarSesion, async (req, res) => {
     const { nombre, fecha } = req.body;
-    try {
-        const client = await pool.connect();
-        await client.query(
-            `INSERT INTO hitos (proyecto_id, nombre, fecha, estado) VALUES ($1, $2, $3, 'Pendiente')`,
-            [req.params.id, nombre, fecha]
-        );
-        client.release();
-        res.redirect(`/app/proyectos/${req.params.id}`);
-    } catch (err) { res.send("Error al guardar hito"); }
+    await pool.query("INSERT INTO hitos (proyecto_id, nombre, fecha, estado) VALUES ($1, $2, $3, 'Pendiente')", 
+        [req.params.id, nombre, fecha]);
+    res.redirect(`/app/proyectos/${req.params.id}#cronograma`);
 });
 
-// 4. REGISTRAR BITÁCORA
+router.get('/:id/hito/eliminar/:hid', verificarSesion, async (req, res) => {
+    await pool.query("DELETE FROM hitos WHERE id = $1", [req.params.hid]);
+    res.redirect(`/app/proyectos/${req.params.id}#cronograma`);
+});
+
+/**
+ * GESTIÓN DE BITÁCORA
+ */
 router.post('/:id/bitacora', verificarSesion, async (req, res) => {
     const { titulo, descripcion, tipo_registro } = req.body;
-    try {
-        const client = await pool.connect();
-        await client.query(
-            `INSERT INTO bitacora (proyecto_id, titulo, descripcion, tipo_registro, fecha_registro) 
-             VALUES ($1, $2, $3, $4, NOW())`,
-            [req.params.id, titulo, descripcion, tipo_registro]
-        );
-        client.release();
-        res.redirect(`/app/proyectos/${req.params.id}`);
-    } catch (err) { res.send("Error al registrar bitácora"); }
+    await pool.query(
+        "INSERT INTO bitacora (proyecto_id, titulo, descripcion, tipo_registro, fecha_registro) VALUES ($1, $2, $3, $4, NOW())",
+        [req.params.id, titulo, descripcion, tipo_registro]
+    );
+    res.redirect(`/app/proyectos/${req.params.id}#bitacora`);
 });
 
-// 5. NUEVO CONTROL DE CAMBIO
+router.get('/:id/bitacora/eliminar/:bid', verificarSesion, async (req, res) => {
+    await pool.query("DELETE FROM bitacora WHERE id = $1", [req.params.bid]);
+    res.redirect(`/app/proyectos/${req.params.id}#bitacora`);
+});
+
+/**
+ * GESTIÓN DE CONTROL DE CAMBIOS (RC)
+ */
 router.post('/:id/cambio', verificarSesion, async (req, res) => {
     const { titulo, descripcion, impacto_costo, impacto_tiempo } = req.body;
+    await pool.query(
+        "INSERT INTO control_cambios (proyecto_id, titulo, descripcion, impacto_costo, impacto_tiempo, estatus, fecha_registro) VALUES ($1, $2, $3, $4, $5, 'Pendiente', NOW())",
+        [req.params.id, titulo, descripcion, parseFloat(impacto_costo)||0, parseInt(impacto_tiempo)||0]
+    );
+    res.redirect(`/app/proyectos/${req.params.id}#cambios`);
+});
+
+router.post('/:id/cambio/:cid/aprobar', verificarSesion, async (req, res) => {
+    await pool.query("UPDATE control_cambios SET estatus = 'Aprobado' WHERE id = $1", [req.params.cid]);
+    await sincronizarIndicadores(req.params.id);
+    res.redirect(`/app/proyectos/${req.params.id}#cambios`);
+});
+
+router.post('/:id/cambio/:cid/rechazar', verificarSesion, async (req, res) => {
+    await pool.query("UPDATE control_cambios SET estatus = 'Rechazado' WHERE id = $1", [req.params.cid]);
+    res.redirect(`/app/proyectos/${req.params.id}#cambios`);
+});
+
+router.get('/:id/cambio/eliminar/:cid', verificarSesion, async (req, res) => {
+    await pool.query("DELETE FROM control_cambios WHERE id = $1", [req.params.cid]);
+    res.redirect(`/app/proyectos/${req.params.id}#cambios`);
+});
+
+/* ----------------------------------------------------------------------------------------------------
+ * 8. GESTIÓN DE CICLO DE VIDA (ARCHIVAR)
+ * ---------------------------------------------------------------------------------------------------- */
+
+router.get('/eliminar/:id', verificarSesion, async (req, res) => {
     try {
-        const client = await pool.connect();
-        await client.query(
-            `INSERT INTO control_cambios (proyecto_id, titulo, descripcion, impacto_costo, impacto_tiempo, estatus, fecha_registro) 
-             VALUES ($1, $2, $3, $4, $5, 'Pendiente', NOW())`,
-            [req.params.id, titulo, descripcion, parseFloat(impacto_costo) || 0, parseInt(impacto_tiempo) || 0]
-        );
-        client.release();
-        res.redirect(`/app/proyectos/${req.params.id}`);
-    } catch (err) { 
-        console.error(err);
-        res.send("Error al registrar cambio: " + err.message); 
+        await pool.query("UPDATE proyectos SET salud = 'Archivado' WHERE id = $1", [req.params.id]);
+        res.redirect('/app/proyectos');
+    } catch (e) {
+        res.status(500).send("Fallo en el proceso de archivado.");
     }
 });
 
-// 6. APROBAR CAMBIO
-router.post('/:id/cambio/:idCambio/aprobar', verificarSesion, async (req, res) => {
-    try {
-        const client = await pool.connect();
-        await client.query("UPDATE control_cambios SET estatus = 'Aprobado' WHERE id = $1", [req.params.idCambio]);
-        client.release();
-        res.redirect(`/app/proyectos/${req.params.id}`);
-    } catch (err) { res.send("Error al aprobar cambio: " + err.message); }
-});
-
-// 7. RECHAZAR CAMBIO
-router.post('/:id/cambio/:idCambio/rechazar', verificarSesion, async (req, res) => {
-    try {
-        const client = await pool.connect();
-        await client.query("UPDATE control_cambios SET estatus = 'Rechazado' WHERE id = $1", [req.params.idCambio]);
-        client.release();
-        res.redirect(`/app/proyectos/${req.params.id}`);
-    } catch (err) { res.send("Error al rechazar cambio: " + err.message); }
-});
-
-// 8. ACTUALIZAR PROGRESO DE ENTREGABLE Y SINCRONIZAR PROYECTO
-router.post('/:id/entregable/:idEntregable/actualizar', verificarSesion, async (req, res) => {
-    const { nuevo_progreso } = req.body;
-    const idProyecto = req.params.id;
-
-    try {
-        const client = await pool.connect();
-        
-        // A. Actualizar el entregable individual
-        let estado = 'En Curso';
-        const prog = parseInt(nuevo_progreso);
-        if (prog === 100) estado = 'Completado';
-        else if (prog === 0) estado = 'Pendiente';
-
-        await client.query(
-            "UPDATE entregables SET progreso = $1, estado = $2 WHERE id = $3", 
-            [prog, estado, req.params.idEntregable]
-        );
-
-        // B. MAGIA DE SINCRONIZACIÓN: Recalcular el promedio total del proyecto
-        const resultPromedio = await client.query(
-            "SELECT AVG(progreso) as promedio FROM entregables WHERE proyecto_id = $1",
-            [idProyecto]
-        );
-        
-        const nuevoAvanceTotal = Math.round(resultPromedio.rows[0].promedio || 0);
-
-        // C. Guardar el nuevo total en la tabla principal de proyectos
-        await client.query(
-            "UPDATE proyectos SET progreso = $1 WHERE id = $2",
-            [nuevoAvanceTotal, idProyecto]
-        );
-
-        client.release();
-        res.redirect(`/app/proyectos/${idProyecto}`);
-
-    } catch (err) { 
-        console.error(err);
-        res.send("Error al sincronizar progreso: " + err.message); 
-    }
-});
-
+// EXPORTACIÓN DEL CONTROLADOR INTEGRAL
 module.exports = router;

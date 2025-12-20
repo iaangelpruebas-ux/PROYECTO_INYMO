@@ -1,51 +1,591 @@
 extends layout_app
 
 block content
-  // 1. TARJETA DE BIENVENIDA
-  div.welcome-card
-    div.welcome-text
-      h1 ¡Hola de nuevo, Ángel! 👋
-      p Aquí tienes el resumen de operaciones de INYMO al día de hoy.
-    div
-      // Botón de acción rápida (verde)
-      a.btn-primary(href="/app/proyectos") + Nuevo Proyecto
+  //- =========================================================================
+  //- INYMO ENTERPRISE SYSTEMS - PROJECT INTELLIGENCE DASHBOARD (V.6.0)
+  //- =========================================================================
+  //- Arquitectura de visualización masiva para control de portafolio.
+  //- Incluye: Análisis de Rendimiento, Gestión de RH, y Radar Operativo.
+  //- =========================================================================
 
-  // 2. GRID DE RESUMEN
-  div.stats-grid
-    // Tarjeta 1
-    div.stat-card
-      div.stat-icon.blue: i.bx.bx-building-house
-      div.stat-info
-        h3 8
-        p Proyectos Activos
-    
-    // Tarjeta 2
-    div.stat-card.orange: i.bx.bx-error-circle
-      div.stat-info
-        h3 2
-        p Alertas de Bitácora
-    
-    // Tarjeta 3
-    div.stat-card.green: i.bx.bx-dollar-circle
-      div.stat-info
-        h3 $120k
-        p Facturado este mes
+  //- 📥 RECURSOS Y LIBRERÍAS
+  script(src="https://cdn.jsdelivr.net/npm/chart.js")
+  link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css")
 
-  // 3. ACCESO RÁPIDO A COPILOT
-  div(style="margin-top: 30px;")
-    h3 Acciones Rápidas
-    div(style="display: flex; gap: 20px; margin-top: 15px;")
+  //- 🎨 ARQUITECTURA DE ESTILOS (BLOQUE EXPANDIDO +200 LÍNEAS)
+  style.
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Roboto+Mono:wght@500;700&display=swap');
+
+    :root {
+      --inymo-navy: #0f172a;
+      --inymo-gold: #d4af37;
+      --inymo-slate: #1e293b;
+      --inymo-bg: #f1f5f9;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --white: #ffffff;
+      --border-std: #e2e8f0;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --shadow-lux: 0 10px 25px -5px rgba(15, 23, 42, 0.1);
+    }
+
+    body { 
+      background-color: var(--inymo-bg); 
+      font-family: 'Inter', sans-serif; 
+      color: var(--inymo-navy); 
+      overflow-x: hidden;
+    }
+
+    .dashboard-full-container {
+      padding: 40px 50px 100px;
+    }
+
+    /* --- ESTILOS DE CABECERA --- */
+    .hero-executive-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 45px;
+      margin-bottom: 35px;
+      border: 1px solid var(--border-std);
+      box-shadow: var(--shadow-lux);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-executive-card::after {
+      content: '';
+      position: absolute;
+      right: -50px;
+      top: -50px;
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .hero-title-group h1 {
+      font-weight: 800;
+      font-size: 2.2rem;
+      letter-spacing: -1.5px;
+      margin: 0;
+      color: var(--inymo-navy);
+    }
+
+    .hero-title-group p {
+      color: #64748b;
+      font-size: 1.1rem;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+
+    /* --- CINTA DE MÉTRICAS (KPI RIBBON) --- */
+    .metrics-ribbon-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .metric-card-lux {
+      background: var(--inymo-navy);
+      border-radius: var(--radius-md);
+      padding: 30px;
+      color: var(--white);
+      position: relative;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: 1px solid transparent;
+    }
+
+    .metric-card-lux:hover {
+      transform: translateY(-8px);
+      border-color: var(--inymo-gold);
+      box-shadow: 0 20px 30px -10px rgba(0,0,0,0.3);
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .metric-value {
+      display: block;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 12px 0;
+    }
+
+    .metric-footer {
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+
+    /* --- SISTEMA DE PANELES --- */
+    .dashboard-main-grid {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 30px;
+    }
+
+    .glass-panel-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-std);
+      padding: 35px;
+      box-shadow: var(--shadow-lux);
+      margin-bottom: 30px;
+    }
+
+    .panel-header-lux {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .panel-title-lux {
+      font-size: 1rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* --- RADAR DE PROYECTOS (ESTILO INDUSTRIAL) --- */
+    .radar-table { width: 100%; border-collapse: separate; border-spacing: 0 12px; }
+    .radar-table thead th { 
+      padding: 0 20px 10px; 
+      font-size: 0.75rem; 
+      color: #94a3b8; 
+      text-transform: uppercase; 
+      font-weight: 700; 
+    }
+
+    .radar-row {
+      background: #fcfcfc;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .radar-row:hover {
+      background: #ffffff;
+      transform: scale(1.01);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .radar-cell {
+      padding: 22px 20px;
+      border-top: 1px solid #f1f5f9;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .radar-cell:first-child { border-left: 1px solid #f1f5f9; border-radius: 15px 0 0 15px; }
+    .radar-cell:last-child { border-right: 1px solid #f1f5f9; border-radius: 0 15px 15px 0; }
+
+    .project-identity { display: flex; align-items: center; gap: 15px; }
+    .project-avatar { 
+      width: 45px; height: 45px; border-radius: 12px; 
+      background: var(--inymo-navy); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .progress-track-lux {
+      height: 8px; background: #f1f5f9; border-radius: 10px; overflow: hidden; width: 100%;
+    }
+    .progress-fill-lux { height: 100%; border-radius: 10px; transition: width 1s ease; }
+
+    /* --- COPILOT Y ACCIONES RÁPIDAS --- */
+    .copilot-card-dark {
+      background: linear-gradient(135deg, var(--inymo-navy) 0%, #1e293b 100%);
+      border-radius: var(--radius-md);
+      padding: 30px;
+      color: var(--white);
+      margin-bottom: 30px;
+    }
+
+    .quick-link-box {
+      background: var(--white);
+      padding: 20px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-std);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      transition: all 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .quick-link-box:hover {
+      border-color: var(--inymo-gold);
+      transform: translateX(10px);
+    }
+
+    .icon-square {
+      width: 50px; height: 50px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    /* --- NOTIFICACIONES --- */
+    .notify-item {
+      display: flex; gap: 15px; padding: 15px 0;
+      border-bottom: 1px dashed var(--border-std);
+    }
+    .notify-item:last-child { border-bottom: none; }
+    .notify-indicator { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+
+    /* --- BOTONES --- */
+    .btn-executive-lux {
+      background: var(--inymo-navy);
+      color: var(--white);
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-weight: 700;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: 0.3s;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+    }
+
+    .btn-executive-lux:hover {
+      background: var(--inymo-gold);
+      color: var(--inymo-navy);
+      transform: translateY(-2px);
+    }
+
+  //- =========================================================================
+  //- 🏗️ CUERPO DEL DASHBOARD
+  //- =========================================================================
+  div.dashboard-full-container
+    
+    //- 1. HEADER DE BIENVENIDA
+    header.hero-executive-card
+      div.hero-title-group
+        h1 ¡Hola de nuevo, Ángel! 👋
+        p.text-muted Tienes 14 proyectos activos. El rendimiento global está un 5% arriba del objetivo.
+      div.hero-actions
+        a.btn-executive-lux(href="/app/proyectos/nuevo")
+          i.bx.bx-plus-circle.fs-4
+          span Iniciar Nuevo Proyecto
+
+    //- 2. CINTA DE KPIs FINANCIEROS Y OPERATIVOS
+    section.metrics-ribbon-grid
+      // KPI 1
+      div.metric-card-lux
+        span.metric-label Utilidad Real Acumulada
+        span.metric-value $3,450,200
+        div.metric-footer.text-success
+          i.bx.bx-trending-up
+          span +12.4% vs Mes Anterior
       
-      // Card pequeña de Copilot
-      div.card-panel(style="flex: 1; padding: 20px; display: flex; align-items: center; gap: 15px; border-left: 4px solid #8cc63f;")
-        i.bx.bxs-bot(style="font-size: 2rem; color: #8cc63f;")
-        div
-          h4 Consultar a Copilot
-          p.text-muted "Genera una cotización rápida..."
+      // KPI 2
+      div.metric-card-lux(style="border-bottom: 4px solid var(--info);")
+        span.metric-label SPI Global (Tiempo)
+        span.metric-value 1.05
+        div.metric-footer.text-info
+          i.bx.bx-check-double
+          span Operaciones en tiempo óptimo
       
-      // Card pequeña de Inventario
-      div.card-panel(style="flex: 1; padding: 20px; display: flex; align-items: center; gap: 15px; border-left: 4px solid #0f172a;")
-        i.bx.bx-box(style="font-size: 2rem; color: #0f172a;")
-        div
-          h4 Revisar Inventario
-          p.text-muted "Ver stock de material..."
+      // KPI 3
+      div.metric-card-lux(style="border-bottom: 4px solid var(--warning);")
+        span.metric-label CPI Global (Costo)
+        span.metric-value 0.96
+        div.metric-footer.text-warning
+          i.bx.bx-error-circle
+          span Ligero sobrecosto detectado
+      
+      // KPI 4
+      div.metric-card-lux
+        span.metric-label Capital Humano Activo
+        span.metric-value 48
+        div.metric-footer.text-muted
+          i.bx.bx-user-voice
+          span 4 equipos en campo hoy
+
+    //- 3. ÁREA DE TRABAJO PRINCIPAL (GRID 2 COLUMNAS)
+    div.dashboard-main-grid
+      
+      // --- LADO IZQUIERDO: OPERACIONES Y GRÁFICAS ---
+      div.left-operation-column
+        
+        // GRÁFICA DE FLUJO FINANCIERO
+        div.glass-panel-card
+          div.panel-header-lux
+            h3.panel-title-lux
+              i.bx.bx-stats.fs-4.text-primary
+              | Desempeño Financiero del Portafolio
+            div.d-flex.gap-2
+              select.form-select.form-select-sm(style="width: 150px;")
+                option Último Semestre
+                option Año 2025
+          
+          div(style="height: 350px;")
+            canvas#mainPerformanceChart
+
+        // RADAR DE PROYECTOS CRÍTICOS
+        div.glass-panel-card
+          div.panel-header-lux
+            h3.panel-title-lux
+              i.bx.bx-radar.fs-4.text-danger
+              | Radar de Proyectos Activos
+            a.small.fw-bold.text-primary(href="/app/proyectos") Ver todos los proyectos
+          
+          table.radar-table
+            thead
+              tr
+                th Proyecto / Cliente
+                th Progreso Técnico
+                th Salud
+                th ROI Est.
+            tbody
+              // Proyecto 1
+              tr.radar-row
+                td.radar-cell
+                  div.project-identity
+                    div.project-avatar: i.bx.bx-building
+                    div
+                      strong.d-block Nave Industrial "Aceros S.A."
+                      span.text-muted.small Grupo México
+                td.radar-cell(width="250")
+                  div.d-flex.justify-content-between.small.mb-1
+                    span 75%
+                  div.progress-track-lux: div.progress-fill-lux(style="width: 75%; background: var(--inymo-gold);")
+                td.radar-cell
+                  span.badge.bg-success.rounded-pill En Tiempo
+                td.radar-cell
+                  strong.text-dark 18.5%
+
+              // Proyecto 2
+              tr.radar-row
+                td.radar-cell
+                  div.project-identity
+                    div.project-avatar(style="background: #eff6ff; color: #3b82f6;"): i.bx.bx-wrench
+                    div
+                      strong.d-block Automatización Línea 3
+                      span.text-muted.small Tequila Don Julio
+                td.radar-cell
+                  div.d-flex.justify-content-between.small.mb-1
+                    span 40%
+                  div.progress-track-lux: div.progress-fill-lux(style="width: 40%; background: var(--danger);")
+                td.radar-cell
+                  span.badge.bg-danger.rounded-pill Retrasado
+                td.radar-cell
+                  strong.text-dark 12.0%
+
+              // Proyecto 3
+              tr.radar-row
+                td.radar-cell
+                  div.project-identity
+                    div.project-avatar(style="background: #f0fdf4; color: #16a34a;"): i.bx.bx-hard-hat
+                    div
+                      strong.d-block Consultoría Estructural
+                      span.text-muted.small Hotel Riu Plaza
+                td.radar-cell
+                  div.d-flex.justify-content-between.small.mb-1
+                    span 95%
+                  div.progress-track-lux: div.progress-fill-lux(style="width: 95%; background: var(--success);")
+                td.radar-cell
+                  span.badge.bg-info.rounded-pill Por Finalizar
+                td.radar-cell
+                  strong.text-dark 22.1%
+
+      // --- LADO DERECHO: SIDEBAR DE INTELIGENCIA ---
+      aside.right-intelligence-column
+        
+        // PANEL COPILOT IA
+        div.copilot-card-dark
+          div.d-flex.align-items-center.gap-3.mb-4
+            div.icon-square(style="background: var(--success);"): i.bx.bxs-bot.text-white.fs-3
+            h4.fw-bold.mb-0 INYMO Copilot
+          p.small.opacity-75 "Ángel, detecté que el costo del acero en la Nave Industrial subió 15%. ¿Quieres que recalcule el impacto en tu margen de utilidad?"
+          button.btn.btn-light.btn-sm.w-100.mt-3.fw-bold Consultar Análisis IA
+
+        // ACCIONES RÁPIDAS
+        div.mb-5
+          h5.fw-bold.mb-3 Herramientas de Gestión
+          
+          a.quick-link-box(href="/app/inventario")
+            div.icon-square.bg-light: i.bx.bx-package.text-primary
+            div
+              h6.fw-bold.mb-0 Control de Inventario
+              span.small.text-muted 12 materiales bajo stock
+          
+          a.quick-link-box(href="/app/nomina")
+            div.icon-square.bg-light: i.bx.bx-group.text-success
+            div
+              h6.fw-bold.mb-0 Nómina y RH
+              span.small.text-muted 3 incidencias por revisar
+          
+          a.quick-link-box(href="/app/reportes")
+            div.icon-square.bg-light: i.bx.bx-file.text-warning
+            div
+              h6.fw-bold.mb-0 Centro de Reportes
+              span.small.text-muted Generar PDF de cierre
+
+        // ALERTAS DE BITÁCORA
+        div.glass-panel-card
+          div.panel-header-lux
+            h3.panel-title-lux
+              i.bx.bx-bell.fs-4.text-warning
+              | Alertas de Obra
+          
+          div.notifications-list
+            div.notify-item
+              div.notify-indicator.bg-danger
+              div
+                strong Incidente Grave: Nave B
+                p.small.text-muted Falla en suministro eléctrico detuvo colado. Hace 2h.
+            
+            div.notify-item
+              div.notify-indicator.bg-warning
+              div
+                strong Hito Próximo: Don Julio
+                p.small.text-muted Entrega de planos estructurales mañana 9:00 AM.
+            
+            div.notify-item
+              div.notify-indicator.bg-info
+              div
+                strong Pago Recibido: Hotel Riu
+                p.small.text-muted Factura F-1024 liquidada por el cliente. Ayer.
+
+    //- 4. SECCIÓN INFERIOR: CARGA DE TRABAJO (RH)
+    div.glass-panel-card.mt-5
+      div.panel-header-lux
+        h3.panel-title-lux
+          i.bx.bx-group.fs-4.text-primary
+          | Distribución de Carga por Líder de Proyecto
+      div(style="height: 300px;")
+        canvas#workloadChart
+
+  //- =========================================================================
+  //- 🧠 LÓGICA DE DATOS (SCRIPTS EXPANDIDOS +150 LÍNEAS)
+  //- =========================================================================
+  script.
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      // --- CONFIGURACIÓN DE GRÁFICA PRINCIPAL (PERFORMANCE) ---
+      const ctxMain = document.getElementById('mainPerformanceChart').getContext('2d');
+      
+      // Gradiente para Ingresos
+      const gradientIn = ctxMain.createLinearGradient(0, 0, 0, 400);
+      gradientIn.addColorStop(0, 'rgba(212, 175, 55, 0.3)');
+      gradientIn.addColorStop(1, 'rgba(212, 175, 55, 0)');
+
+      new Chart(ctxMain, {
+        type: 'line',
+        data: {
+          labels: ['Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+          datasets: [
+            {
+              label: 'Venta Proyectada',
+              data: [1.2, 1.5, 1.1, 1.8, 2.1, 2.4],
+              borderColor: '#d4af37',
+              backgroundColor: gradientIn,
+              fill: true,
+              tension: 0.4,
+              borderWidth: 4,
+              pointRadius: 6,
+              pointBackgroundColor: '#fff',
+              pointBorderWidth: 3
+            },
+            {
+              label: 'Costo Real (Mat + Nómina)',
+              data: [0.8, 0.9, 0.85, 1.1, 1.3, 1.45],
+              borderColor: '#0f172a',
+              borderDash: [5, 5],
+              tension: 0.4,
+              borderWidth: 2,
+              pointRadius: 0
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { 
+              position: 'bottom',
+              labels: { font: { family: 'Inter', weight: '600' }, padding: 20 }
+            },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              titleFont: { size: 14 },
+              bodyFont: { size: 13 },
+              padding: 15,
+              displayColors: true,
+              callbacks: {
+                label: (ctx) => `$${ctx.raw}M MXN`
+              }
+            }
+          },
+          scales: {
+            y: { 
+              beginAtZero: true,
+              grid: { borderDash: [2, 2], color: '#e2e8f0' },
+              ticks: { callback: (v) => `$${v}M` }
+            },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+
+      // --- CONFIGURACIÓN DE GRÁFICA DE CARGA RH ---
+      const ctxWork = document.getElementById('workloadChart').getContext('2d');
+      new Chart(ctxWork, {
+        type: 'bar',
+        data: {
+          labels: ['Ing. Velasco', 'Arq. Lara', 'Ing. Roberto', 'Cuadrilla A', 'Cuadrilla B'],
+          datasets: [{
+            label: 'Horas Hombre Asignadas',
+            data: [160, 190, 120, 240, 200],
+            backgroundColor: [
+              '#0f172a', '#1e293b', '#334155', '#475569', '#64748b'
+            ],
+            borderRadius: 12,
+            barThickness: 40
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { 
+              grid: { display: false },
+              ticks: { callback: (v) => `${v}h` }
+            },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    });
+
+    //- Función para refrescar datos (Simulación)
+    function refreshDashboard() {
+      console.log("Sincronizando con PostgreSQL...");
+      // Aquí iría la lógica AJAX
+    }

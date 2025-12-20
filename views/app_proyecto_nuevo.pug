@@ -1,87 +1,600 @@
 extends layout_app
 
 block content
-  // La línea link debe empezar pegada al borde izquierdo de la pestaña
+  //- =========================================================================
+  //- INYMO PROJECT INCEPTION - ESTRATEGIA Y ALTA DE PROYECTOS (V.5.0)
+  //- =========================================================================
+  //- Diseño: IA Orange "Midnight Emerald" UI
+  //- Capacidades: Dual Smart Search, AJAX Modal, Auto-Sequence Folio.
+  //- =========================================================================
+  
   link(rel='stylesheet', href='/stylesheets/proyectos.css') 
 
-  // --- ENCABEZADO DEL PROYECTO ---
-  div.module-header
-    div.header-title
-      a.back-link(href="/app/proyectos") 
-        i.bx.bx-left-arrow-alt
-        | Volver al Portafolio
-      h1 Crear Nuevo Proyecto
-      p.subtitle Define los parámetros estratégicos para empezar a operar.
+  //- --- ARQUITECTURA VISUAL (CSS DE ALTO NIVEL) ---
+  style.
+    :root {
+      --glass-bg: rgba(255, 255, 255, 0.95);
+      --accent-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --success-gradient: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      --soft-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+      --input-focus: #3b82f6;
+    }
 
-  div.form-container
-    // El formulario apunta a la ruta POST que crearemos en index.js
-    form.new-project-form(action="/app/proyectos/crear" method="POST")
+    .inception-wrapper {
+      animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+      padding-bottom: 100px;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Tarjeta Principal Flotante */
+    .master-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 30px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    /* Secciones del Formulario (Steps) */
+    .form-step-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+
+    .step-number {
+      width: 40px; height: 40px;
+      background: var(--accent-gradient);
+      color: white;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+    }
+
+    .step-title {
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin: 0;
+    }
+
+    /* Inputs Modernos */
+    .lux-input {
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      background: #fcfdfe;
+    }
+
+    .lux-input:focus {
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+      background: white;
+    }
+
+    .lux-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #64748b;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Smart Search Components */
+    .search-container { position: relative; }
+    
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    
+    .search-icon-float {
+      position: absolute;
+      left: 15px;
+      color: #94a3b8;
+      font-size: 1.2rem;
+      z-index: 5;
+    }
+
+    .input-smart-search {
+      padding-left: 45px !important;
+    }
+
+    .smart-results-list {
+      position: absolute;
+      top: 105%; left: 0; right: 0;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      z-index: 1000;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+      padding: 10px;
+      border: 1px solid #f1f5f9;
+    }
+
+    .result-item {
+      padding: 12px 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: 0.2s;
+    }
+
+    .result-item:hover {
+      background: #f8fafc;
+      transform: translateX(5px);
+    }
+
+    .avatar-icon {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+    .avatar-client { background: #eff6ff; color: #3b82f6; }
+    .avatar-leader { background: #f0fdf4; color: #22c55e; }
+
+    /* Botón Crear dentro de búsqueda */
+    .btn-create-item {
+      margin-top: 10px;
+      padding: 12px;
+      background: #f0fdf4;
+      color: #16a34a;
+      font-weight: 700;
+      text-align: center;
+      border-radius: 12px;
+      cursor: pointer;
+      border: 1px dashed #22c55e;
+      transition: 0.3s;
+    }
+    .btn-create-item:hover { background: #dcfce7; }
+
+    /* Badge para el Código Auto */
+    .code-badge {
+      background: #f1f5f9;
+      padding: 8px 15px;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+      font-weight: 800;
+      color: #0f172a;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Botón de Lanzamiento Final */
+    .btn-launch {
+      background: var(--accent-gradient);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 20px 40px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.3);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .btn-launch:hover {
+      transform: scale(1.05) translateY(-5px);
+      box-shadow: 0 30px 60px rgba(15, 23, 42, 0.4);
+      color: white;
+    }
+
+    /* Alertas de Información */
+    .info-bubble {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 15px;
+      border-radius: 0 12px 12px 0;
+      font-size: 0.85rem;
+      color: #1e40af;
+      margin-top: 10px;
+    }
+
+  .container-fluid.px-4.py-4.inception-wrapper
+    
+    //- --- CABECERA EJECUTIVA ---
+    .row.align-items-end.mb-5
+      .col-md-8
+        nav(aria-label="breadcrumb")
+          ol.breadcrumb.bg-transparent.p-0.small
+            li.breadcrumb-item: a.text-muted.text-decoration-none(href="/app/proyectos") 🏗️ Proyectos
+            li.breadcrumb-item.active.fw-bold.text-dark(aria-current="page") Alta Estratégica
+        h1.display-5.fw-bold.text-dark.mb-1 🚀 Iniciar Nueva Misión
+        p.text-muted.fs-5 Define el alcance, los recursos y la rentabilidad del contrato.
       
-      // --- SECCIÓN 1: IDENTIFICACIÓN Y ESTRATEGIA (PMBOK) ---
-      h3.form-section-title Información Básica y Valor
-      div.form-grid
+      .col-md-4.text-md-end
+        a.btn.btn-white.border.shadow-sm.rounded-pill.px-4.fw-bold(href="/app/proyectos")
+          i.bx.bx-arrow-back.me-2
+          | Cancelar y Volver
+
+    .row.justify-content-center
+      .col-xl-10
+        .master-card.p-0
+          //- Barra de Progreso Visual
+          .progress(style="height: 6px; border-radius: 0;")
+            .progress-bar.bg-primary(style="width: 100%;")
+
+          .card-body.p-5
+            form#formProject(action="/app/proyectos/crear" method="POST")
+              
+              //- ---------------------------------------------------------
+              //- PASO 1: ADN DEL PROYECTO
+              //- ---------------------------------------------------------
+              .form-step-header
+                .step-number 01
+                h4.step-title Definición de Identidad
+              
+              .row.g-4.mb-5
+                .col-12
+                  label.lux-label
+                    i.bx.bx-edit-alt
+                    | Nombre Comercial del Proyecto *
+                  input.form-control.lux-input.form-control-lg(
+                    type="text" 
+                    name="nombre" 
+                    placeholder="Ej: Nave Industrial 'El Refugio' - Fase 1" 
+                    required
+                  )
+                  small.text-muted Este nombre será visible en los reportes ejecutivos.
+
+                .col-md-6.search-container
+                  label.lux-label
+                    i.bx.bx-building-house
+                    | Cliente Estratégico *
+                  .search-input-wrapper
+                    i.bx.bx-search.search-icon-float
+                    input#clienteSearch.form-control.lux-input.input-smart-search(
+                      type="text" 
+                      placeholder="Escribe para buscar cliente..." 
+                      autocomplete="off"
+                    )
+                    input#clienteId(type="hidden" name="cliente_id" required)
+                  
+                  div#clienteResults.smart-results-list
+                    div.btn-create-item(data-bs-toggle="modal" data-bs-target="#modalNuevoClienteFull")
+                      i.bx.bx-plus-circle.me-2
+                      | Registrar Nuevo Cliente
+
+                .col-md-6.search-container
+                  label.lux-label
+                    i.bx.bx-crown
+                    | Líder del Proyecto (PM) *
+                  .search-input-wrapper
+                    i.bx.bx-user-circle.search-icon-float
+                    input#liderSearch.form-control.lux-input.input-smart-search(
+                      type="text" 
+                      placeholder="Buscar por nombre o cargo..." 
+                      autocomplete="off"
+                      value=user.nombre
+                    )
+                    input#liderId(type="hidden" name="lider_id" value=user.id)
+                  
+                  div#liderResults.smart-results-list
+
+                .col-md-6
+                  label.lux-label
+                    i.bx.bx-barcode
+                    | Identificador Único (Folio)
+                  .d-flex.align-items-center.gap-3
+                    span.code-badge= codigoSugerido
+                    input(type="hidden" name="codigo" value=codigoSugerido)
+                    span.badge.bg-success.bg-opacity-10.text-success.rounded-pill
+                      i.bx.bx-check.me-1
+                      | Sugerido
+
+                .col-md-6
+                  label.lux-label
+                    i.bx.bx-git-merge
+                    | Modelo de Ejecución (Metodología)
+                  select.form-select.lux-input(name="tipo_entrega" required)
+                    option(value="Predictivo") 📐 Predictivo (Waterfall)
+                    option(value="Híbrido") ⚖️ Híbrido (Mezcla)
+                    option(value="Ágil") ⚡ Ágil (Scrum/Iterativo)
+
+              //- ---------------------------------------------------------
+              //- PASO 2: CRONOGRAMA Y TIEMPOS (NUEVA SECCIÓN)
+              //- ---------------------------------------------------------
+              .form-step-header
+                .step-number 02
+                h4.step-title Cronograma de Hitos
+              
+              .row.g-4.mb-5
+                .col-md-6
+                  label.lux-label
+                    i.bx.bx-calendar-play
+                    | Fecha de Inicio Real *
+                  input.form-control.lux-input(type="date" name="fecha_inicio" required)
+                  .info-bubble
+                    i.bx.bx-info-circle.me-2
+                    | Vital para calcular el **SPI** (Índice de Desempeño del Tiempo).
+
+                .col-md-6
+                  label.lux-label
+                    i.bx.bx-calendar-check
+                    | Fecha de Entrega Comprometida *
+                  input.form-control.lux-input(type="date" name="fecha_fin" required)
+
+              //- ---------------------------------------------------------
+              //- PASO 3: INGENIERÍA FINANCIERA
+              //- ---------------------------------------------------------
+              .form-step-header
+                .step-number 03
+                h4.step-title Análisis de Valor y Costo
+              
+              .row.g-4.mb-5
+                .col-md-6
+                  label.lux-label
+                    i.bx.bx-trending-up
+                    | Valor de Negocio (Ingreso Proyectado) *
+                  .input-group
+                    span.input-group-text.bg-white.border-end-0.ps-3 $
+                    input.form-control.lux-input.border-start-0(
+                      type="number" 
+                      name="valor_negocio" 
+                      placeholder="Ej: 5200000" 
+                      step="0.01"
+                      required
+                    )
+                  small.text-muted El monto total que el cliente pagará a INYMO.
+
+                .col-md-6
+                  label.lux-label
+                    i.bx.bx-wallet
+                    | Presupuesto Autorizado (Costo Objetivo) *
+                  .input-group
+                    span.input-group-text.bg-white.border-end-0.ps-3 $
+                    input.form-control.lux-input.border-start-0(
+                      type="number" 
+                      name="presupuesto" 
+                      placeholder="Ej: 4600000" 
+                      step="0.01"
+                      required
+                    )
+                  small.text-muted Límite de gasto para mantener el **CPI** saludable.
+
+              //- ---------------------------------------------------------
+              //- PASO 4: CONFIGURACIÓN ESTRATÉGICA
+              //- ---------------------------------------------------------
+              .form-step-header
+                .step-number 04
+                h4.step-title Gestión de Riesgos y Fase
+              
+              .row.g-4.mb-5
+                .col-md-6
+                  label.lux-label
+                    i.bx.bx-error-alt
+                    | Perfil de Riesgo Inicial
+                  select.form-select.lux-input(name="riesgo" required)
+                    option(value="Bajo") 🟢 Bajo (Controlado)
+                    option(value="Medio") 🟡 Medio (Requiere Vigilancia)
+                    option(value="Alto") 🔴 Alto (Crítico)
+                
+                .col-md-6
+                  label.lux-label
+                    i.bx.bx-layer
+                    | Fase de Apertura en Sistema
+                  select.form-select.lux-input(name="fase" required)
+                    option(value="Inicio") 1. Fase de Inicio (Kick-off)
+                    option(value="Planificación") 2. Fase de Planificación
+
+              //- BOTÓN DE ACCIÓN FINAL
+              .text-center.mt-5
+                button.btn.btn-launch(type="submit")
+                  i.bx.bx-rocket.me-2
+                  | Inicializar Proyecto en INYMO
+                p.text-muted.small.mt-3 Al dar clic, se notificará al líder asignado y se creará el repositorio de planos.
+
+  //- =========================================================================
+  //- MODAL: ALTA DE CLIENTE FULL (PROFESIONAL)
+  //- =========================================================================
+  .modal.fade#modalNuevoClienteFull(tabindex="-1" aria-hidden="true")
+    .modal-dialog.modal-lg.modal-dialog-centered
+      .modal-content.rounded-4.border-0.shadow-lg
+        .modal-header.bg-dark.text-white.p-4
+          div
+            h5.modal-title.fw-bold
+              i.bx.bx-building-house.me-2
+              | Registro de Socio Comercial
+            p.small.mb-0.opacity-75 Alta rápida de cliente para vinculación inmediata.
+          button.btn-close.btn-close-white(data-bs-dismiss="modal")
         
-        div.input-group
-          label(for="nombre") Nombre del Proyecto *
-          input#nombre(type="text" name="nombre" placeholder="Ej: Nave Industrial Colibrí" required)
-        
-        div.input-group
-          label(for="cliente") Cliente *
-          input#cliente(type="text" name="cliente" placeholder="Ej: Grupo Aceros de Occidente" required)
+        form#formClienteFull(enctype="multipart/form-data")
+          .modal-body.p-5
+            .row.g-4
+              .col-12
+                label.lux-label Razón Social / Nombre Comercial *
+                input.form-control.lux-input(id="modalNombre" name="nombre" required placeholder="Ej. Constructora del Norte S.A. de C.V.")
+              
+              .col-md-6
+                label.lux-label Clave de Registro (RFC)
+                input.form-control.lux-input(name="rfc" placeholder="XAXX010101000" style="text-transform: uppercase;")
+              
+              .col-md-6
+                label.lux-label Contacto de Enlace
+                input.form-control.lux-input(name="contacto" placeholder="Nombre completo")
+              
+              .col-md-6
+                label.lux-label Línea Telefónica
+                input.form-control.lux-input(name="telefono" placeholder="(00) 0000-0000")
+              
+              .col-md-6
+                label.lux-label Correo Corporativo
+                input.form-control.lux-input(name="correo" type="email" placeholder="contacto@empresa.com")
+              
+              .col-12
+                .p-4.border.rounded-4.bg-light.d-flex.align-items-center.gap-4
+                   .icon-container.bg-white.p-3.rounded-3.shadow-sm
+                     i.bx.bxs-file-pdf.fs-1.text-danger
+                   div.flex-grow-1
+                       label.fw-bold.small.d-block.mb-1 Constancia de Situación Fiscal (PDF)
+                       input.form-control.form-control-sm(type="file" name="constancia" accept="application/pdf")
+                       small.text-muted Este documento es vital para la validación comercial.
+
+          .modal-footer.border-0.px-5.pb-5
+            button.btn.btn-light.rounded-pill.px-4(type="button" data-bs-dismiss="modal") Cancelar
+            button.btn.btn-dark.rounded-pill.px-5.fw-bold(type="submit") 
+              span#btnSaveText Registrar y Seleccionar
+              span#btnSaveSpinner.spinner-border.spinner-border-sm.ms-2.d-none
+
+  //- =========================================================================
+  //- INTELIGENCIA DE DATOS (CLIENT SIDE LOGIC)
+  //- =========================================================================
+  script.
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      /**
+       * MÓDULO 1: BÚSQUEDA DE CLIENTES
+       * Realiza peticiones AJAX al endpoint de clientes para filtrado en tiempo real.
+       */
+      const clientInput = document.getElementById('clienteSearch');
+      const clientList = document.getElementById('clienteResults');
+      const clientId = document.getElementById('clienteId');
+      
+      clientInput.addEventListener('input', async (e) => {
+        const term = e.target.value.trim();
+        if (term.length < 2) { clientList.style.display = 'none'; return; }
+
+        try {
+          const res = await fetch(`/app/clientes/api/buscar-json?term=${term}`);
+          const data = await res.json();
+          clientList.innerHTML = ''; 
           
-        div.input-group
-          label(for="lider") Líder del Proyecto (PM) *
-          input#lider(type="text" name="lider" placeholder="Ej: Ing. Ángel Velasco" required)
+          if (data.length > 0) {
+            data.forEach(c => {
+              const name = c.nombre_comercial || c.razon_social || "Sin Nombre";
+              const div = document.createElement('div');
+              div.className = 'result-item';
+              div.innerHTML = `
+                <div class="d-flex align-items-center w-100">
+                    <div class="avatar-icon avatar-client me-3"><i class='bx bx-briefcase'></i></div>
+                    <div>
+                        <div class="fw-bold text-dark" style="font-size:0.9rem">${name}</div>
+                        <small class="text-muted" style="font-size:0.75rem">RFC: ${c.rfc || 'Sin RFC'}</small>
+                    </div>
+                </div>
+              `;
+              div.onclick = () => {
+                clientInput.value = name;
+                clientId.value = c.id;
+                clientList.style.display = 'none';
+              };
+              clientList.appendChild(div);
+            });
+          } else {
+             clientList.innerHTML = `<div class="p-3 text-center text-muted small">No se encontró el socio comercial.</div>`;
+          }
+
+          const createBtn = document.createElement('div');
+          createBtn.className = 'btn-create-item';
+          createBtn.innerHTML = '<i class="bx bx-plus-circle me-1"></i> Registrar Nuevo Cliente';
+          createBtn.setAttribute('data-bs-toggle', 'modal');
+          createBtn.setAttribute('data-bs-target', '#modalNuevoClienteFull');
+          clientList.appendChild(createBtn);
           
-        div.input-group
-          label(for="codigo") Código Único (INY-25-00X)
-          input#codigo(type="text" name="codigo" placeholder="Ej: INY-25-015" required)
+          clientList.style.display = 'block';
+        } catch (err) { console.error("Search Client Error:", err); }
+      });
 
-        div.input-group
-          label(for="tipo_entrega") Tipo de Entrega (PMBOK)
-          select#tipo_entrega(name="tipo_entrega" required)
-            option(value="Predictivo") Predictivo (Cascada)
-            option(value="Híbrido") Híbrido (Mezcla)
-            option(value="Ágil") Ágil (Iterativo/Scrum)
+      /**
+       * MÓDULO 2: BÚSQUEDA DE TALENTO (PM)
+       * Conecta con la tabla rrhh_colaboradores para asignación de líderes.
+       */
+      const leaderInput = document.getElementById('liderSearch');
+      const leaderList = document.getElementById('liderResults');
+      const leaderId = document.getElementById('liderId');
 
-        div.input-group
-          label(for="valor_negocio") Valor de Negocio Estimado (USD) *
-          input#valor_negocio(type="number" name="valor_negocio" placeholder="Ej: 5200000" required)
+      leaderInput.addEventListener('input', async (e) => {
+        const term = e.target.value.trim();
+        if (term.length < 2) { leaderList.style.display = 'none'; return; }
 
-      // --- SECCIÓN 2: FINANZAS Y TIEMPO ---
-      h3.form-section-title Finanzas y Plazos
-      div.form-grid
-        div.input-group
-          label(for="presupuesto") Presupuesto Total (USD) *
-          input#presupuesto(type="number" name="presupuesto" placeholder="Ej: 4500000" required)
+        try {
+          const res = await fetch(`/app/rrhh/api/buscar-colaborador?term=${term}`);
+          const data = await res.json();
+          leaderList.innerHTML = ''; 
+          
+          if (data.length > 0) {
+            data.forEach(emp => {
+              const div = document.createElement('div');
+              div.className = 'result-item';
+              div.innerHTML = `
+                <div class="d-flex align-items-center w-100">
+                    <div class="avatar-icon avatar-leader me-3"><i class='bx bx-user'></i></div>
+                    <div>
+                        <div class="fw-bold text-dark" style="font-size:0.9rem">${emp.nombre_completo}</div>
+                        <small class="text-muted" style="font-size:0.75rem">${emp.puesto || 'Especialista INYMO'}</small>
+                    </div>
+                </div>
+              `;
+              div.onclick = () => {
+                leaderInput.value = emp.nombre_completo;
+                leaderId.value = emp.id;
+                leaderList.style.display = 'none';
+              };
+              leaderList.appendChild(div);
+            });
+            leaderList.style.display = 'block';
+          } else {
+             leaderList.innerHTML = `<div class="p-2 text-center text-muted small fst-italic">Sin resultados en la plantilla activa.</div>`;
+             leaderList.style.display = 'block';
+          }
+        } catch (err) { console.error("Search Leader Error:", err); }
+      });
+
+      // Cerrar listas al clickear fuera (UX Shield)
+      document.addEventListener('click', (e) => {
+        if (!clientInput.contains(e.target) && !clientList.contains(e.target)) clientList.style.display = 'none';
+        if (!leaderInput.contains(e.target) && !leaderList.contains(e.target)) leaderList.style.display = 'none';
+      });
+
+      /**
+       * MÓDULO 3: GUARDADO ASÍNCRONO DE CLIENTES
+       * Permite crear el cliente sin romper el flujo de creación del proyecto.
+       */
+      const formModal = document.getElementById('formClienteFull');
+      formModal.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btnText = document.getElementById('btnSaveText');
+        const spinner = document.getElementById('btnSaveSpinner');
         
-        div.input-group
-          label(for="fecha_fin") Fecha de Finalización Estimada *
-          input#fecha_fin(type="date" name="fecha_fin" required)
+        btnText.innerText = "Sincronizando...";
+        spinner.classList.remove('d-none');
 
-      // --- SECCIÓN 3: ESTADO INICIAL ---
-      h3.form-section-title Estado Inicial
-      div.form-grid
-        div.input-group
-          label(for="riesgo") Nivel de Riesgo Inicial
-          select#riesgo(name="riesgo" required)
-            option(value="Bajo") Bajo
-            option(value="Medio") Medio
-            option(value="Alto") Alto
-        
-        div.input-group
-          label(for="fase") Fase Inicial
-          select#fase(name="fase" required)
-            option(value="Inicio") 1. Inicio
-            option(value="Planificación") 2. Planificación
-            option(value="Ejecución") 3. Ejecución
-            option(value="Cierre") 4. Cierre
-
-      // --- BOTÓN FINAL ---
-      button.btn-submit.btn-save(type="submit") 
-        i.bx.bx-save
-        |  Guardar Proyecto y Empezar 🚀
-
-  // Mensaje de éxito/error (Lo insertaremos si viene del servidor)
-  if mensaje
-    div.alert-message(class=mensaje.tipo)= mensaje.texto
+        const formData = new FormData(formModal);
+        try {
+          // Envío multipart/form-data
+          await fetch('/app/clientes/nuevo', { method: 'POST', body: formData });
+          const nombreNuevo = document.getElementById('modalNombre').value;
+          
+          bootstrap.Modal.getInstance(document.getElementById('modalNuevoClienteFull')).hide();
+          clientInput.value = nombreNuevo;
+          clientInput.dispatchEvent(new Event('input')); // Recargar búsqueda para vincular ID
+          
+          alert(`Excelente: "${nombreNuevo}" ha sido registrado con éxito.`);
+        } catch (err) {
+          alert("Error de integridad al guardar cliente.");
+        } finally {
+          btnText.innerText = "Registrar y Seleccionar";
+          spinner.classList.add('d-none');
+          formModal.reset();
+        }
+      });
+    });

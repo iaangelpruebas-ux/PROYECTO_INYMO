@@ -1,0 +1,252 @@
+//- ==========================================================================================
+//- I N Y M O   O P E R A T I O N A L   M O D U L E   ( T A C T I C A L )
+//- ==========================================================================================
+//- Versión: 28.5.0 "Tactical Mixin Library"
+//- Descripción: Librería de componentes reutilizables para la gestión operativa.
+//- ==========================================================================================
+
+//- MIXIN 1: GESTIÓN DE RIESGOS
+mixin widgetRiesgos(p)
+  .module-card
+    .module-header
+      h5.module-title: i.bx.bx-shield-quarter.text-danger.fs-4: | Riesgos Activos
+      button.btn-pro.dark(onclick="openModal('modalRiesgo', 'crear')" style="font-size:0.75rem; padding:6px 12px;") + Nuevo
+    .module-body.no-pad
+      if p.riesgos.length > 0
+        table.table-exec
+          tbody
+            each r in p.riesgos
+              tr
+                td
+                  strong.d-block.small= r.descripcion
+                  span.badge.rounded-pill.mt-1(class=r.impacto=='Alto'?'bg-danger':'bg-warning text-dark')= r.impacto
+                td.text-end
+                  button.btn-sq.edit.me-1(onclick=`editarRiesgo('${r.id}', '${r.descripcion}', '${r.impacto}')`): i.bx.bx-pencil
+                  button.btn-sq.delete(onclick=`confirmAction('/app/proyectos/${p.id}/riesgo/eliminar/${r.id}')`): i.bx.bx-trash
+      else
+        .p-5.text-center.text-muted.small No hay riesgos registrados.
+
+//- MIXIN 2: BITÁCORA DE PROYECTO
+mixin widgetBitacora(p)
+  .module-card
+    .module-header
+      h5.module-title: i.bx.bx-notepad.text-primary.fs-4: | Bitácora
+      button.btn-pro.dark(onclick="openModal('modalBitacora')" style="font-size:0.75rem; padding:6px 12px;") + Nota
+    .module-body(style="max-height:500px; overflow-y:auto;")
+      if p.bitacora.length > 0
+        .timeline-v
+          each b in p.bitacora
+            .timeline-item
+              .timeline-marker(class=(b.tipo_registro || 'nota').toLowerCase())
+              .timeline-content
+                .d-flex.justify-content-between.mb-1
+                  span.timeline-date= new Date(b.fecha_registro).toLocaleDateString()
+                  i.bx.bx-trash.text-danger(style="cursor:pointer;" onclick=`confirmAction('/app/proyectos/${p.id}/bitacora/eliminar/${b.id}')`)
+                strong.d-block.text-dark= b.titulo
+                p.mb-0.small.text-muted= b.descripcion
+      else
+        .p-5.text-center.text-muted.small Sin actividad reciente.
+
+//- MIXIN 3: ENTREGABLES (WBS)
+mixin widgetEntregables(p)
+  .module-card
+    .module-header
+      h5.module-title: i.bx.bx-layer.text-primary.fs-4: | Entregables (WBS)
+      button.btn-pro.dark(onclick="openModal('modalEntregable', 'crear')") + Nuevo
+    .module-body.no-pad
+      table.table-exec
+        thead: tr: th Entregable: th % Avance: th Resp.: th
+        tbody
+          if p.entregables.length > 0
+            each e in p.entregables
+              tr
+                td.fw-bold= e.nombre
+                td
+                  form.d-flex.align-items-center.gap-2(action=`/app/proyectos/${p.id}/entregable/${e.id}/actualizar` method="POST")
+                    input.form-control.text-center(type="number" name="nuevo_progreso" value=e.progreso min="0" max="100" style="width:70px; margin:0; padding:6px; font-weight:bold;")
+                    button.btn-sq.edit(type="submit" title="Guardar"): i.bx.bx-save
+                td.small= e.responsable
+                td.text-end
+                  button.btn-sq.edit.me-1(onclick=`editarEntregable('${e.id}', '${e.nombre}', '${e.responsable}', '${e.fecha_entrega ? new Date(e.fecha_entrega).toISOString().split('T')[0] : ''}')`): i.bx.bx-pencil
+                  button.btn-sq.delete(onclick=`confirmAction('/app/proyectos/${p.id}/entregable/eliminar/${e.id}')`): i.bx.bx-trash
+          else
+            tr: td(colspan="4" class="text-center py-5 text-muted") WBS Vacío.
+
+//- MIXIN 4: HITOS CLAVE
+mixin widgetHitos(p)
+  .module-card
+    .module-header
+      h5.module-title: i.bx.bx-flag.text-warning.fs-4: | Hitos Clave
+      button.btn-pro.dark(onclick="openModal('modalHito', 'crear')") + Hito
+    .module-body
+      if p.hitos.length > 0
+        .row.g-3
+          each h in p.hitos
+            .col-md-6
+              .hito-card(style="display:flex; gap:15px; align-items:center; background:#fcfcfc; padding:15px; border-radius:12px; border:1px solid #e2e8f0;")
+                div(style="text-align:center; background:#e2e8f0; padding:8px 12px; border-radius:8px;")
+                  - var d = new Date(h.fecha)
+                  span(style="display:block; font-weight:800; font-size:1.1rem;")= d.getDate()
+                  span(style="font-size:0.7rem; text-transform:uppercase;")= d.toLocaleString('es-MX', { month: 'short' })
+                div(style="flex-grow:1;")
+                  span(style="font-weight:700; font-size:0.9rem; display:block;")= h.nombre
+                  span.badge.bg-white.text-dark.border= h.estado
+                div
+                  i.bx.bx-pencil.text-primary(style="cursor:pointer;" onclick=`editarHito('${h.id}', '${h.nombre}', '${new Date(h.fecha).toISOString().split('T')[0]}')`)
+                  i.bx.bx-trash.text-danger.ms-2(style="cursor:pointer;" onclick=`confirmAction('/app/proyectos/${p.id}/hito/eliminar/${h.id}')`)
+      else
+        .text-center.py-4.text-muted Sin hitos programados.
+
+//- MIXIN 5: TODOS LOS MODALES DE OPERACIÓN
+mixin renderModals(p)
+  //- MODAL CAMBIO
+  #modalCambio.modal-overlay
+    .modal-card
+      .modal-header: h5.m-0#tituloCambio Solicitud de Cambio: i.bx.bx-x.fs-3(onclick="closeModal('modalCambio')" style="cursor:pointer;")
+      form#formCambio(action=`/app/proyectos/${p.id}/cambio` method="POST")
+        .modal-content-area
+          label.form-label Título: input.form-input(name="titulo" required)
+          .row
+            .col-6: label.form-label Costo (+/-): input.form-input(type="number" name="impacto_costo" step="0.01" value="0")
+            .col-6: label.form-label Tiempo (+/-): input.form-input(type="number" name="impacto_tiempo" value="0")
+          label.form-label Justificación: textarea.form-input(name="descripcion" rows="3" required)
+        .p-4.text-end.bg-light: button.btn-pro.dark(type="submit") Enviar
+
+  //- MODAL GASTO
+  #modalGasto.modal-overlay
+    .modal-card
+      .modal-header: h5.m-0 Registrar Gasto: i.bx.bx-x.fs-3(onclick="closeModal('modalGasto')" style="cursor:pointer;")
+      form(action=`/app/proyectos/${p.id}/gasto` method="POST")
+        .modal-content-area
+          label.form-label Concepto: input.form-input(name="concepto" required)
+          .row
+            .col-6: label.form-label Monto: input.form-input(type="number" name="monto" required)
+            .col-6: label.form-label Fecha: input.form-input(type="date" name="fecha" required)
+        .p-4.text-end.bg-light: button.btn-pro.dark(type="submit") Guardar
+
+  //- MODAL RIESGO
+  #modalRiesgo.modal-overlay
+    .modal-card
+      .modal-header: h5.m-0#tituloRiesgo Nuevo Riesgo: i.bx.bx-x.fs-3(onclick="closeModal('modalRiesgo')" style="cursor:pointer;")
+      form#formRiesgo(action=`/app/proyectos/${p.id}/riesgo` method="POST")
+        .modal-content-area
+          input#riesgoId(type="hidden" name="id")
+          label.form-label Descripción: textarea.form-input#riesgoDesc(name="descripcion" required rows="3")
+          label.form-label Impacto: select.form-input#riesgoImpacto(name="impacto"): option Alto: option Medio: option Bajo
+        .p-4.text-end.bg-light: button.btn-pro.danger(type="submit") Registrar
+
+  //- MODAL HITO
+  #modalHito.modal-overlay
+    .modal-card
+      .modal-header: h5.m-0#tituloHito Nuevo Hito: i.bx.bx-x.fs-3(onclick="closeModal('modalHito')" style="cursor:pointer;")
+      form#formHito(action=`/app/proyectos/${p.id}/hito` method="POST")
+        .modal-content-area
+          label.form-label Nombre: input.form-input#hitoNombre(name="nombre" required)
+          label.form-label Fecha: input.form-input#hitoFecha(type="date" name="fecha" required)
+        .p-4.text-end.bg-light: button.btn-pro.gold(type="submit") Agendar
+
+  //- MODAL ENTREGABLE
+  #modalEntregable.modal-overlay
+    .modal-card
+      .modal-header: h5.m-0#tituloEntregable Nuevo Entregable: i.bx.bx-x.fs-3(onclick="closeModal('modalEntregable')" style="cursor:pointer;")
+      form#formEntregable(action=`/app/proyectos/${p.id}/entregable` method="POST")
+        .modal-content-area
+          label.form-label Nombre: input.form-input#entregableNombre(name="nombre" required)
+          label.form-label Responsable: input.form-input#entregableResp(name="responsable" required)
+          label.form-label Fecha: input.form-input#entregableFecha(type="date" name="fecha_entrega" required)
+        .p-4.text-end.bg-light: button.btn-pro.dark(type="submit") Crear
+
+  //- MODAL BITÁCORA
+  #modalBitacora.modal-overlay
+    .modal-card
+      .modal-header: h5.m-0 Entrada Bitácora: i.bx.bx-x.fs-3(onclick="closeModal('modalBitacora')" style="cursor:pointer;")
+      form(action=`/app/proyectos/${p.id}/bitacora` method="POST")
+        .modal-content-area
+          label.form-label Título: input.form-input(name="titulo" required)
+          label.form-label Tipo: select.form-input(name="tipo_registro"): option Avance: option Incidente: option Nota
+          label.form-label Descripción: textarea.form-input(name="descripcion" rows="3")
+        .p-4.text-end.bg-light: button.btn-pro.dark(type="submit") Registrar
+
+//- MIXIN 6: LÓGICA DE CONTROL (SCRIPTS)
+mixin renderScripts(p)
+  script.
+    // Control de Modales
+    function openModal(id, mode) { 
+        if(mode === 'crear') { const f = document.querySelector(`#${id} form`); if(f) f.reset(); }
+        document.getElementById(id).style.display = 'block'; 
+    }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function confirmAction(url, msg = "¿Estás seguro?") { if(confirm(msg)) window.location.href = url; }
+
+    // Helpers de Edición
+    function editarRiesgo(id, desc, impacto) {
+        document.getElementById('riesgoDesc').value = desc;
+        document.getElementById('riesgoImpacto').value = impacto;
+        document.getElementById('tituloRiesgo').innerText = "Editar Riesgo";
+        openModal('modalRiesgo');
+    }
+    function editarHito(id, nombre, fecha) {
+        document.getElementById('hitoNombre').value = nombre;
+        document.getElementById('hitoFecha').value = fecha;
+        document.getElementById('tituloHito').innerText = "Editar Hito";
+        openModal('modalHito');
+    }
+    function editarEntregable(id, nombre, resp, fecha) {
+        document.getElementById('entregableNombre').value = nombre;
+        document.getElementById('entregableResp').value = resp;
+        document.getElementById('entregableFecha').value = fecha;
+        document.getElementById('tituloEntregable').innerText = "Editar Entregable";
+        openModal('modalEntregable');
+    }
+
+    // Filtros de Fecha
+    function aplicarFiltros() {
+       const start = document.getElementById('filtroInicio').value;
+       const end = document.getElementById('filtroFin').value;
+       if(start && end) window.location.href = `?start=${start}&end=${end}`;
+       else alert('Selecciona ambas fechas');
+    }
+
+    // Event Listeners
+    window.onclick = function(e) { if(e.target.className === 'modal-overlay') document.querySelectorAll('.modal-overlay').forEach(m => m.style.display='none'); }
+
+    // Gráficas Chart.js (Renderizado condicional)
+    document.addEventListener('DOMContentLoaded', () => {
+       const ctxS = document.getElementById('chartCurvaS').getContext('2d');
+       const labels = !{p.graficos.labels};
+       new Chart(ctxS, {
+           type: 'line',
+           data: {
+               labels: labels,
+               datasets: [
+                   { label: 'PV (Planeado)', data: !{p.graficos.pv}, borderColor: '#94a3b8', borderDash: [5,5], pointRadius: 0, tension: 0.4 },
+                   { label: 'EV (Ganado)', data: !{p.graficos.ev}, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.4 },
+                   { label: 'AC (Real)', data: !{p.graficos.ac}, borderColor: '#dc2626', tension: 0.4 }
+               ]
+           },
+           options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } } }, plugins: { legend: { position: 'top' } } }
+       });
+
+       const ctxP = document.getElementById('chartPerformance').getContext('2d');
+       new Chart(ctxP, {
+           type: 'line',
+           data: {
+               labels: labels,
+               datasets: [
+                   { label: 'SPI', data: !{p.graficos.spi}, borderColor: '#3b82f6', tension: 0.4 },
+                   { label: 'CPI', data: !{p.graficos.cpi}, borderColor: '#d4af37', tension: 0.4 }
+               ]
+           },
+           options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 2 }, x: { grid: { display: false } } } }
+       });
+
+       const ctxD = document.getElementById('chartDonut').getContext('2d');
+       new Chart(ctxD, {
+           type: 'doughnut',
+           data: {
+               labels: ['Completado', 'Restante'],
+               datasets: [{ data: [#{p.progreso}, #{100 - p.progreso}], backgroundColor: ['#10b981', '#e2e8f0'], borderWidth: 0 }]
+           },
+           options: { cutout: '75%', plugins: { tooltip: { enabled: false }, legend: { display: false } } }
+       });
+    });
