@@ -1,330 +1,61 @@
 extends layout_dashboard
 
 block content
-  //- =========================================================================
-  //- INYMO COMMAND CENTER - EXECUTIVE DASHBOARD V.3.0
-  //- =========================================================================
-  
-  //- 📥 LIBRERÍAS DE RENDERIZADO GRÁFICO
-  script(src="https://cdn.jsdelivr.net/npm/chart.js")
-  link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css")
+  // Título de la Sección
+  div.page-header
+    div
+      h1 Panel General
+      p.text-muted Resumen de operaciones y alertas activas.
+    div
+      a.btn-primary(href="/proyectos/nuevo") + Nuevo Proyecto
 
-  //- 🎨 NÚCLEO DE DISEÑO ESTRATÉGICO (CSS DE ALTO IMPACTO)
-  style.
-    :root {
-      --inymo-navy: #0f172a;
-      --inymo-gold: #d4af37;
-      --inymo-accent: #3b82f6;
-      --glass: rgba(255, 255, 255, 0.9);
-      --success: #10b981;
-      --danger: #ef4444;
-    }
-
-    .dashboard-container {
-      padding: 20px 40px 60px;
-      background: #f8fafc;
-      min-height: 100vh;
-    }
-
-    /* --- HEADER PREMIUM --- */
-    .header-lux {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 40px;
-    }
-    .welcome-text h1 { font-weight: 800; color: var(--inymo-navy); letter-spacing: -1px; margin: 0; }
-    .welcome-text p { color: #64748b; font-weight: 500; margin-top: 5px; }
-
-    /* --- KPI RIBBON (ESTILO TRADING) --- */
-    .kpi-ribbon {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 25px;
-      margin-bottom: 40px;
-    }
-    .kpi-card-lux {
-      background: var(--inymo-navy);
-      border-radius: 20px;
-      padding: 25px;
-      color: white;
-      box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.15);
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.3s ease;
-    }
-    .kpi-card-lux:hover { transform: translateY(-5px); }
-    .kpi-card-lux::after {
-      content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px;
-      background: rgba(255,255,255,0.03); border-radius: 50%;
-    }
-    .kpi-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 1px; }
-    .kpi-value { font-size: 2rem; font-weight: 800; margin: 10px 0; display: block; font-family: 'Roboto Mono', monospace; }
-    .kpi-sub { font-size: 0.8rem; display: flex; align-items: center; gap: 5px; }
-    .text-gold { color: var(--inymo-gold); }
-
-    /* --- MAIN GRID SYSTEM --- */
-    .main-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 30px;
-    }
-
-    .glass-panel {
-      background: white;
-      border-radius: 24px;
-      border: 1px solid #e2e8f0;
-      padding: 30px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-    }
-
-    /* --- PROYECT PERFORMANCE TRACKER --- */
-    .project-row {
-      display: grid;
-      grid-template-columns: 2fr 1.5fr 1fr 1fr;
-      align-items: center;
-      padding: 20px 0;
-      border-bottom: 1px solid #f1f5f9;
-    }
-    .project-row:last-child { border-bottom: none; }
-    .proj-info strong { display: block; color: var(--inymo-navy); font-size: 0.95rem; }
-    .proj-info span { font-size: 0.8rem; color: #64748b; }
+  // Tarjetas de Resumen (Stats)
+  div.stats-grid
+    div.stat-card
+      div.stat-icon.blue
+        i.bx.bx-building
+      div.stat-info
+        h3 12
+        p Proyectos Activos
     
-    .progress-bar-lux {
-      height: 8px; background: #f1f5f9; border-radius: 10px; overflow: hidden; width: 100%;
-    }
-    .progress-fill { height: 100%; background: var(--inymo-navy); border-radius: 10px; }
-
-    /* --- BADGES --- */
-    .status-badge {
-      padding: 6px 12px; border-radius: 30px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
-    }
-    .status-badge.on-track { background: #dcfce7; color: #15803d; }
-    .status-badge.delayed { background: #fee2e2; color: #b91c1c; }
-
-    /* --- SIDEBAR COMPONENTS --- */
-    .alert-item {
-      display: flex; gap: 15px; margin-bottom: 20px; padding: 15px;
-      border-radius: 16px; background: #fff1f2; border: 1px solid #fecaca;
-    }
-    .alert-icon { width: 40px; height: 40px; border-radius: 12px; background: white; display: flex; align-items: center; justify-content: center; color: var(--danger); font-size: 1.5rem; }
-
-    .btn-lux {
-      background: var(--inymo-navy); color: white; padding: 12px 24px; border-radius: 12px;
-      font-weight: 700; border: none; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px;
-    }
-    .btn-lux:hover { background: var(--inymo-gold); color: var(--inymo-navy); transform: scale(1.02); }
-
-  //- =========================================================================
-  //- CONTENIDO VISUAL
-  //- =========================================================================
-  div.dashboard-container
+    div.stat-card.orange
+      div.stat-icon
+        i.bx.bx-time-five
+      div.stat-info
+        h3 3
+        p Entregas esta semana
     
-    //- 1. HEADER EJECUTIVO
-    div.header-lux
-      div.welcome-text
-        h1 Gestión de Portafolio Estratégico
-        p Monitoreo de Desempeño y Gobernanza (PMO)
-      div
-        button.btn-lux(onclick="location.href='/proyectos/nuevo'")
-          i.bx.bx-plus-circle.fs-4
-          | Nuevo Proyecto
+    div.stat-card.green
+      div.stat-icon
+        i.bx.bx-dollar-circle
+      div.stat-info
+        h3 $450k
+        p Facturado este mes
+    
+    div.stat-card.red
+      div.stat-icon
+        i.bx.bx-error-circle
+      div.stat-info
+        h3 2
+        p Alertas de Seguridad
 
-    //- 2. CINTA DE INDICADORES GLOBALES (EVM & RIESGO)
-    div.kpi-ribbon
-      //- SPI GLOBAL
-      div.kpi-card-lux
-        span.kpi-label SPI GLOBAL
-        span.kpi-value 1.20
-        div.kpi-sub.text-info
-          i.bx.bx-time-five
-          | Índice de desempeño cronograma
-      
-      //- CPI GLOBAL
-      div.kpi-card-lux(style="border-left: 5px solid var(--success);")
-        span.kpi-label CPI GLOBAL
-        span.kpi-value 0.95
-        div.kpi-sub.text-success
-          i.bx.bx-trending-up
-          | Eficiencia de costos del portafolio
-      
-      //- EXPOSICIÓN AL RIESGO
-      div.kpi-card-lux(style="border-left: 5px solid var(--danger);")
-        span.kpi-label EXPOSICIÓN AL RIESGO
-        span.kpi-value 11%
-        div.kpi-sub.text-danger
-          i.bx.bx-error-circle
-          | Proyectos con estatus crítico
-      
-      //- VALOR GANADO ACUMULADO
-      div.kpi-card-lux
-        span.kpi-label VALOR GANADO (EV)
-        span.kpi-value.text-gold $8,158,700
-        div.kpi-sub
-          i.bx.bx-dollar-circle
-          | Capital devengado total (Acumulado)
+  // Sección dividida
+  div.dashboard-sections
+    div.section-left
+      h3 📅 Cronograma Reciente
+      div.card-panel
+        ul.activity-list
+          li 
+            span.dot.blue 
+            | Se finalizó la estructura en "Nave Industrial B" - Hace 2h
+          li 
+            span.dot.orange 
+            | Cotización pendiente para "Grupo Modelo" - Hace 5h
+          li 
+            span.dot.green 
+            | Pago recibido de "Cliente X" - Ayer
 
-    //- 3. ÁREA DE TRABAJO PRINCIPAL
-    div.main-grid
-      
-      //- --- BLOQUE IZQUIERDO: MONITOR DE OPERACIONES ---
-      div.glass-panel
-        div.d-flex.justify-content-between.align-items-center.mb-4
-          h3.mod-title: i.bx.bx-list-check.me-2: | Radar de Proyectos Activos
-          div.d-flex.gap-2
-            span.badge.bg-light.text-dark.border Filtros
-            span.badge.bg-light.text-dark.border Q4 2025
-        
-        div.project-table-header.project-row.text-muted.small.fw-bold.px-2
-          div PROYECTO / CLIENTE
-          div PROGRESO TÉCNICO
-          div SALUD (EVM)
-          div ACCIONES
-        
-        div.project-list.mt-2
-          //- Proyecto 1
-          div.project-row.px-2
-            div.proj-info
-              strong Nave Industrial Aceros S.A.
-              span Grupo Aceros de México
-            div
-              div.d-flex.justify-content-between.small.mb-1
-                span 75%
-              div.progress-bar-lux: div.progress-fill(style="width: 75%; background: var(--inymo-gold);")
-            div: span.status-badge.on-track En Tiempo
-            div: a.btn-icon(href="#"): i.bx.bx-right-arrow-alt.fs-4.text-primary
-
-          //- Proyecto 2
-          div.project-row.px-2
-            div.proj-info
-              strong Automatización Línea 3
-              span Tequila Don Julio
-            div
-              div.d-flex.justify-content-between.small.mb-1
-                span 40%
-              div.progress-bar-lux: div.progress-fill(style="width: 40%; background: var(--danger);")
-            div: span.status-badge.delayed Retrasado
-            div: a.btn-icon(href="#"): i.bx.bx-right-arrow-alt.fs-4.text-primary
-
-          //- Proyecto 3
-          div.project-row.px-2
-            div.proj-info
-              strong Consultoría Estructural
-              span Hotel Riu Plaza
-            div
-              div.d-flex.justify-content-between.small.mb-1
-                span 95%
-              div.progress-bar-lux: div.progress-fill(style="width: 95%; background: var(--success);")
-            div: span.status-badge.on-track Finalizando
-            div: a.btn-icon(href="#"): i.bx.bx-right-arrow-alt.fs-4.text-primary
-
-      //- --- BLOQUE DERECHO: ANALÍTICA Y ALERTAS ---
-      div.d-flex.flex-column.gap-4
-        
-        //- TARJETA FINANCIERA: UTILIDAD GLOBAL
-        div.glass-panel(style="background: var(--inymo-navy); color: white;")
-          h4.fw-bold Rendimiento Financiero
-          div.chart-container.mt-4(style="height: 180px;")
-             canvas#chartVentas
-          div.mt-4.d-flex.justify-content-between
-            div
-              small.text-muted Inversión Total
-              div.fw-bold.fs-5 $12.4M
-            div
-              small.text-muted Utilidad (EV - AC)
-              div.fw-bold.fs-5.text-success +18.4%
-
-        //- CENTRO DE NOTIFICACIONES CRÍTICAS
-        div.glass-panel
-          h4.fw-bold.mb-4: i.bx.bx-bell.me-2: | Alertas de PMO
-          
-          div.alert-item
-            div.alert-icon: i.bx.bx-error
-            div
-              strong Riesgo de Suministros
-              p.small.text-muted El acero para "Nave B" tiene 15 días de retraso.
-          
-          div.alert-item(style="background: #fffbeb; border-color: #fef3c7;")
-            div.alert-icon.text-warning: i.bx.bx-time
-            div
-              strong Hito Próximo
-              p.small.text-muted Entrega de planos estructurales mañana.
-
-    //- 4. SECCIÓN INFERIOR: LOGÍSTICA Y RH
-    div.main-grid.mt-5
-       div.glass-panel
-          h4.fw-bold.mb-4 Carga de Trabajo por Equipo
-          div.chart-container(style="height: 250px;")
-             canvas#chartWorkload
-       
-       div.glass-panel
-          h4.fw-bold.mb-4 Quick Access
-          div.d-grid.gap-2
-             button.btn.btn-outline-dark.text-start.py-3.px-4.rounded-4
-               i.bx.bx-file.me-2
-               | Reporte Mensual de Utilidades
-             button.btn.btn-outline-dark.text-start.py-3.px-4.rounded-4
-               i.bx.bx-user-voice.me-2
-               | Directorio de Contratistas
-             button.btn.btn-outline-dark.text-start.py-3.px-4.rounded-4
-               i.bx.bx-map.me-2
-               | Mapa de Obras Activas
-
-  //- =========================================================================
-  //- 🧠 INTELIGENCIA DE DATOS (SCRIPTS)
-  //- =========================================================================
-  script.
-    document.addEventListener('DOMContentLoaded', () => {
-      
-      // --- GRÁFICA DE VENTAS VS COSTOS ---
-      const ctxVentas = document.getElementById('chartVentas').getContext('2d');
-      new Chart(ctxVentas, {
-        type: 'line',
-        data: {
-          labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
-          datasets: [{
-            label: 'Ingresos',
-            data: [12, 19, 15, 25, 22, 30],
-            borderColor: '#fbbf24',
-            tension: 0.4,
-            fill: false
-          }, {
-            label: 'Costos',
-            data: [10, 15, 13, 20, 18, 22],
-            borderColor: 'rgba(255,255,255,0.5)',
-            borderDash: [5, 5],
-            tension: 0.4,
-            fill: false
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { display: false },
-            y: { display: false }
-          }
-        }
-      });
-
-      // --- GRÁFICA DE CARGA DE TRABAJO (BAR) ---
-      const ctxWork = document.getElementById('chartWorkload').getContext('2d');
-      new Chart(ctxWork, {
-        type: 'bar',
-        data: {
-          labels: ['Ing. Velasco', 'Arq. Lara', 'Ing. Roberto', 'Cuadrilla A'],
-          datasets: [{
-            label: 'Proyectos Asignados',
-            data: [4, 6, 3, 8],
-            backgroundColor: '#0f172a',
-            borderRadius: 10
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } }
-        }
-      });
-    });
+    div.section-right
+      h3 📊 Rendimiento
+      div.card-panel.chart-placeholder
+        p [Aquí irá tu gráfica de rendimiento]

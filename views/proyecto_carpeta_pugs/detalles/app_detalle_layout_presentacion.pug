@@ -1,0 +1,437 @@
+extends ../../layout_app
+
+block content
+  //- ==========================================================================================
+  //- I N Y M O   E X E C U T I V E   D A S H B O A R D   ( P H A S E   1 . 5 )
+  //- ==========================================================================================
+  //- Versión: 39.0.0 "Inymo Corporate Identity Restored"
+  //- Autor: Ángel Velasco & IA Orange
+  //- Descripción: Interfaz ejecutiva con paleta Navy/Gold y chips de gobernanza.
+  //- ==========================================================================================
+
+  //- 1. RECURSOS VISUALES
+  link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css")
+  link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap")
+
+  //- 2. MOTOR DE ESTILOS (CSS CORE EXPANDIDO - ALTA FIDELIDAD)
+  style.
+    /* ----------------------------------------------------------------------
+       A. SISTEMA DE VARIABLES (DESIGN TOKENS - INYMO BRAND)
+       ---------------------------------------------------------------------- */
+    :root {
+      /* PALETA CORPORATIVA INYMO */
+      --navy-900: #0f172a;
+      --navy-800: #1e293b;
+      --navy-700: #334155;
+      --navy-600: #475569;
+      
+      --gold-500: #8cc63f; /* Inymo Gold */
+      --gold-600: #b45309;
+      --gold-100: #fef3c7;
+      
+      --blue-600: #2563eb;
+      --blue-100: #eff6ff;
+      
+      --green-600: #8cc63f;
+      --green-700: #047857;
+      --green-100: #ecfdf5;
+      
+      --red-600: #dc2626;
+      --red-700: #b91c1c;
+      --red-100: #fef2f2;
+      
+      --white: #ffffff;
+      --bg-canvas: #f8fafc;
+      --border-light: #e2e8f0;
+      
+      /* FUENTES */
+      --font-main: 'Poppins', sans-serif;
+      --font-mono: 'Roboto Mono', monospace;
+      
+      /* SOMBRAS */
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ----------------------------------------------------------------------
+       B. RESET Y ESTRUCTURA BASE
+       ---------------------------------------------------------------------- */
+    * { box-sizing: border-box; }
+
+    body {
+      background-color: var(--bg-canvas);
+      font-family: var(--font-main);
+      color: var(--navy-900);
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .main-container {
+      padding: 20px 2% !important; 
+      max-width: 100% !important; /* Liberamos el ancho total */
+      width: 100% !important;
+      margin: 0 !important;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    /* ----------------------------------------------------------------------
+       C. COMPONENTE: TARJETA DE IDENTIDAD (IDENTITY CARD)
+       ---------------------------------------------------------------------- */
+    .identity-card {
+      background-color: var(--white);
+      border-radius: 24px;
+      padding: 40px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      width: 100% !important; /* Ocupa todo el ancho del container */
+      box-sizing: border-box;
+    }
+
+    /* Línea decorativa: De Navy a Verde Inymo */
+    /* Línea decorativa lateral */
+    .identity-card::before {
+      content: '';
+      position: absolute;
+      top: 0; 
+      left: 0; 
+      bottom: 0;
+      width: 8px;
+      background: linear-gradient(180deg, var(--navy-900) 0%, #8cc63f 100%) !important;
+      border-radius: 24px 0 0 24px;
+    }
+
+    .project-title-display {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--navy-900);
+      margin: 10px 0 15px 0;
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .info-chip {
+      background-color: var(--bg-canvas);
+      border: 1px solid var(--border-light);
+      padding: 8px 16px;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--navy-700);
+      font-weight: 600;
+    }
+
+    .info-chip i { font-size: 1.1rem; color: var(--navy-500); }
+    .info-chip strong { color: var(--navy-900); font-weight: 700; }
+
+    /* ESTADOS DE SALUD */
+    .health-ok { background-color: var(--green-100); border-color: var(--green-600); color: var(--green-700); }
+    .health-warning { background-color: var(--gold-100); border-color: var(--gold-500); color: var(--gold-600); }
+    .health-danger { background-color: var(--red-100); border-color: var(--red-600); color: var(--red-700); }
+
+    /* ESTADOS DE RIESGO (Chips minimalistas) */
+    span.info-chip(class=`risk-${p.riesgo}`)
+          i.bx.bx-error-circle
+          strong= p.riesgo
+
+    - var healthClass = p.salud === 'En Tiempo' ? 'health-ok' : (p.salud === 'Retrasado' ? 'health-warning' : 'health-danger');
+        span.info-chip(class=healthClass)
+          i.bx.bxs-circle
+          strong= p.salud
+
+    /* METODOLOGÍA */
+    .method-agile { background-color: var(--blue-100); border-color: var(--blue-600); color: var(--blue-700); }
+    .method-hybrid { background-color: var(--gold-100); border-color: var(--gold-500); color: var(--gold-600); }
+    .method-waterfall { background-color: #f3e8ff; border-color: #7c3aed; color: #6d28d9; }
+
+    /* ----------------------------------------------------------------------
+       D. TOOLBAR (ORGANIZACIÓN GRUPOS IZQUIERDA / DERECHA)
+       ---------------------------------------------------------------------- */
+    .actions-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-top: 10px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .toolbar-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-toolbar {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-toolbar:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+    .btn-toolbar.primary { background-color: var(--navy-900); color: var(--white); }
+    .btn-toolbar.secondary { background-color: var(--white); color: var(--navy-700); border: 1px solid var(--border-light); }
+    .btn-toolbar.danger { background-color: var(--red-100); color: var(--red-600); border: 1px solid var(--red-100); }
+    .btn-toolbar.rescue { background-color: var(--green-100); color: var(--green-700); border: 1px solid var(--green-600); }
+
+    /* ----------------------------------------------------------------------
+       E. SISTEMA DE REPORTES (DROPDOWN)
+       ---------------------------------------------------------------------- */
+    .dropdown { position: relative; display: inline-block; }
+    
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%; left: 0;
+      background-color: var(--white);
+      min-width: 240px;
+      box-shadow: var(--shadow-xl);
+      border-radius: 12px;
+      padding: 8px 0;
+      z-index: 999;
+      margin-top: 5px;
+      border: 1px solid var(--border-light);
+    }
+        /* 1. Lo encuentras en la sección E. SISTEMA DE REPORTES (DROPDOWN) */
+    .dropdown::after {
+      content: "";
+      position: absolute;
+      top: 100%;       /* Inicia justo donde termina el botón */
+      left: 0;
+      width: 100%;
+      height: 20px;    /* Esta es la 'zona segura' invisible */
+    }
+
+    .dropdown:hover .dropdown-content { display: block; animation: fadeIn 0.2s ease; }
+    
+    .dropdown-item {
+      color: var(--navy-700);
+      padding: 12px 20px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .dropdown-item:hover { background-color: var(--bg-canvas); color: var(--navy-900); }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ----------------------------------------------------------------------
+       F. ESTILOS DE NAVEGACIÓN (VOLVER)
+       ---------------------------------------------------------------------- */
+    .btn-back {
+      color: var(--navy-600);
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+
+    /* Botón de volver con acento Verde Inymo */
+    .btn-back:hover { 
+      color: var(--inymo-green) !important; 
+      transform: translateX(-3px);
+      transition: 0.3s;
+    }
+    
+        /* El botón 'Configurar' ahora es verde inymo */
+    .btn-toolbar.primary {
+      background-color: var(--inymo-green) !important;
+      color: var(--navy-900) !important; /* Texto oscuro para mejor contraste sobre verde */
+      border: 1px solid var(--inymo-green-dark);
+    }
+
+    .btn-toolbar.primary:hover {
+      background-color: var(--inymo-green-dark) !important;
+    }
+
+
+    .archived-banner {
+      background-color: var(--navy-900);
+      color: var(--white);
+      text-align: center;
+      padding: 12px;
+      font-weight: 700;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+
+    /* --- ESTADOS DE RIESGO (REEMPLAZAR ESTA SECCIÓN) --- */
+    .risk-Bajo, .risk-bajo { 
+      background-color: #f4f9ec !important; 
+      border: 1px solid #8cc63f !important; 
+      color: #7ab532 !important; 
+      display: flex !important;
+    }
+    
+    .risk-Medio, .risk-medio { 
+      background-color: #fef9c3 !important; 
+      border: 1px solid #d4af37 !important; 
+      color: #854d0e !important; 
+      display: flex !important;
+    }
+    
+    .risk-Alto, .risk-alto { 
+      background-color: #fef2f2 !important; 
+      border: 1px solid #dc2626 !important; 
+      color: #991b1b !important; 
+      display: flex !important;
+    }
+
+    /* Fix visual para el icono y el texto */
+    .info-chip[class*="risk-"] i { color: inherit !important; }
+    .info-chip strong { text-transform: capitalize; }
+
+
+    
+
+  //- =========================================================================
+  //- 3. ESTRUCTURA HTML (PRESENTACIÓN DE IDENTIDAD)
+  //- =========================================================================
+  .main-container
+    
+    //- A. TARJETA DE IDENTIDAD MAESTRA
+    .identity-card
+      
+      //- 1. Botón Volver y Estado Archivado
+      div
+        a.btn-back(href="/app/proyectos") 
+          i.bx.bx-left-arrow-alt.fs-4
+          | Portafolio inymo
+        
+        if p.isArchivado
+          .archived-banner.mt-3
+            i.bx.bxs-archive-in.fs-4
+            | PROYECTO ARCHIVADO - MODO DE LECTURA
+
+        h1.project-title-display= p.nombre
+
+      //- 2. Metadatos de Identidad (Chips Organizados)
+      .meta-row
+        //- Identificador (Roboto Mono)
+        span.info-chip
+          i.bx.bx-barcode
+          span ID: 
+          strong(style="font-family: var(--font-mono);")= p.codigo
+        
+        //- Director del Proyecto
+        span.info-chip
+          i.bx.bx-user-circle
+          span PM: 
+          strong= p.lider
+
+        //- Fecha de Entrega
+        span.info-chip
+          i.bx.bx-calendar-event
+          span Entrega: 
+          strong= p.fecha_entrega
+
+        //- Chip de Riesgo Literal (Sin suposiciones, mapeo directo de la tabla)
+        span.info-chip(class=`risk-${p.riesgo}`)
+          i.bx.bx-error-circle
+          strong= p.riesgo
+
+        //- Semáforo de Salud Dinámico
+        - var healthClass = p.salud === 'En Tiempo' ? 'health-ok' : (p.salud === 'Retrasado' ? 'health-warning' : 'health-danger');
+        span.info-chip(class=healthClass)
+          i.bx.bxs-circle
+          strong= p.salud
+
+        //- Metodología Corporativa
+        - var methodClass = (p.metodologia === 'Ágil' || p.metodologia === 'Agil') ? 'method-agile' : (p.metodologia === 'Híbrido' || p.metodologia === 'Hibrido' ? 'method-hybrid' : 'method-waterfall');
+        span.info-chip(class=methodClass)
+          i.bx.bx-git-repo-forked
+          strong= p.metodologia
+
+      //- 3. Botonera Estratégica Organizada (Toolbar Bipolar)
+      .actions-toolbar
+        
+        //- GRUPO IZQUIERDO: Operación y Consultas
+        .toolbar-group
+          a.btn-toolbar.secondary(href=`/app/proyectos/${p.id}/repositorio`)
+            i.bx.bxs-folder-open.text-warning.fs-5
+            | Repositorio (#{p.totalPlanos})
+
+          div.dropdown
+            button.btn-toolbar.secondary
+              i.bx.bxs-file-pdf.text-danger.fs-5
+              | Generar Reporte
+              i.bx.bx-chevron-down
+            div.dropdown-content
+              a.dropdown-item(href=`/app/proyectos/reporte/general/${p.id}` target="_blank")
+                i.bx.bx-file
+                | Reporte General
+              a.dropdown-item(href=`/app/proyectos/reporte/financiero/${p.id}` target="_blank")
+                i.bx.bx-dollar-circle
+                | Auditoría Financiera
+              a.dropdown-item(href=`/app/proyectos/reporte/operativo/${p.id}` target="_blank")
+                i.bx.bx-cog
+                | Estatus Operativo
+              a.dropdown-item(href=`/app/proyectos/reporte/ejecutivo/${p.id}` target="_blank")
+                i.bx.bx-briefcase
+                | Resumen Ejecutivo
+
+          a.btn-toolbar.secondary(href=`/app/proyectos/${p.id}/historial-cotizaciones`)
+            i.bx.bx-history.fs-5
+            | Cotizaciones
+
+        //- GRUPO DERECHO: Administración y Ciclo de Vida
+        .toolbar-group
+          if !p.isArchivado
+            a.btn-toolbar.primary(href=`/app/proyectos/${p.id}/editar`)
+              i.bx.bx-slider-alt.fs-5
+              | Configurar
+
+          if p.isArchivado
+            a.btn-toolbar.rescue(href=`/app/proyectos/${p.id}/rescatar` onclick="return confirm('¿Reactivar proyecto?')")
+              i.bx.bx-undo.fs-5
+              | Rescatar Proyecto
+          else
+            a.btn-toolbar.danger(href=`/app/proyectos/${p.id}/archivar` onclick="return confirm('¿Archivar proyecto?')")
+              i.bx.bx-archive-in.fs-5
+              | Archivar Proyecto
+
+  //- =========================================================================
+  //- 4. SCRIPTS DE INTERACCIÓN
+  //- =========================================================================
+  script.
+    function confirmAction(url, msg) {
+      if(confirm(msg)) window.location.href = url;
+    }
+
+    //- ESTA ES LA PARTE CLAVE: Inyectamos las finanzas justo debajo
+  include ./app_detalle_finanzas.pug

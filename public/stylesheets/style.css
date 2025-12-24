@@ -1,21 +1,25 @@
 /* --- RESET & BASICS --- */
 :root {
-  --primary-blue: #1e3c72;
-  --secondary-blue: #2a5298;
-  --accent-orange: #ff7e5f;
-  --accent-orange-dark: #e67e22;
-  --text-dark: #2c3e50;
-  --text-light: #ecf0f1;
-  --bg-light: #f8f9fa;
+  /* PALETA PRIMARIA: INYMO GREEN (#8cc63f) */
+  --inymo-green: #8cc63f;
+  --inymo-green-dark: #7ab532;
+  --inymo-green-100: #f4f9ec;
+  
+  /* PALETA DE CONTRASTE */
+  --navy-900: #0f172a;
+  --navy-800: #1e293b;
+  
+  /* NEUTROS */
+  --white: #ffffff;
+  --bg-canvas: #f8fafc;
+  --border-light: #e2e8f0;
+  --font-main: 'Poppins', sans-serif;
 }
 
 body {
   font-family: 'Poppins', sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: var(--bg-light);
-  color: var(--text-dark);
-  overflow-x: hidden; /* Evita scroll horizontal por las animaciones */
+  background-color: var(--bg-canvas); /* Cambiado de bg-light */
+  color: var(--navy-900); /* Cambiado de text-dark */
 }
 
 h1, h2, h3 { font-weight: 700; }
@@ -408,3 +412,56 @@ video {
 .back-link:hover {
   color: #ff7e5f;
 }
+/* Estilos Semánticos para Metodología - Colores específicos */
+.info-chip.method-agile { background-color: var(--blue-100); border-color: var(--blue-600); color: var(--blue-700); }
+.info-chip.method-hybrid { background-color: var(--gold-100); border-color: var(--gold-500); color: var(--gold-600); }
+.info-chip.method-waterfall { background-color: #f3e8ff; border-color: #7c3aed; color: #6d28d9; }
+
+/* Estilos Semánticos para Riesgo */
+.info-chip.risk-bajo { background-color: var(--green-100); border-color: var(--green-600); color: var(--green-700); }
+.info-chip.risk-medio { background-color: var(--gold-100); border-color: var(--gold-500); color: var(--gold-600); }
+.info-chip.risk-alto { background-color: var(--red-100); border-color: var(--red-600); color: var(--red-700); }
+
+/* Ajuste para la alineación de botones derecha/izquierda */
+.actions-toolbar {
+  display: flex;
+  justify-content: space-between; /* Separa los grupos a los extremos */
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 20px;
+  padding-top: 30px;
+  border-top: 1px solid var(--border-light);
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+
+/* --- ESTADOS DE RIESGO (MAPEADO DIRECTO DE TABLA) --- */
+    /* Verde Inymo para Bajo */
+    .risk-Bajo, .risk-bajo { 
+      background-color: #f4f9ec !important; 
+      border: 1px solid #8cc63f !important; 
+      color: #7ab532 !important; 
+    }
+    
+    /* Amarillo/Oro para Medio */
+    .risk-Medio, .risk-medio { 
+      background-color: #fef9c3 !important; 
+      border: 1px solid #d4af37 !important; 
+      color: #854d0e !important; 
+    }
+    
+    /* Rojo para Alto */
+    .risk-Alto, .risk-alto { 
+      background-color: #fef2f2 !important; 
+      border: 1px solid #dc2626 !important; 
+      color: #991b1b !important; 
+    }
+
+    /* Forzar que el icono del chip de riesgo herede el color del texto */
+    .info-chip[class*="risk-"] i { color: inherit !important; }

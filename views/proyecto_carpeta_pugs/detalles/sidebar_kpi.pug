@@ -1,0 +1,27 @@
+//- MÓDULO DE IDENTIDAD RÁPIDA
+.hero-mini.mb-4
+  h6.text-muted.small.fw-bold ID: #{p.codigo}
+  h2.fw-bold(style="letter-spacing:-1px;")= p.nombre
+  span.badge(class=p.salud === 'En Tiempo' ? 'bg-success' : 'bg-danger')= p.salud
+
+hr
+
+//- KPIs VERTICALES
+.kpi-vertical-list
+  .kpi-box.mb-3.p-3.border.rounded-3
+    span.small.text-muted.fw-bold PRESUPUESTO (BAC)
+    h4.fw-bold= fmt.toMXN(p.presupuesto)
+  
+  .kpi-box.mb-3.p-3.border.rounded-3
+    span.small.text-muted.fw-bold COSTO REAL (AC)
+    h4.fw-bold.text-danger= fmt.toMXN(p.costo_real)
+
+  .kpi-box.mb-4.p-3.border.rounded-3(style="background:#f8fafc")
+    span.small.text-muted.fw-bold DIAGNÓSTICO DE SALUD
+    p.mt-2.small.fw-bold= p.diagnostico_ia || "Calculando..."
+
+//- RENDIMIENTO DONUT (Donde estaba antes en el medio, ahora a la izquierda)
+.performance-donut.text-center.p-4.bg-light.rounded-4
+  canvas#chartDonut(style="max-width:180px; margin: 0 auto;")
+  h3.mt-3.fw-bold #{p.progreso}%
+  span.text-muted Avance Físico Actual

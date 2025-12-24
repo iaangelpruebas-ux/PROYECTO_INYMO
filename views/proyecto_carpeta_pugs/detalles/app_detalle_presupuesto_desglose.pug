@@ -1,0 +1,501 @@
+extends ../../layout_app
+
+block content
+  //- ==========================================================================================
+  //- I N Y M O   E N T E R P R I S E   S Y S T E M S
+  //- PROJECT INTELLIGENCE UNIT - PHASE 10: ADVANCED RESOURCE & ASSET GOVERNANCE
+  //- ==========================================================================================
+  //- @version: 115.0.0 "The Strategic Resource Monolith"
+  //- @author: Ángel Velasco & IA Orange
+  //- @description: Interfaz maestra para el control de adquisiciones, proveedores y stock.
+  //- ==========================================================================================
+  
+  link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css")
+  link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Roboto+Mono:wght@400;700&display=swap")
+
+  style.
+    /* -----------------------------------------------------------------------------------------
+     * 1. NÚCLEO DEL SISTEMA DE DISEÑO (INYMO PREMIUM UI)
+     * ----------------------------------------------------------------------------------------- */
+    :root {
+      --navy-950: #020617;
+      --navy-900: #0f172a;
+      --navy-800: #1e293b;
+      --navy-700: #334155;
+      --inymo-green: #8cc63f;
+      --inymo-green-dark: #7ab532;
+      --recovery-emerald: #10b981;
+      --recovery-bg: #ecfdf5;
+      --border-light: #e2e8f0;
+      --white: #ffffff;
+      --danger-red: #ef4444;
+      --font-mono: 'Roboto Mono', monospace;
+      --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+      --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+    }
+
+    /* 2. MAQUETACIÓN ESTRUCTURAL FULL-WIDTH */
+    .main-container {
+      padding: 60px 4%;
+      max-width: 100%;
+      width: 100%;
+      margin: 0;
+      background-color: #f8fafc;
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      transition: all 0.4s ease;
+    }
+
+    /* 3. DASHBOARD DE INDICADORES FINANCIEROS (KPIs) */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 35px;
+      margin-bottom: 60px;
+    }
+
+    .card-kpi {
+      background: var(--white);
+      border-radius: 32px;
+      padding: 45px;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-xl);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .card-kpi:hover { transform: translateY(-15px); box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.2); }
+    .card-kpi::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 12px; background: var(--navy-900); }
+    .card-kpi.accent::after { background: var(--inymo-green); }
+    .card-kpi.recovery::after { background: var(--recovery-emerald); }
+
+    .kpi-label { font-size: 1rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 3px; }
+    .kpi-value { font-size: 3rem; font-weight: 900; color: var(--navy-950); font-family: var(--font-mono); margin: 15px 0; display: block; letter-spacing: -2px; }
+    .kpi-footer { font-size: 0.9rem; color: #94a3b8; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+
+    /* 4. SECCIONES DE GESTIÓN (MODULE CONTAINERS) */
+    .section-wrapper {
+      background: var(--white);
+      border-radius: 40px;
+      padding: 60px;
+      margin-bottom: 60px;
+      box-shadow: var(--shadow-xl);
+      border: 1px solid var(--border-light);
+      position: relative;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 45px;
+      border-bottom: 3px solid #f1f5f9;
+      padding-bottom: 25px;
+    }
+
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--navy-900);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      letter-spacing: -1.5px;
+      margin: 0;
+    }
+
+    /* 5. BUSCADOR Y TABLA DE STOCK (THE RECOVERY ENGINE) */
+    .stock-engine-box {
+      background: #f1f5f9;
+      border-radius: 30px;
+      padding: 40px;
+      border: 2px dashed #cbd5e1;
+      margin-top: 20px;
+    }
+
+    .stock-table-container {
+      max-height: 550px;
+      overflow-y: auto;
+      border-radius: 25px;
+      background: white;
+      box-shadow: var(--shadow-inner);
+    }
+
+    .stock-table { width: 100%; border-collapse: collapse; }
+    .stock-table thead th { position: sticky; top: 0; background: var(--navy-900); color: white; padding: 22px; font-size: 0.8rem; text-transform: uppercase; z-index: 20; letter-spacing: 1px; }
+    .stock-table tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.3s; }
+    .stock-table tbody tr:hover { background: var(--recovery-bg); }
+    .stock-table td { padding: 22px; vertical-align: middle; }
+
+    /* 6. COMPONENTES UI ESPECIALIZADOS */
+    .input-inymo {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 20px 25px;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      color: var(--navy-900);
+      font-size: 1rem;
+    }
+    .input-inymo:focus { border-color: var(--inymo-green); background: white; outline: none; box-shadow: 0 0 0 6px rgba(140, 198, 63, 0.15); }
+
+    .btn-action-main {
+      padding: 20px 40px;
+      border-radius: 22px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 15px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: none;
+      cursor: pointer;
+    }
+    .btn-report { background: var(--navy-950); color: white; border: 1px solid rgba(255,255,255,0.1); }
+    .btn-report:hover { background: #000; transform: scale(1.05); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+
+    .btn-apartar { background: var(--recovery-emerald); color: white; padding: 12px 25px; border-radius: 15px; font-weight: 800; border: none; font-size: 0.9rem; transition: 0.3s; }
+    .btn-apartar:hover { background: #059669; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2); }
+
+    .text-recovery { color: var(--recovery-emerald) !important; font-weight: 900; }
+    .badge-recovery { background: var(--recovery-bg); color: var(--recovery-emerald); padding: 8px 18px; border-radius: 15px; font-size: 0.8rem; font-weight: 800; border: 1px solid var(--recovery-emerald); display: inline-flex; align-items: center; gap: 8px; }
+
+    /* 7. TABLA DE AUDITORÍA FINAL */
+    .audit-table { width: 100%; border-collapse: separate; border-spacing: 0 18px; }
+    .audit-table thead th { background: transparent; color: var(--navy-700); padding: 20px; font-weight: 900; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; border-bottom: 3px solid var(--navy-900); }
+    .audit-table tbody tr td { background: var(--white); padding: 30px; border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    .audit-table tr td:first-child { border-left: 1px solid var(--border-light); border-radius: 25px 0 0 25px; }
+    .audit-table tr td:last-child { border-right: 1px solid var(--border-light); border-radius: 0 25px 25px 0; }
+
+  .main-container
+    //- ========================================================================================
+    //- A. CABECERA CORPORATIVA DE ALTO NIVEL
+    //- ========================================================================================
+    header.d-flex.justify-content-between.align-items-start.mb-5
+      div
+        a.btn-back(href=`/app/proyectos/${p.id}` style="text-decoration:none; color:#64748b; font-weight:800; display:flex; align-items:center; gap:12px; margin-bottom:20px;") 
+          i.bx.bx-arrow-back.fs-3
+          | VOLVER AL DASHBOARD DEL PROYECTO
+        h1(style="font-size: 4.8rem; font-weight:900; color: var(--navy-900); margin:0; line-height:0.9; letter-spacing:-4px;") Gobernanza de Presupuesto
+        p.text-muted.fs-3(style="font-weight:500; margin-top:15px;") Auditoría de Recursos, Compras e Inventario: #[span(style="color:var(--navy-900); font-weight:900;")= p.nombre]
+      
+      .text-end.d-flex.flex-column.align-items-end.gap-3
+        //- BOTÓN DE REPORTE EJECUTIVO (VISUALIZACIÓN DE PROYECTO)
+        button.btn-action-main.btn-report(type="button" onclick="window.open('/app/presentacion/reporte/presupuesto/" + p.id + "', '_blank')")
+          i.bx.bxs-file-pdf.fs-2
+          | Generar Reporte PDF
+        
+        .project-id-badge(style="background:var(--navy-900); padding:20px 40px; border-radius:25px; color:white; border: 1px solid var(--inymo-green);")
+          span.small.text-muted.fw-bold(style="display:block; letter-spacing:3px; text-transform:uppercase;") Código de Gestión
+          span(style="font-family:var(--font-mono); font-weight:900; font-size:2.2rem; color:var(--inymo-green);")= p.codigo
+
+    //- ========================================================================================
+    //- B. KPI DASHBOARD (MÉTRICAS DE CONTROL FINANCIERO)
+    //- ========================================================================================
+    - var totalEgresos = partidas.reduce((acc, curr) => acc + parseFloat(curr.total || 0), 0)
+    - var totalAhorroRecuperado = partidas.filter(i => i.es_recuperado).reduce((acc, curr) => acc + parseFloat(curr.total || 0), 0)
+    
+    .summary-grid
+      .card-kpi
+        span.kpi-label Presupuesto Base (BAC)
+        span.kpi-value= formatMoney(p.presupuesto)
+        p.kpi-footer: span #[i.bx.bx-target-lock] Techo financiero aprobado originalmente.
+      
+      .card-kpi.accent
+        span.kpi-label Inversión Real (AC)
+        span.kpi-value(style="color: var(--inymo-green);")= formatMoney(totalEgresos)
+        p.kpi-footer: span #[i.bx.bx-trending-up] Total acumulado entre compras y activos.
+
+      .card-kpi.recovery
+        span.kpi-label Valor Recuperado (Stock)
+        span.kpi-value(style="color: var(--recovery-emerald);")= formatMoney(totalAhorroRecuperado)
+        p.kpi-footer: span #[i.bx.bx-recycle] Ahorro directo por reuso de materiales sobrantes.
+
+    //- ========================================================================================
+    //- C. MÓDULO DE MATERIAL DE INVENTARIO LIBRE (APARTAR)
+    //- ========================================================================================
+    .section-wrapper(style="border-top: 15px solid var(--recovery-emerald);")
+      h3.section-title
+        i.bx.bx-package.text-success.fs-1
+        | Material de Inventario Libre (Stock Sobrante)
+      p.section-subtitle Busque materiales disponibles de otros proyectos o almacenes centrales para asignarlos sin costo de adquisición nuevo.
+      
+      .stock-engine-box
+        .row.g-4.mb-5
+          .col-md-7
+            label.fw-bold.mb-2.text-navy #[i.bx.bx-search-alt] Buscador Inteligente
+            input.form-control.input-inymo#stockFilterInput(type="text" placeholder="Filtrar por ubicación, ID de material o fecha de entrada...")
+          
+          .col-md-5
+            label.fw-bold.mb-2.text-navy #[i.bx.bx-sort-alt-2] Ordenar Existencias
+            select.form-select.input-inymo#stockSortSelect
+              option(value="desc") Mayor disponibilidad primero
+              option(value="asc") Menor disponibilidad primero
+              option(value="id") Ordenar por ID de Artículo
+
+        .stock-table-container
+          table.stock-table#stockDataTable
+            thead
+              tr
+                th Identificador Articulo
+                th Ubicación / Origen del Stock
+                th Cant. Disponible
+                th Precio de Sistema
+                th Operación de Apartado
+            tbody
+              if stock && stock.length > 0
+                each s in stock
+                  tr.stock-row(data-qty=s.cantidad data-id=s.articulo_id)
+                    td: strong.text-navy ID-#{s.articulo_id}
+                    td: span.badge.bg-light.text-dark.p-3.fs-6(style="border:1px solid #e2e8f0;")= s.ubicacion
+                    td: span.fw-bold.fs-4= s.cantidad
+                    td: span.text-muted.font-mono= formatMoney(s.precio_original)
+                    td
+                      form.d-flex.gap-3(action=`/app/proyectos/${p.id}/presupuesto/asignar-stock` method="POST")
+                        input(type="hidden" name="stock_id" value=s.id)
+                        input.form-control.input-inymo(type="number" step="0.01" name="cantidad_a_usar" max=s.cantidad placeholder="Cant." required style="width:120px; padding:10px 15px; border-radius:12px;")
+                        input.form-control.input-inymo(name="notas" placeholder="Uso técnico..." style="width:180px; padding:10px 15px; border-radius:12px;")
+                        button.btn-apartar(type="submit")
+                          i.bx.bx-pin.me-1
+                          | APARTAR
+              else
+                tr
+                  td.text-center.py-5(colspan="5")
+                    i.bx.bx-info-circle.fs-1.text-muted
+                    h5.mt-3.text-muted No hay materiales libres registrados en la red INYMO.
+
+    //- ========================================================================================
+    //- D. SECCIÓN DE ADQUISICIONES EXTERNAS (COMPRAS)
+    //- ========================================================================================
+    .section-wrapper(style="border-top: 15px solid var(--navy-900);")
+      .section-header
+        h3.section-title
+          i.bx.bx-cart-add.text-primary.fs-1
+          | Compras y Adquisiciones con Proveedores
+        button.btn-action-main(type="button" data-bs-toggle="modal" data-bs-target="#modalAltaProveedor" style="background:var(--navy-900); color:white;")
+          i.bx.bx-user-plus.fs-3
+          | Alta Rápida Proveedor
+
+      p.section-subtitle Registro de egresos financieros vinculados a cotizaciones o facturas de proveedores externos.
+
+      form(action=`/app/proyectos/${p.id}/presupuesto/agregar` method="POST" enctype="multipart/form-data")
+        .row.g-4
+          .col-md-5
+            label.form-label.fw-bold Concepto / Descripción Detallada
+            input.form-control.input-inymo(name="concepto" placeholder="Ej: Aceros Estructurales ASTM, Sensores..." required)
+          
+          .col-md-4
+            label.form-label.fw-bold Proveedor del Catálogo Maestro
+            select.form-select.input-inymo(name="proveedor_id")
+              option(value="") -- Seleccionar Proveedor --
+              each prov in proveedores
+                option(value=prov.id)= prov.nombre_empresa
+          
+          .col-md-3
+            label.form-label.fw-bold Categoría de Gasto
+            select.form-select.input-inymo(name="categoria")
+              option(value="Materiales") Materiales
+              option(value="Mano de Obra") Mano de Obra
+              option(value="Servicios") Servicios
+              option(value="Logística") Logística
+              option(value="Indirectos") Indirectos
+          
+          .col-md-2
+            label.form-label.fw-bold Cantidad
+            input.form-control.input-inymo(type="number" step="0.01" name="cantidad" value="1")
+
+          .col-md-3
+            label.form-label.fw-bold Precio Unitario (Monto Neto)
+            input.form-control.input-inymo(type="number" step="0.01" name="precio_unitario" placeholder="$ 0.00" required)
+
+          .col-md-7
+            label.form-label.fw-bold Notas y Justificación de Compra
+            textarea.form-control.input-inymo(name="notas" rows="1" placeholder="Explique la necesidad operativa de este gasto...")
+
+          .col-md-5
+            label.form-label.fw-bold Evidencia Documental (Cotización/Factura PDF)
+            input.form-control.input-inymo(type="file" name="evidencia_pdf" accept="application/pdf")
+
+          .col-md-7.d-flex.align-items-end.justify-content-end
+            button.btn-action-main.btn-green(type="submit" style="width:400px;")
+              i.bx.bx-shield-check.fs-2
+              | Registrar Gasto Externo
+
+    //- ========================================================================================
+    //- E. TABLA DE AUDITORÍA DE PARTIDAS Y RESERVAS
+    //- ========================================================================================
+    .section-wrapper
+      .d-flex.justify-content-between.align-items-center.mb-5
+        h4.fw-bold(style="font-size:2rem; margin:0;") Historial de Gestión de Recursos
+        span.badge.bg-dark.p-4.rounded-pill(style="font-size:1rem;") Total de Partidas Registradas: #{partidas.length}
+
+      table.audit-table
+        thead
+          tr
+            th Insumo / Concepto
+            th Proveedor / Origen
+            th Total (MXN)
+            th Documentación
+            th Acciones de Control
+        tbody
+          if partidas.length > 0
+            each item in partidas
+              tr
+                td
+                  div(style="font-weight:900; font-size:1.2rem; color:var(--navy-950);")= item.concepto
+                  if item.es_recuperado
+                    span.badge-recovery.mt-2
+                      i.bx.bx-recycle
+                      | RECURSO RECUPERADO DE STOCK
+                  if item.notas
+                    p.small.text-muted.mt-3(style="font-style:italic; border-left:4px solid #e2e8f0; padding-left:15px;")= item.notas
+                
+                td
+                  if item.proveedor_nombre
+                    .fw-bold.text-navy.fs-5= item.proveedor_nombre
+                    small.text-muted Proveedor Externo Autorizado
+                  else
+                    .fw-bold.text-success.fs-5 INYMO INTERNAL STOCK
+                    small.text-muted Inventario de Obra Anterior
+                
+                td(class=item.es_recuperado ? 'text-recovery' : '')
+                  span(style="font-family:var(--font-mono); font-weight:900; font-size:1.5rem;")= formatMoney(item.total)
+                
+                td.text-center
+                  if item.archivo_evidencia_url
+                    a.btn.btn-outline-danger.p-4(href=item.archivo_evidencia_url target="_blank" style="border-radius:20px; transition:0.3s;")
+                      i.bx.bxs-file-pdf.fs-2
+                  else
+                    span.text-muted -- Sin Evidencia --
+                
+                td.text-center
+                  .d-flex.gap-3.justify-content-center
+                    a.btn.btn-light.p-4(href=`/app/proyectos/${p.id}/presupuesto/editar/${item.id}` style="border-radius:20px;")
+                      i.bx.bx-edit-alt.fs-3
+                    a.btn.btn-outline-danger.p-4(href=`/app/proyectos/${p.id}/presupuesto/eliminar/${item.id}` onclick="return confirm('ATENCIÓN ÁNGEL: Si elimina esta partida de stock, las unidades regresarán al inventario global automáticamente. ¿Desea continuar?')" style="border-radius:20px;")
+                      i.bx.bx-trash.fs-3
+          else
+            tr
+              td.text-center.py-5(colspan="5")
+                i.bx.bx-spreadsheet.fs-1.text-muted
+                h5.mt-3.text-muted No hay registros financieros detectados para este identificador.
+
+  //- ========================================================================================
+  //- F. MODAL: REGISTRO ACELERADO DE PROVEEDORES (BLINDAJE DE DUPLICADOS)
+  //- ========================================================================================
+  .modal.fade#modalAltaProveedor(tabindex="-1" aria-hidden="true")
+    .modal-dialog.modal-dialog-centered.modal-lg
+      .modal-content(style="border-radius:40px; border:none; box-shadow:var(--shadow-xl);")
+        .modal-header.bg-dark.text-white(style="border-radius:40px 40px 0 0; padding: 45px;")
+          h5.modal-title.fw-bold(style="font-size:2.4rem; letter-spacing:-2px;")
+            i.bx.bx-user-check.me-3
+            | Registro de Nuevo Proveedor
+          button.btn-close.btn-close-white(type="button" data-bs-dismiss="modal")
+        
+        .modal-body.p-5
+          form#formQuickProv(action=`/app/proyectos/${p.id}/proveedor/rapido` method="POST")
+            .mb-5
+              label.form-label.fw-bold Empresa / Razón Social
+              input.form-control.input-inymo#provNameInput(name="nombre_empresa" placeholder="Ej: Aceros y Techados de México S.A." required)
+              #duplicadoAlert.mt-4.p-4(style="display:none; background:#fee2e2; color:var(--danger-red); border-radius:20px; border: 2px solid var(--danger-red);")
+                i.bx.bx-error-circle.me-3.fs-3
+                strong ADVERTENCIA DE SEGURIDAD:
+                br
+                | Este proveedor ya se encuentra registrado en el sistema. Por favor, selecciónelo del menú desplegable en el formulario principal para evitar duplicidad de data.
+            
+            .row.g-5
+              .col-md-6
+                label.form-label.fw-bold Persona de Contacto
+                input.form-control.input-inymo(name="contacto_nombre" placeholder="Nombre del agente de ventas")
+              .col-md-6
+                label.form-label.fw-bold Teléfono de Contacto
+                input.form-control.input-inymo(name="telefono" placeholder="33 XXXX XXXX")
+            
+            .mt-5.text-end
+              button.btn.btn-light.px-5.py-4.me-4(type="button" data-bs-dismiss="modal" style="border-radius:20px; font-weight:800; text-transform:uppercase;") Cancelar Operación
+              button.btn-action-main.btn-green#btnSubmitProv(type="submit")
+                i.bx.bx-save.fs-2
+                | Guardar Proveedor
+
+  //- ========================================================================================
+  //- G. SCRIPTS DE INTELIGENCIA DE NEGOCIO (INYMO CLIENT ENGINE)
+  //- ========================================================================================
+  script.
+    /* 1. INYECTOR DE DATA DEL SERVIDOR */
+    const catalogoProveedores = !{JSON.stringify(proveedores)};
+
+    /* 2. DETECTOR DE PROVEEDORES DUPLICADOS (PREVENTIVO EN TIEMPO REAL) */
+    const inputProv = document.getElementById('provNameInput');
+    const alertDuplicado = document.getElementById('duplicadoAlert');
+    const btnGuardarProv = document.getElementById('btnSubmitProv');
+
+    inputProv.addEventListener('input', (e) => {
+      const busqueda = e.target.value.trim().toLowerCase();
+      // Buscamos coincidencia exacta ignorando mayúsculas/minúsculas
+      const existe = catalogoProveedores.find(p => p.nombre_empresa.toLowerCase() === busqueda);
+
+      if (existe && busqueda.length > 3) {
+        alertDuplicado.style.display = 'block';
+        inputProv.style.borderColor = 'var(--danger-red)';
+        inputProv.style.backgroundColor = '#fff1f2';
+        btnGuardarProv.disabled = true;
+        btnGuardarProv.style.opacity = '0.3';
+        btnGuardarProv.style.cursor = 'not-allowed';
+      } else {
+        alertDuplicado.style.display = 'none';
+        inputProv.style.borderColor = '';
+        inputProv.style.backgroundColor = '';
+        btnGuardarProv.disabled = false;
+        btnGuardarProv.style.opacity = '1';
+        btnGuardarProv.style.cursor = 'pointer';
+      }
+    });
+
+    /* 3. MOTOR DE FILTRADO DINÁMICO DE STOCK (SEARCH-AS-YOU-TYPE) */
+    const searchInput = document.getElementById('stockFilterInput');
+    const stockRows = document.querySelectorAll('.stock-row');
+
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      stockRows.forEach(row => {
+        const contenido = row.innerText.toLowerCase();
+        // Filtra por cualquier coincidencia en la fila (Ubicación, ID, etc)
+        row.style.display = contenido.includes(query) ? '' : 'none';
+      });
+    });
+
+    /* 4. MOTOR DE ORDENAMIENTO DE INVENTARIO (DATA-DRIVEN) */
+    const sortSelect = document.getElementById('stockSortSelect');
+    const tableBody = document.querySelector('#stockDataTable tbody');
+
+    sortSelect.addEventListener('change', (e) => {
+      const criteria = e.target.value;
+      const arrayRows = Array.from(stockRows);
+
+      arrayRows.sort((a, b) => {
+        if (criteria === 'asc' || criteria === 'desc') {
+          const qtyA = parseFloat(a.dataset.qty);
+          const qtyB = parseFloat(b.dataset.qty);
+          return criteria === 'asc' ? qtyA - qtyB : qtyB - qtyA;
+        } else if (criteria === 'id') {
+          const idA = parseInt(a.dataset.id);
+          const idB = parseInt(b.dataset.id);
+          return idA - idB;
+        }
+      });
+
+      // Re-inyectamos las filas ordenadas al DOM
+      arrayRows.forEach(row => tableBody.appendChild(row));
+    });
+
+    /* 5. HELPER FORMATEADOR DE MONEDA MEXICANA (CLIENTE) [2025-12-12] */
+    function formatCurrencyMX(val) {
+      return new Intl.NumberFormat('es-MX', { 
+        style: 'currency', 
+        currency: 'MXN',
+        minimumFractionDigits: 2
+      }).format(val);
+    }

@@ -1,0 +1,32 @@
+extends ../../layout_app
+
+block content
+  style.
+    .analytics-layout {
+      display: flex;
+      width: 100%;
+      height: calc(100vh - 70px); /* Ajuste según tu navbar */
+      overflow: hidden;
+      background: #f1f5f9;
+    }
+    .sidebar-panel {
+      flex: 0 0 30%; /* EL 30% DE LA IZQUIERDA */
+      background: #fff;
+      border-right: 1px solid #e2e8f0;
+      overflow-y: auto;
+      padding: 25px;
+    }
+    .main-visualizer {
+      flex: 0 0 70%; /* EL 70% DE LA DERECHA */
+      overflow-y: auto;
+      padding: 30px;
+    }
+
+  .analytics-layout
+    //- PANEL IZQUIERDO (ASSEMBLY)
+    aside.sidebar-panel
+      include ./sidebar_kpi.pug
+
+    //- PANEL DERECHO (ASSEMBLY)
+    main.main-visualizer
+      include ./main_charts.pug

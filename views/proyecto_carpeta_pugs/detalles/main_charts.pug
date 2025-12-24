@@ -1,0 +1,33 @@
+//- ENCABEZADO DE ACCIONES DERECHO
+.d-flex.justify-content-between.align-items-center.mb-4
+  h3.fw-bold Análisis Estadístico y Tendencias
+  .btn-group
+    button.btn.btn-white.border.btn-sm #[i.bx.bx-export] Exportar PDF
+    button.btn.btn-dark.btn-sm #[i.bx.bx-fullscreen] Pantalla Completa
+
+//- ÁREA DE GRÁFICA MAESTRA (CURVA S)
+.card.border-0.shadow-sm.rounded-4.mb-4
+  .card-header.bg-white.p-4.border-0
+    h5.fw-bold.m-0: i.bx.bx-line-chart.me-2.text-success: | Curva S: Proyección vs Realidad
+  .card-body.p-4
+    div(style="height: 450px; width: 100%;")
+      canvas#chartCurvaS
+
+//- COMPARATIVA CPI/SPI
+.row
+  .col-md-12
+    .card.border-0.shadow-sm.rounded-4
+      .card-header.bg-white.p-4.border-0
+        h5.fw-bold.m-0: i.bx.bx-bar-chart-alt-2.me-2.text-primary: | Índice de Desempeño Histórico
+      .card-body.p-4
+        div(style="height: 300px; width: 100%;")
+          canvas#chartPerformance
+
+//- SCRIPT DE ENSAMBLAJE (Para que las gráficas sepan dónde dibujarse)
+script.
+  document.addEventListener('DOMContentLoaded', () => {
+    // Aquí pondrías la inicialización de Chart.js
+    // que ya tenías en tu código original, pero ahora
+    // apuntando a los ID de este nuevo PUG.
+    console.log("Analytics Engine Iniciado en modo Split-View 30/70");
+  });
