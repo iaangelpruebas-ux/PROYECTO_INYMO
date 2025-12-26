@@ -1,27 +1,314 @@
-//- MÓDULO DE IDENTIDAD RÁPIDA
-.hero-mini.mb-4
-  h6.text-muted.small.fw-bold ID: #{p.codigo}
-  h2.fw-bold(style="letter-spacing:-1px;")= p.nombre
-  span.badge(class=p.salud === 'En Tiempo' ? 'bg-success' : 'bg-danger')= p.salud
+//- ==========================================================================================
+//- I N Y M O   S T R A T E G I C   I N T E L L I G E N C E   -   S I D E B A R   ( 3 0 % )
+//- ==========================================================================================
+//- @version: 185.0.0 "The Sentinel Vanguard"
+//- @framework: IA Orange Core v.4.0
+//- @standards: PMBOK 7th Ed. / ISO 30414 (Human Capital Reporting)
+//- @description: Módulo de monitoreo ejecutivo de alto impacto con análisis predictivo.
+//- ==========================================================================================
 
-hr
+style.
+  /* -----------------------------------------------------------------------------------------
+     1. DESIGN TOKENS & SYSTEM VARIABLES (INYMO ELITE)
+     ----------------------------------------------------------------------------------------- */
+  :root {
+    --inymo-primary: #8cc63f;
+    --inymo-primary-glow: rgba(140, 198, 63, 0.4);
+    --inymo-navy: #0f172a;
+    --inymo-dark-glass: rgba(15, 23, 42, 0.98);
+    --inymo-border: #e2e8f0;
+    --inymo-danger: #ef4444;
+    --inymo-warning: #fbbf24;
+    --inymo-success: #10b981;
+    --font-data: 'Roboto Mono', monospace;
+  }
 
-//- KPIs VERTICALES
-.kpi-vertical-list
-  .kpi-box.mb-3.p-3.border.rounded-3
-    span.small.text-muted.fw-bold PRESUPUESTO (BAC)
-    h4.fw-bold= fmt.toMXN(p.presupuesto)
-  
-  .kpi-box.mb-3.p-3.border.rounded-3
-    span.small.text-muted.fw-bold COSTO REAL (AC)
-    h4.fw-bold.text-danger= fmt.toMXN(p.costo_real)
+  /* 2. CONTENEDOR PRINCIPAL: CONTROL DE MISIÓN */
+  .sentinel-sidebar-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 10px;
+    /* Evitamos overflow:hidden para permitir que los tooltips floten libremente */
+    position: relative;
+    animation: sidebarPowerUp 1s cubic-bezier(0.22, 1, 0.36, 1);
+  }
 
-  .kpi-box.mb-4.p-3.border.rounded-3(style="background:#f8fafc")
-    span.small.text-muted.fw-bold DIAGNÓSTICO DE SALUD
-    p.mt-2.small.fw-bold= p.diagnostico_ia || "Calculando..."
+  @keyframes sidebarPowerUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
 
-//- RENDIMIENTO DONUT (Donde estaba antes en el medio, ahora a la izquierda)
-.performance-donut.text-center.p-4.bg-light.rounded-4
-  canvas#chartDonut(style="max-width:180px; margin: 0 auto;")
-  h3.mt-3.fw-bold #{p.progreso}%
-  span.text-muted Avance Físico Actual
+  /* 3. ARQUITECTURA DE TOOLTIPS "LIVELY" (Z-INDEX SUPERIOR) */
+  .lively-tooltip-container {
+    position: relative;
+    display: inline-flex;
+    cursor: help;
+    z-index: 50; /* Base superior */
+  }
+
+  .lively-tooltip-content {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: 160%;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    width: 340px; /* Tamaño optimizado para visibilidad directiva */
+    background: var(--inymo-dark-glass);
+    backdrop-filter: blur(15px);
+    color: white;
+    padding: 28px;
+    border-radius: 22px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    /* Prioridad máxima de renderizado para no ser tapado por el 70% */
+    z-index: 999999 !important; 
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(140, 198, 63, 0.4);
+    pointer-events: none;
+  }
+
+  .lively-tooltip-content b {
+    display: block;
+    color: var(--inymo-primary);
+    font-size: 1.15rem;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 8px;
+  }
+
+  /* Flecha del Tooltip */
+  .lively-tooltip-content::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -12px;
+    border-width: 12px;
+    border-style: solid;
+    border-color: var(--inymo-dark-glass) transparent transparent transparent;
+  }
+
+  .lively-tooltip-container:hover .lively-tooltip-content {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* 4. BARRA DE PROGRESO INDUSTRIAL (REQ 10) */
+  .industrial-progress-track {
+    margin-top: 25px;
+    background: #f1f5f9;
+    border-radius: 100px;
+    height: 20px;
+    width: 100%;
+    border: 1.5px solid var(--inymo-border);
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.06);
+  }
+
+  .industrial-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #8cc63f 0%, #10b981 100%);
+    border-radius: 100px;
+    transition: width 2.5s cubic-bezier(0.19, 1, 0.22, 1);
+    position: relative;
+    box-shadow: 0 0 15px var(--inymo-primary-glow);
+  }
+
+  /* Efecto de Pulso de Carga */
+  .industrial-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%);
+    animation: industrialSweep 3s infinite ease-in-out;
+  }
+
+  @keyframes industrialSweep {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+  }
+
+  /* 5. CARDS DE ANALÍTICA (GLASSMORPHISM) */
+  .glass-card-sentinel {
+    background: #ffffff;
+    border-radius: 32px;
+    border: 1px solid var(--inymo-border);
+    padding: 38px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03);
+    transition: all 0.4s ease;
+  }
+
+  .glass-card-sentinel:hover {
+    border-color: var(--inymo-primary);
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
+  }
+
+  /* 6. TABLAS DE VARIACIÓN TÉCNICA (REQ 6, 11) */
+  .variance-data-table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: separate;
+    border-spacing: 0 12px;
+  }
+
+  .variance-data-table td {
+    padding: 10px 0;
+    border-bottom: 1px solid #f8fafc;
+  }
+
+  .label-variance { color: var(--inymo-slate); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; }
+  .value-variance { font-family: var(--font-data); font-weight: 800; text-align: right; font-size: 1rem; }
+
+  /* 7. SEGURIDAD DE RIESGOS */
+  .risk-pill {
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+  }
+
+  .ia-banner-alert {
+    padding: 22px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    border: 1px solid rgba(0,0,0,0.04);
+    /* Estilos para el NPR (Número de Prioridad de Riesgo) */
+    .npr-badge {
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-family: var(--font-data);
+      font-weight: 800;
+      font-size: 0.75rem;
+    }
+    .npr-bajo { background: #ecfdf5; color: #10b981; }
+    .npr-medio { background: #fffbeb; color: #fbbf24; }
+    .npr-alto { background: #fef2f2; color: #ef4444; }
+    }
+
+.sentinel-sidebar-wrapper
+  //- --- BLOQUE 0: METADATOS DE MISIÓN ---
+  .sidebar-identity-header.mb-2
+    span.text-muted.small.fw-bold(style="letter-spacing: 3px; text-transform: uppercase;") INYMO
+    h2.fw-bold.mt-1(style="letter-spacing: -2px; color: var(--inymo-navy); font-size: 2.2rem;") Sentinel Monitor
+    .d-flex.align-items-center.gap-2.mt-2
+      span.badge.bg-dark.p-2(style="border-radius: 8px;") PROJECT: #{p.codigo}
+      span.badge.bg-light.text-dark.border.p-2 KPIs
+
+  //- --- BLOQUE 1: RENDIMIENTO OPERATIVO (REQ 7, 8, 9, 10, 12, 13) ---
+  .glass-card-sentinel
+    .d-flex.justify-content-between.align-items-center.mb-5
+      h6.fw-bold.m-0.text-navy RENDIMIENTO OPERATIVO
+      i.bx.bx-line-chart.text-muted.fs-5
+
+    //- Visualización Circular y Barra Lineal (Req 10)
+    .performance-center.text-center.mb-3
+      div(style="position:relative; width:210px; height:210px; margin: 0 auto;")
+        canvas#chartDonut
+        div(style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;")
+          h2.fw-bold.m-0(style="font-size: 3.6rem; letter-spacing: -3px; color: var(--inymo-navy);") #{p.progreso}%
+          span.text-muted.small.fw-bold(style="letter-spacing:1px;") AVANCE REAL
+
+      //- BARRA DE PROGRESO INDUSTRIAL (REQ 10)
+      .industrial-progress-track
+        .industrial-progress-bar(style=`width: ${p.progreso}%`)
+      p.text-muted.x-small.mt-3.fw-bold CUMPLIMIENTO FÍSICO VS LÍNEA BASE
+
+    //- Grid de Índices EVM con Lively Tooltips (Req 7, 8, 13)
+    .row.g-3.mt-5
+      .col-6
+        .p-4.rounded-4.bg-light.border.h-100
+          .d-flex.justify-content-between.align-items-center.mb-2
+            span.small.fw-bold.text-muted CPI
+            .lively-tooltip-container
+              i.bx.bx-help-circle(style="font-size: 1.3rem; color: var(--inymo-slate);")
+              .lively-tooltip-content
+                b COST PERFORMANCE INDEX
+                p Mide la eficiencia financiera del proyecto. Un valor de <b>1.0</b> significa que cada peso invertido está generando exactamente un peso de avance. Valores menores indican sobrecostos operativos.
+          .d-flex.align-items-center.gap-2
+            h3.fw-bold.m-0(class=(p.kpi ? p.kpi.cpi_color : ''))= (p.kpi ? p.kpi.cpi_v : '1.00')
+            i.bx.fs-4(class=(p.kpi ? p.kpi.cpi_trend : ''))
+
+      .col-6
+        .p-4.rounded-4.bg-light.border.h-100
+          .d-flex.justify-content-between.align-items-center.mb-2
+            span.small.fw-bold.text-muted SPI
+            .lively-tooltip-container
+              i.bx.bx-help-circle(style="font-size: 1.3rem; color: var(--inymo-slate);")
+              .lively-tooltip-content
+                b SCHEDULE PERFORMANCE INDEX
+                p Mide la eficiencia del cronograma. <b>1.0</b> indica cumplimiento exacto del tiempo. Si es menor a 1, el proyecto presenta retrasos físicos respecto a la planificación original.
+          .d-flex.align-items-center.gap-2
+            h3.fw-bold.m-0(class=(p.kpi ? p.kpi.spi_color : ''))= (p.kpi ? p.kpi.spi_v : '1.00')
+            i.bx.fs-4(class=(p.kpi ? p.kpi.spi_trend : ''))
+
+    //- Salud del Proyecto y Recomendación IA (Req 9, 12)
+    - var iaBg = (p.kpi && p.kpi.diagnostico === 'ESTRATEGIA ÓPTIMA') ? '#f0fdf4' : '#fffbeb'
+    - var iaText = (p.kpi && p.kpi.diagnostico === 'ESTRATEGIA ÓPTIMA') ? '#166534' : '#b45309'
+    .ia-banner-alert.mt-4(style=`background: ${iaBg}; color: ${iaText}; border: 1px solid rgba(0,0,0,0.04);`)
+      i.bx.bxs-bolt-circle.fs-2
+      div
+        span.d-block.x-small.fw-bold(style="opacity: 0.7; letter-spacing: 1px;") IA INYMO RECOMMENDATION
+        span.fw-bold(style="font-size: 1rem;")= (p.kpi ? p.kpi.diagnostico : 'PROCESANDO DATA...')
+        //- NUEVO: DASHBOARD DE RIESGOS MINI E IA [cite: 7, 10]
+    .glass-card-sentinel.mt-4(style="border-top: 5px solid var(--inymo-danger);")
+      .d-flex.justify-content-between.align-items-center.mb-3
+        h6.fw-bold.m-0 ESTATUS DE RIESGOS
+        i.bx.bx-shield-quarter.text-danger.fs-4
+      .row.text-center
+        .col-6.border-end
+          span.text-muted.x-small.fw-bold RIESGOS ACTIVOS
+          h4.fw-bold.m-0.text-navy= (p.riesgos ? p.riesgos.length : 0)
+        .col-6
+          span.text-muted.x-small.fw-bold TAREAS MITIGACIÓN
+          h4.fw-bold.m-0.text-navy 0
+         
+      
+      //- SECCIÓN IA RIESGOS [cite: 42, 53]
+      .ia-banner-alert.mt-4(style="background: #f8fafc; border: 1px dashed var(--inymo-border); padding: 15px;")
+        i.bx.bx-brain.text-primary.fs-3
+        div
+          span.d-block.x-small.fw-bold ANALÍTICA PREVENTIVA IA
+          span.text-muted(style="font-size: 0.75rem; line-height: 1.2; display: block;") Escaneando factores críticos de éxito...
+           //- BOTÓN DE ACCESO ApP AMEF
+      a.btn.btn-dark.w-100.mt-4.p-3.d-flex.align-items-center.justify-content-center(href=`/app/proyectos/${p.id}/riesgos/amef` style="border-radius: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; font-size: 0.7rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: none;")
+        i.bx.bx-list-check.me-2.fs-5(style="color: var(--inymo-primary);")
+        | Análisis de AMEF
+
+  //- --- BLOQUE 2: VARIACIONES Y DESVIACIONES (REQ 6, 11) ---
+  .glass-card-sentinel
+    h6.fw-bold.mb-4 #[i.bx.bx-stats.me-2.text-primary] ANÁLISIS DE VARIACIÓN
+    table.variance-data-table
+      tbody
+        tr
+          td.label-variance 
+            i.bx.bx-calendar-exclamation.me-2
+            | Desviación Temporal
+          td.value-variance(class=(p.kpi && p.kpi.dias_desviacion < 0) ? 'text-danger' : 'text-success')
+            | #{p.kpi ? (p.kpi.dias_desviacion > 0 ? '+' : '') + p.kpi.dias_desviacion : 0} días
+        tr
+          td.label-variance 
+            i.bx.bx-money-withdraw.me-2
+            | Variación de Costo (CV)
+          td.value-variance(class=(p.kpi ? p.kpi.cv_color : ''))= (p.kpi ? p.kpi.cv_f : '$0.00')
+        tr
+          td.label-variance 
+            i.bx.bx-tachometer.me-2
+            | Burn Rate Proyectado
+          td.value-tech.text-primary.value-variance= (p.kpi ? p.kpi.cpi_v : '1.00') + 'x'
+    
+    .p-3.mt-4.rounded-4.bg-light.small.text-muted(style="line-height: 1.5; border: 1px solid var(--inymo-border);")
+      i.bx.bx-info-circle.me-2.text-primary
+      | Los valores reflejan la salud operativa calculada sobre el Presupuesto al Cierre (BAC) y el Gasto Real Acumulado.

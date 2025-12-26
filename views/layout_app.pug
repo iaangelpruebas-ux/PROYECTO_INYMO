@@ -13,6 +13,7 @@ html(lang="es")
     link(rel='icon', href='/images/icono.png', type='image/png')
     
     // --- 1. LIBRERÍAS DE ESTILO EXTERNAS (CDNs) ---
+    script(src="https://cdn.jsdelivr.net/npm/chart.js") 
     link(href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css", rel="stylesheet")
     link(href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap", rel="stylesheet")
     link(href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css", rel="stylesheet")
@@ -179,7 +180,6 @@ html(lang="es")
           // 5. SECCIÓN: ESTRATEGIA (CONEXIÓN BI)
           p.nav-label Estrategia
           ul.list-unstyled
-            //- CORRECCIÓN: Se cambia /app/analytics por /app/bi para sincronizar con Router
             li: a.sidebar-link(href="/app/bi") 
               i.bx.bx-line-chart
               span Inteligencia (BI)
@@ -201,7 +201,6 @@ html(lang="es")
             div.user-info.text-end.me-3.d-none.d-md-block
               span.d-block.fw-bold.text-dark Ing. Ángel Velasco
               span.d-block.small.text-success.fw-bold Diseñador
-            // Badge de Usuario con borde verde corporativo
             div.user-badge.bg-dark.text-white.rounded-circle.d-flex.justify-content-center.align-items-center.border.border-2.border-success(style="width: 46px; height: 46px; font-weight: 700; font-size: 0.9rem;") AV
         
         div.content-area
@@ -230,7 +229,6 @@ html(lang="es")
         const path = window.location.pathname;
         const links = document.querySelectorAll('.sidebar-link');
         links.forEach(l => {
-          // Coincidencia exacta o parcial para subrutas
           if(path.startsWith(l.getAttribute('href'))) {
             l.classList.add('active');
           }

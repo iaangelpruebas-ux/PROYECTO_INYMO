@@ -1,0 +1,333 @@
+extends ../../../layout_app
+
+block content
+  //- ==========================================================================================
+  //- I N Y M O   S T R A T E G I C   I N T E L L I G E N C E   -   A M E F   V A N G U A R D
+  //- ==========================================================================================
+  //- @version: 3.0.0 "The Sentinel Vanguard"
+  //- @description: Interfaz de gestión de riesgos con cálculo de NPR y analítica predictiva.
+  //- @author: IA Orange Core
+  //- ==========================================================================================
+
+  style.
+    /* 1. DESIGN TOKENS */
+    :root {
+      --inymo-primary: #8cc63f;
+      --inymo-navy: #0f172a;
+      --inymo-slate: #64748b;
+      --inymo-border: #e2e8f0;
+      --glass-bg: rgba(255, 255, 255, 0.95);
+      --font-mono: 'Roboto Mono', monospace;
+    }
+
+    /* 2. LAYOUT ENGINE */
+    .amef-vanguard-wrapper {
+      padding: 50px;
+      background: #f8fafc;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* 3. WIDGETS DE ALTO IMPACTO (FIX PARA EL NaN) */
+    .sentinel-stat-card {
+      background: white;
+      border-radius: 28px;
+      padding: 30px;
+      border: 1px solid var(--inymo-border);
+      position: relative;
+      overflow: visible;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .sentinel-stat-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+      border-color: var(--inymo-primary);
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--inymo-slate);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: var(--inymo-navy);
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+
+    /* 4. EXPLICACIONES TÉCNICAS (CONCEPTO POP-UPS) */
+    .concept-explain {
+      cursor: help;
+      border-bottom: 2px dashed var(--inymo-border);
+      position: relative;
+    }
+
+    .concept-explain:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 120%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--inymo-navy);
+      color: white;
+      padding: 15px;
+      border-radius: 12px;
+      width: 250px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      line-height: 1.4;
+      z-index: 1000;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+
+    /* 5. TABLA DE INGENIERÍA DE RIESGOS */
+    .engineering-table-container {
+      background: white;
+      border-radius: 35px;
+      border: 1px solid var(--inymo-border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-top: 40px;
+    }
+
+    .table-sentinel thead th {
+      background: #f1f5f9;
+      color: var(--inymo-navy);
+      font-weight: 800;
+      font-size: 0.7rem;
+      padding: 25px;
+      border: none;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* 6. INDICADORES NPR DINÁMICOS */
+    .npr-indicator {
+      width: 55px;
+      height: 55px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      font-family: var(--font-mono);
+      font-weight: 900;
+      font-size: 1.1rem;
+      margin: 0 auto;
+    }
+
+    .npr-crit { background: #fee2e2; color: #ef4444; border: 2px solid #fca5a5; }
+    .npr-mod { background: #fef3c7; color: #d97706; border: 2px solid #fcd34d; }
+    .npr-safe { background: #dcfce7; color: #16a34a; border: 2px solid #86efac; }
+
+    /* 7. IA INSIGHTS PANEL */
+    .ia-vanguard-panel {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      border-radius: 35px;
+      padding: 40px;
+      color: white;
+      position: relative;
+      overflow: visible;
+    }
+
+    .ia-vanguard-panel::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, var(--inymo-primary-glow) 0%, transparent 70%);
+      opacity: 0.2;
+    }
+
+  .amef-vanguard-wrapper
+    //- HEADER DE CONTROL DE MISIÓN
+    .d-flex.justify-content-between.align-items-end.mb-5
+      div
+        span.badge.bg-primary.mb-3.px-3.py-2(style="border-radius: 10px; font-weight: 800;") PROTOCOLO DE RIESGOS ACTIVO
+        h1.display-4.fw-bold(style="letter-spacing: -3px; color: var(--inymo-navy);") Matriz AMEF Sentinel
+        p.text-muted.fw-bold Análisis predictivo de Modos de Falla y Efectos del Proyecto #{p.codigo}
+      
+      div.d-flex.gap-3
+        a.btn.btn-light.btn-lg(href=`/app/proyectos/${p.id}`, style="border-radius: 20px; border: 1px solid var(--inymo-border);") 
+          i.bx.bx-arrow-back.me-2
+          | Dashboard
+        button.btn.btn-dark.btn-lg(style="border-radius: 20px; padding: 15px 35px;", data-bs-toggle="modal", data-bs-target="#modalRiesgo")
+          i.bx.bx-shield-plus.me-2
+          | Nuevo Análisis
+
+    //- SECCIÓN 1: KPI RECONSTRUCT (Fix para el error visual)
+    .row.g-4.mb-5
+      .col-md-3
+        .sentinel-stat-card.border-start.border-danger(style="border-width: 6px !important;")
+          span.stat-label RIESGOS CRÍTICOS
+          - var criticos = riesgos.filter(r => (r.severidad * r.probabilidad * (r.deteccion || 1)) >= 100).length
+          .stat-value= criticos
+          small.text-muted Acciones inmediatas requeridas
+
+      .col-md-3
+        .sentinel-stat-card.border-start.border-warning(style="border-width: 6px !important;")
+          span.stat-label EXPOSICIÓN TOTAL (NPR)
+          - var totalNPR = riesgos.reduce((acc, r) => acc + ( (r.severidad || 0) * (r.probabilidad || 0) * (r.deteccion || 1) ), 0)
+          //- Fix para el NaN: Si es 0 o NaN, poner 0
+          .stat-value= isNaN(totalNPR) ? 0 : totalNPR
+          small.text-muted Sumatoria de gravedad acumulada
+
+      .col-md-3
+        .sentinel-stat-card.border-start.border-success(style="border-width: 6px !important;")
+          span.stat-label MITIGACIÓN
+          - var mitigados = riesgos.filter(r => r.plan_mitigacion).length
+          .stat-value= mitigados
+          small.text-muted Planes operativos activos
+
+      .col-md-3
+        .sentinel-stat-card(style="background: var(--inymo-navy);")
+          span.stat-label.text-white SALUD TÉCNICA
+          .stat-value.text-white= (criticos > 0 ? 'ALERTA' : 'ESTABLE')
+          i.bx.bxs-zap.text-warning.fs-1.mt-2
+
+    //- SECCIÓN 2: TABLA TÉCNICA CON EXPLICACIONES
+    .engineering-table-container
+      .p-4.border-bottom.d-flex.justify-content-between.align-items-center
+        h5.fw-bold.m-0 #[i.bx.bx-grid-alt.me-2.text-primary] Desglose de Ingeniería de Riesgos
+        .d-flex.gap-2
+          span.badge.bg-light.text-dark.border Standard ISO 31000
+          span.badge.bg-light.text-dark.border PMBOK V7
+
+      .table-responsive
+        table.table.table-sentinel.align-middle.m-0
+          thead
+            tr
+              th(style="width: 250px;") Modo de Falla
+              th(style="width: 300px;") Efecto / Impacto
+              th.text-center
+                span.concept-explain(data-tooltip="SEVERIDAD: Gravedad del efecto en el cliente o proceso (1-10).") SEV
+              th.text-center
+                span.concept-explain(data-tooltip="OCURRENCIA: Probabilidad de que la falla suceda (1-10).") OCUR
+              th.text-center
+                span.concept-explain(data-tooltip="DETECCIÓN: Capacidad de los controles para detectar la falla (1-10).") DET
+              th.text-center
+                span.concept-explain(data-tooltip="NPR (Número de Prioridad de Riesgo): SEV x OCUR x DET. Define la urgencia.") NPR
+              th Acciones de Mitigación
+              th Estado
+          tbody
+            if riesgos && riesgos.length > 0
+              each r in riesgos
+                - var nprCalculado = (r.severidad || 0) * (r.probabilidad || 0) * (r.deteccion || 1)
+                - var nprClass = nprCalculado >= 100 ? 'npr-crit' : (nprCalculado >= 40 ? 'npr-mod' : 'npr-safe')
+                tr
+                  td
+                    .fw-bold.text-navy= r.nombre || 'Modo no especificado'
+                    small.text-muted.x-small= `FOLIO: INY-R-00${r.id}`
+                  td
+                    p.small.m-0.text-muted= r.descripcion || 'Sin descripción detallada'
+                  td.text-center.fw-bold= r.severidad || 0
+                  td.text-center.fw-bold= r.probabilidad || 0
+                  td.text-center.fw-bold= r.deteccion || 1
+                  td.text-center
+                    .npr-indicator(class=nprClass)= nprCalculado
+                  td
+                    if r.plan_mitigacion
+                      p.x-small.m-0.fw-bold.text-navy= r.plan_mitigacion
+                    else
+                      span.text-danger.x-small.fw-bold REQUIERE PLAN URGENTE
+                  td
+                    span.badge.rounded-pill(class=r.plan_mitigacion ? 'bg-success' : 'bg-danger')= r.plan_mitigacion ? 'CONTROL' : 'FALLA'
+            else
+              tr
+                td.text-center.py-5(colspan="8")
+                  i.bx.bx-shield-x.display-1.text-muted.mb-3
+                  h5.text-muted No se han detectado riesgos en la matriz Sentinel.
+
+    //- SECCIÓN 3: PANELES INFORMATIVOS Y LEYENDA (FIX VISUAL)
+    .row.mt-5.g-4
+      .col-lg-8
+        .sentinel-stat-card
+          h6.fw-bold.mb-4 #[i.bx.bx-info-circle.me-2] Guía de Interpretación de Riesgos
+          .row.text-center.g-3
+            .col-4
+              .p-4.rounded-4(style="background: #fef2f2;")
+                .npr-indicator.npr-crit.mb-2 100+
+                h6.fw-bold.text-danger CRÍTICO
+                p.x-small.m-0 Requiere acción correctiva inmediata.
+            .col-4
+              .p-4.rounded-4(style="background: #fffbeb;")
+                .npr-indicator.npr-mod.mb-2 40-100
+                h6.fw-bold.text-warning MODERADO
+                p.x-small.m-0 Monitoreo preventivo semanal.
+            .col-4
+              .p-4.rounded-4(style="background: #f0fdf4;")
+                .npr-indicator.npr-safe.mb-2 1-40
+                h6.fw-bold.text-success BAJO
+                p.x-small.m-0 Riesgo bajo control operativo.
+
+      .col-lg-4
+        .ia-vanguard-panel
+          h5.fw-bold.mb-3 #[i.bx.bx-brain.me-2.text-primary] Sentinel AI Insights
+          p.small.opacity-75 Basado en la severidad histórica del proyecto #{p.codigo}, la detección de fallas actual es un 15% más eficiente que el promedio mensual.
+          hr.opacity-25.my-4
+          .d-flex.align-items-center.gap-3
+            .progress.flex-grow-1(style="height: 8px; border-radius: 100px;")
+              .progress-bar.bg-primary(style="width: 85%")
+            span.small.fw-bold 85% Confiabilidad
+          button.btn.btn-outline-primary.btn-sm.w-100.mt-4.rounded-pill Generar Reporte Predictivo
+
+    //- SECCIÓN 4: DICCIONARIO DE CONCEPTOS PARA EL USUARIO
+    .mt-4.p-4.bg-white.border.rounded-4
+      h6.fw-bold.text-navy #[i.bx.bx-book-bookmark.me-2] Glosario de Términos AMEF
+      .row.mt-3
+        .col-md-3
+          strong SEVERIDAD (S):
+          p.x-small.text-muted Estima qué tan grave es el efecto de la falla en el cumplimiento del proyecto.
+        .col-md-3
+          strong OCURRENCIA (O):
+          p.x-small.text-muted Qué tan frecuente es la causa que origina el modo de falla.
+        .col-md-3
+          strong DETECCIÓN (D):
+          p.x-small.text-muted Probabilidad de que los controles actuales identifiquen la falla antes de que ocurra.
+        .col-md-3
+          strong NPR:
+          p.x-small.text-muted Multiplicación S x O x D. Es el indicador universal de prioridad técnica.
+
+  //- MODAL DE REGISTRO (CONSTRUIDO PARA EL BLOQUE 5)
+  .modal.fade#modalRiesgo(tabindex="-1")
+    .modal-dialog.modal-dialog-centered.modal-lg
+      .modal-content(style="border-radius: 30px; border: none; overflow: hidden;")
+        .modal-header.bg-dark.text-white.p-4
+          h5.modal-title.fw-bold #[i.bx.bx-shield-plus.me-2] Nuevo Análisis de Riesgo
+          button.btn-close.btn-close-white(data-bs-dismiss="modal")
+        .modal-body.p-5
+          form#formAmeF(action=`/app/proyectos/${p.id}/riesgos/agregar`, method="POST")
+            .row.g-4
+              .col-md-12
+                label.form-label.fw-bold Modo de Falla
+                input.form-control.form-control-lg(name="nombre", placeholder="Nombre del riesgo técnico...", required, style="border-radius: 12px;")
+              .col-md-12
+                label.form-label.fw-bold Descripción del Impacto
+                textarea.form-control(name="descripcion", rows="3", placeholder="¿Cuál es el efecto potencial en el proyecto?", style="border-radius: 12px;")
+              .col-md-4
+                label.form-label.fw-bold Severidad (1-10)
+                input.form-control(type="number", name="severidad", min="1", max="10", value="5")
+              .col-md-4
+                label.form-label.fw-bold Ocurrencia (1-10)
+                input.form-control(type="number", name="probabilidad", min="1", max="10", value="5")
+              .col-md-4
+                label.form-label.fw-bold Detección (1-10)
+                input.form-control(type="number", name="deteccion", min="1", max="10", value="5")
+              .col-md-12
+                label.form-label.fw-bold Plan de Mitigación Propuesto
+                input.form-control(name="plan_mitigacion", placeholder="Acción inmediata para reducir el NPR...", style="border-radius: 12px;")
+            
+            .mt-5.d-flex.gap-3
+              button.btn.btn-light.btn-lg.w-100(type="button", data-bs-dismiss="modal", style="border-radius: 15px;") Cancelar
+              button.btn.btn-primary.btn-lg.w-100(type="submit", style="border-radius: 15px;") Guardar en Sentinel

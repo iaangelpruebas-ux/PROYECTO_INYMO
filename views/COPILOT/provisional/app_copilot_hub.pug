@@ -1,0 +1,873 @@
+//- ==========================================================================================
+//- I N Y M O   A R C H I T E C T U R A L   N E U R A L   C O R E
+//- ==========================================================================================
+//- Archivo: app_copilot_hub.pug
+//- Ubicación: views/COPILOT/provisional/app_copilot_hub.pug
+//- Versión: 6.0 Living Core (Formal, Animated & Pleasant High-End UI)
+//- Desarrollado para: Ing. Ángel Velasco (Socio Director)
+//- ==========================================================================================
+//- DESCRIPCIÓN:
+//- Interfaz de comando central con animaciones fluidas de alta gama.
+//- Equilibrio entre estética corporativa de ingeniería y dinamismo visual interactivo.
+//- Incluye simulación de hardware reactiva, fondo de partículas interactivo y UI "Glass-Tech".
+//- ==========================================================================================
+
+extends ../../proyecto_carpeta_pugs/detalles/app_detalle_layout_presentacion
+
+block content
+
+  //- ========================================================================================
+  //- [SECCIÓN 1] INGENIERÍA VISUAL AVANZADA (CSS3 + ANIMATIONS)
+  //- ========================================================================================
+  style.
+    /* --- 1.1 DEFINICIÓN DE VARIABLES DEL SISTEMA (PALETA INYMO VIVA) --- */
+    :root {
+      /* Base Corporativa Limpia */
+      --core-bg: #f0f4f8;            /* Gris azulado muy claro, más agradable que blanco puro */
+      --core-surface: #ffffff;       /* Blanco puro para tarjetas */
+      --core-text-dark: #1e293b;     /* Azul marino profundo para texto principal */
+      --core-text-muted: #64748b;    /* Gris intermedio para subtítulos */
+      --core-border-light: #e2e8f0;  /* Bordes sutiles */
+      
+      /* Acentos de Energía (INYMO Branding) */
+      --energy-primary: #8cc63f;     /* Verde INYMO (Activo/Éxito) */
+      --energy-secondary: #0f172a;   /* Navy Ingenieril (Sólido) */
+      --energy-data: #0ea5e9;        /* Cian Datos (Flujo) */
+      --energy-alert: #f59e0b;       /* Naranja Supervisión (Atención) */
+      --energy-glow-soft: rgba(140, 198, 63, 0.25); /* Resplandor suave */
+      
+      /* Tipografía Técnica y Humana */
+      --font-tech: 'Share Tech Mono', monospace; /* Datos, versiones */
+      --font-human: 'Poppins', sans-serif;       /* Textos, títulos */
+      
+      /* Físicas y Efectos */
+      --anim-speed-fast: 0.2s ease;
+      --anim-speed-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      --anim-speed-slow: 2s ease-in-out infinite;
+      
+      --shadow-card-rest: 0 10px 30px -10px rgba(15, 23, 42, 0.1);
+      --shadow-card-hover: 0 25px 50px -12px rgba(140, 198, 63, 0.25);
+      --glass-surface: rgba(255, 255, 255, 0.8);
+      --glass-blur: blur(12px);
+    }
+
+    /* --- 1.2 ENTORNO Y FONDO DINÁMICO --- */
+    .living-wrapper {
+      background-color: var(--core-bg);
+      min-height: 100vh;
+      position: relative;
+      font-family: var(--font-human);
+      color: var(--core-text-dark);
+      overflow-x: hidden;
+      /* Sutil gradiente de luz superior */
+      background-image: linear-gradient(to bottom, #ffffff 0%, var(--core-bg) 100%);
+    }
+
+    /* Retícula de Planos (Blueprint) con movimiento lento */
+    .blueprint-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 200%; height: 200%;
+      background-image: 
+        linear-gradient(rgba(15, 23, 42, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 23, 42, 0.02) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: 0;
+      pointer-events: none;
+      animation: pan-grid 60s linear infinite; /* Movimiento imperceptible */
+    }
+
+    /* Canvas de Partículas (Red Neuronal Interactiva) */
+    #interactiveNeuralNet {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 0; opacity: 0.7; pointer-events: none; /* JS lo hace interactivo */
+    }
+
+    /* --- 1.3 CONTENEDOR PRINCIPAL --- */
+    .core-interface-container {
+      position: relative;
+      z-index: 10;
+      padding: 40px;
+      max-width: 1650px;
+      margin: 0 auto;
+    }
+
+    /* --- 1.4 HEADER DE COMANDO "RESPIRABLE" --- */
+    .command-header-living {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 60px;
+      padding: 30px;
+      background: var(--glass-surface);
+      backdrop-filter: var(--glass-blur);
+      border-radius: 24px;
+      border: 1px solid var(--core-border-light);
+      box-shadow: var(--shadow-card-rest);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Línea de energía inferior animada */
+    .command-header-living::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      width: 100%;
+      background: linear-gradient(90deg, transparent, var(--energy-primary), transparent);
+      background-size: 200% auto;
+      animation: energy-flow 3s linear infinite;
+    }
+
+    .header-titles-group h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      margin: 0;
+      background: linear-gradient(135deg, var(--energy-secondary) 0%, var(--core-text-muted) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-subtitle-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-top: 10px;
+      font-family: var(--font-tech);
+      color: var(--core-text-muted);
+      font-size: 0.95rem;
+    }
+    
+    .system-badge-pulse {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(140, 198, 63, 0.1);
+      color: var(--energy-primary);
+      padding: 6px 12px;
+      border-radius: 30px;
+      font-weight: 700;
+      border: 1px solid rgba(140, 198, 63, 0.2);
+    }
+    
+    .pulse-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--energy-primary);
+      box-shadow: 0 0 0 0 var(--energy-glow-soft);
+      animation: pulse-soft 2s infinite;
+    }
+
+    .header-metrics-row {
+      display: flex; gap: 40px;
+    }
+    .metric-block { text-align: right; }
+    .metric-label-sm {
+      font-size: 0.75rem;
+      color: var(--core-text-muted);
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .metric-value-lg {
+      font-family: var(--font-tech);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--energy-secondary);
+      position: relative;
+    }
+    /* Pequeño indicador de actividad en métricas */
+    .metric-value-lg::after {
+      content: ''; position: absolute; top: 5px; right: -12px; width: 6px; height: 6px;
+      background: var(--energy-data); border-radius: 50%; opacity: 0.5;
+      animation: blink-soft 1s infinite alternate;
+    }
+
+    /* --- 1.5 GRID DE MÓDULOS VIVOS (LIVING CARDS) --- */
+    .modules-deck-living {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+
+    .tech-card-living {
+      background: var(--core-surface);
+      border: 1px solid var(--core-border-light);
+      border-radius: 20px;
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+      transition: all var(--anim-speed-smooth);
+      cursor: pointer;
+      display: flex; flex-direction: column;
+      height: 100%;
+      box-shadow: var(--shadow-card-rest);
+      z-index: 1;
+    }
+
+    /* Efecto de "Levitación Magnética" y Resplandor al Hover */
+    .tech-card-living:hover {
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: var(--shadow-card-hover);
+      border-color: transparent; /* El borde se reemplaza por el resplandor */
+    }
+    
+    /* Resplandor de borde suave animado */
+    .tech-card-living::after {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; bottom: -2px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--energy-primary), var(--energy-data));
+      z-index: -1;
+      opacity: 0;
+      transition: opacity var(--anim-speed-smooth);
+    }
+    .tech-card-living:hover::after { opacity: 0.4; filter: blur(10px); }
+    .tech-card-living:hover::before { opacity: 1; } /* Borde sólido interno */
+    
+    /* Borde interno sólido para definición */
+    .tech-card-living::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      border-radius: 20px; border: 2px solid var(--energy-primary); opacity: 0; z-index: 0;
+      transition: opacity var(--anim-speed-fast); pointer-events: none;
+    }
+
+    .card-header-zone {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 25px; position: relative; z-index: 2;
+    }
+    
+    .icon-box-living {
+      width: 65px; height: 65px; border-radius: 16px;
+      background: #f1f5f9; color: var(--energy-secondary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      transition: all var(--anim-speed-smooth);
+      border: 1px solid var(--core-border-light);
+      position: relative; overflow: hidden;
+    }
+    /* Animación del icono */
+    .tech-card-living:hover .icon-box-living {
+      background: var(--energy-primary); color: white;
+      border-color: var(--energy-primary);
+      transform: rotate(-5deg) scale(1.1);
+      box-shadow: 0 10px 20px -5px var(--energy-glow-soft);
+    }
+    
+    .version-tag-tech {
+      font-family: var(--font-tech); font-size: 0.7rem; color: var(--core-text-muted);
+      background: #f8fafc; padding: 4px 10px; border: 1px solid var(--core-border-light); border-radius: 30px;
+      font-weight: 600; letter-spacing: 0.5px;
+    }
+
+    .card-body-zone { flex-grow: 1; position: relative; z-index: 2; }
+    .card-body-zone h3 {
+      font-size: 1.25rem; font-weight: 800; color: var(--energy-secondary);
+      margin-bottom: 12px; letter-spacing: -0.5px; transition: color var(--anim-speed-fast);
+    }
+    .tech-card-living:hover .card-body-zone h3 { color: var(--energy-primary); }
+    
+    .card-body-zone p {
+      font-size: 0.9rem; color: var(--core-text-muted); line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    .card-footer-tech {
+      margin-top: auto; position: relative; z-index: 2;
+      border-top: 1px solid rgba(226, 232, 240, 0.6); padding-top: 20px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    
+    .status-indicator-group {
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--font-tech); font-size: 0.75rem; color: var(--core-text-muted); font-weight: 700;
+    }
+    .status-dot-live {
+      width: 8px; height: 8px; background: #cbd5e1; border-radius: 50%;
+      transition: all var(--anim-speed-smooth);
+    }
+    /* El punto se enciende al hover */
+    .tech-card-living:hover .status-dot-live {
+      background: var(--energy-primary);
+      box-shadow: 0 0 10px var(--energy-primary);
+      animation: pulse-soft 1.5s infinite;
+    }
+    
+    .action-icon-arrow {
+      font-size: 1.2rem; color: var(--core-border-light); transition: all var(--anim-speed-fast);
+    }
+    .tech-card-living:hover .action-icon-arrow {
+      color: var(--energy-primary); transform: translateX(5px);
+    }
+
+    /* --- 1.6 MONITOR DEL SISTEMA (ESTILO FLUIDO) --- */
+    .system-monitor-fluid {
+      background: var(--core-surface);
+      border-radius: 24px;
+      border: 1px solid var(--core-border-light);
+      box-shadow: var(--shadow-card-rest);
+      overflow: hidden;
+      display: flex;
+      height: 400px;
+      position: relative;
+    }
+    /* Barra superior de estado del monitor */
+    .system-monitor-fluid::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+      background: linear-gradient(90deg, var(--energy-data), var(--energy-primary));
+      opacity: 0.8;
+    }
+
+    .monitor-logs-section {
+      flex: 2; padding: 30px;
+      border-right: 1px solid var(--core-border-light);
+      background: #fafafa;
+      display: flex; flex-direction: column;
+    }
+    .section-title-tech {
+      font-family: var(--font-tech); font-weight: 700; color: var(--energy-secondary);
+      font-size: 0.95rem; letter-spacing: 1px; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    
+    .logs-scroll-container {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding-right: 10px;
+      /* Scrollbar personalizada sutil */
+      scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;
+    }
+    .logs-scroll-container::-webkit-scrollbar { width: 6px; }
+    .logs-scroll-container::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+
+    .log-entry-row {
+      display: flex; gap: 15px; margin-bottom: 10px; padding: 8px 12px;
+      background: white; border-radius: 8px; border: 1px solid var(--core-border-light);
+      font-family: var(--font-tech); font-size: 0.8rem; align-items: center;
+      animation: slideInUp 0.4s ease-out; /* Animación de entrada */
+    }
+    .log-ts { color: #94a3b8; min-width: 70px; }
+    .log-badge { padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.7rem; }
+    .badge-sys { background: rgba(14, 165, 233, 0.1); color: var(--energy-data); }
+    .badge-ai { background: rgba(140, 198, 63, 0.1); color: var(--energy-primary); }
+    .badge-sec { background: rgba(245, 158, 11, 0.1); color: var(--energy-alert); }
+    .log-msg { color: var(--core-text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .monitor-metrics-section {
+      flex: 1; padding: 30px;
+      background: white; display: flex; flex-direction: column; justify-content: center; gap: 30px;
+    }
+
+    .metric-fluid-group label {
+      display: flex; justify-content: space-between; font-size: 0.8rem;
+      font-weight: 700; color: var(--core-text-muted); margin-bottom: 10px;
+      font-family: var(--font-tech);
+    }
+    .progress-track-fluid {
+      height: 10px; background: #f1f5f9; border-radius: 20px; overflow: hidden;
+      border: 1px solid var(--core-border-light); position: relative;
+    }
+    /* Barra de progreso con efecto líquido */
+    .progress-fill-fluid {
+      height: 100%; border-radius: 20px;
+      background-size: 200% 100%;
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: liquid-flow 2s linear infinite;
+    }
+    .fluid-cpu { background-image: linear-gradient(90deg, var(--energy-secondary), #334155, var(--energy-secondary)); }
+    .fluid-ram { background-image: linear-gradient(90deg, var(--energy-primary), #bef264, var(--energy-primary)); }
+    .fluid-net { background-image: linear-gradient(90deg, var(--energy-data), #7dd3fc, var(--energy-data)); }
+
+    /* --- 1.7 PANTALLA DE CARGA "CLEAN AUTH" --- */
+    #cleanAuthLayer {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: #ffffff; z-index: 9999; display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+    .auth-card-center {
+      text-align: center; padding: 40px;
+    }
+    .auth-spinner-ring {
+      width: 70px; height: 70px; border: 3px solid rgba(140, 198, 63, 0.1);
+      border-top-color: var(--energy-primary); border-radius: 50%;
+      margin: 0 auto 25px; animation: spin-smooth 1s linear infinite;
+    }
+    .auth-title { font-size: 1.5rem; font-weight: 800; color: var(--energy-secondary); letter-spacing: 1px; margin-bottom: 10px; }
+    .auth-status-text { font-family: var(--font-tech); font-size: 0.9rem; color: var(--core-text-muted); }
+    
+    /* --- 1.8 ANIMACIONES KEYFRAMES --- */
+    @keyframes pan-grid { 0% { background-position: 0 0; } 100% { background-position: -1000px 1000px; } }
+    @keyframes energy-flow { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+    @keyframes pulse-soft { 0% { box-shadow: 0 0 0 0 var(--energy-glow-soft); } 70% { box-shadow: 0 0 0 15px rgba(140, 198, 63, 0); } 100% { box-shadow: 0 0 0 0 rgba(140, 198, 63, 0); } }
+    @keyframes blink-soft { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+    @keyframes liquid-flow { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+    @keyframes spin-smooth { 100% { transform: rotate(360deg); } }
+    @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* RESPONSIVIDAD */
+    @media (max-width: 992px) {
+      .command-header-living { flex-direction: column; align-items: flex-start; gap: 30px; }
+      .header-metrics-row { width: 100%; justify-content: space-between; }
+      .system-monitor-fluid { flex-direction: column; height: auto; }
+      .monitor-logs-section { height: 300px; border-right: none; border-bottom: 1px solid var(--core-border-light); }
+    }
+
+  //- ========================================================================================
+  //- [SECCIÓN 2] ESTRUCTURA DOM "LIVING CORE"
+  //- ========================================================================================
+  
+  //- 2.1 CAPA DE AUTENTICACIÓN LIMPIA
+  #cleanAuthLayer
+    .auth-card-center
+      .auth-spinner-ring
+      h3.auth-title INYMO NEURAL LINK
+      p.auth-status-text#authStatusMsg Estableciendo conexión segura...
+
+  .living-wrapper
+    //- Fondos Interactivos
+    .blueprint-overlay
+    canvas#interactiveNeuralNet
+
+    .core-interface-container
+      
+      //- 2.2 ENCABEZADO DE COMANDO "RESPIRABLE"
+      header.command-header-living
+        .header-titles-group
+          h1 Architectural Neural Core
+          .header-subtitle-row
+            .system-badge-pulse
+              .pulse-dot
+              span SYSTEM ONLINE
+            span |
+            i.bx.bx-building-house
+            span Plataforma de Inteligencia Artificial para Ingeniería V.6.0
+        
+        .header-metrics-row
+          .metric-block
+            .metric-label-sm Proyectos Activos
+            .metric-value-lg 142
+          .metric-block
+            .metric-label-sm Precisión IA
+            .metric-value-lg 99.1%
+          .metric-block
+            .metric-label-sm Latencia Neural
+            .metric-value-lg#liveLatency 18ms
+
+      //- 2.3 MATRIZ DE MÓDULOS VIVOS (12 TARJETAS)
+      .modules-deck-living
+        
+        //- [1] Propuestas
+        .tech-card-living(onclick="activateModule('Propuestas', 'Comercial')")
+          .card-header-zone
+            .icon-box-living: i.bx.bx-file-find
+            .version-tag-tech GPT-4o ENG
+          .card-body-zone
+            h3 Generador de Propuestas
+            p Redacción técnica automatizada de alcances y justificaciones para licitaciones, basada en histórico de proyectos.
+          .card-footer-tech
+            .status-indicator-group: .status-dot-live: span READY
+            i.bx.bx-right-arrow-alt.action-icon-arrow
+
+        //- [2] Proveedores
+        .tech-card-living(onclick="activateModule('Proveedores', 'Logística')")
+          .card-header-zone
+            .icon-box-living: i.bx.bx-git-compare
+            .version-tag-tech AUDIT V.2
+          .card-body-zone
+            h3 Auditoría de Proveedores
+            p Comparativo inteligente de cuadros fríos. Detección de desviaciones en precios unitarios de materiales críticos.
+          .card-footer-tech
+            .status-indicator-group: .status-dot-live: span SCANNING
+            i.bx.bx-right-arrow-alt.action-icon-arrow
+
+        //- [3] Flash Quote
+        .tech-card-living(onclick="activateModule('Estimación', 'Costos')")
+          .card-header-zone
+            .icon-box-living: i.bx.bx-stopwatch
+            .version-tag-tech PARAMETRIC
+          .card-body-zone
+            h3 Estimación Paramétrica
+            p Pre-presupuesto inmediato basado en m² y tipología (Nave Industrial, Vertical, Civil).
+          .card-footer-tech
+            .status-indicator-group: .status-dot-live: span ACTIVE
+            i.bx.bx-right-arrow-alt.action-icon-arrow
+
+        //- [4] Estrategia
+        .tech-card-living(onclick="activateModule('Estrategia', 'Negocios')")
+          .card-header-zone
+            .icon-box-living: i.bx.bx-bulb
+            .version-tag-tech BETA ML
+          .card-body-zone
+            h3 Incubadora de Oportunidades
+            p Análisis predictivo para detectar upsellings y nuevos servicios de valor en clientes actuales.
+          .card-footer-tech
+            .status-indicator-group: .status-dot-live: span LEARNING
+            i.bx.bx-right-arrow-alt.action-icon-arrow
+
+        //- [5] Clientes
+        .tech-card-living(onclick="activateModule('Clientes', 'Relaciones')")
+          .card-header-zone
+            .icon-box-living: i.bx.bx-user-voice
+            .version-tag-tech CRM AI
+          .card-body-zone
+            h3 Perfilado 360°
+            p Análisis de sentimiento y tono de comunicación. Sugerencias de negociación personalizadas por cliente.
+          .card-footer-tech
+            .status-indicator-group: .status-dot-live: span READY
+            i.bx.bx-right-arrow-alt.action-icon-arrow
+
+        //- [6] Competencia
+        .tech-card-living(onclick="activateModule('Mercado', 'Inteligencia')")
+          .card-header-zone
+            .icon-box-living: i.bx.bx-radar
+            .version-tag-tech CRAWLER
+          .card-body-zone
+            h3 Monitor de Mercado
+            p Rastreo continuo de licitaciones públicas y precios de competidores directos en la región.
+          .card-footer-tech
+            .status-indicator-group: .status-dot-live: span INDEXING
+            i.bx.bx-right-arrow-alt.action-icon-arrow
+
+        //- [7] Talento
+        .tech-card-living(onclick="activateModule('Talento', 'RRHH')")
+          .card-header-zone
+            .icon-box-living: i.bx.bx-group
+            .version-tag-tech PEOPLE OPS
+          .card-body-zone
+            h3 Performance Analítico
+            p Evaluación de desempeño de ingeniería. Cruce de cumplimiento de hitos con retroalimentación cualitativa.
+          .card-footer-tech
+            .status-indicator-group: .status-dot-live: span READY
+            i.bx.bx-right-arrow-alt.action-icon-arrow
+
+        //- [8] Legal
+        .tech-card-living(onclick="activateModule('Legal', 'Normativa')")
+          .card-header-zone
+            .icon-box-living: i.bx.bx-book-content
+            .version-tag-tech DOF LINK
+          .card-body-zone
+            h3 Asesor Normativo
+            p Conexión directa al Diario Oficial de la Federación. Validación de NOMs y reglamentos de construcción.
+          .card-footer-tech
+            .status-indicator-group: .status-dot-live: span SYNCED
+            i.bx.bx-right-arrow-alt.action-icon-arrow
+
+        //- [9] Riesgos
+        .tech-card-living(onclick="activateModule('Riesgos', 'Prevención')")
+          .card-header-zone
+            .icon-box-living: i.bx.bx-error
+            .version-tag-tech PREDICT V.1
+          .card-body-zone
+            h3 Matriz de Riesgos Predictiva
+            p Detección temprana de posibles incidencias operativas basada en ubicación y tipo de proyecto.
+          .card-footer-tech
+            .status-indicator-group: .status-dot-live: span ANALYZING
+            i.bx.bx-right-arrow-alt.action-icon-arrow
+
+        //- [10] Seguridad (HSE)
+        .tech-card-living(onclick="activateModule('Seguridad', 'HSE')")
+          .card-header-zone
+            .icon-box-living: i.bx.bx-hard-hat
+            .version-tag-tech VISION AI
+          .card-body-zone
+            h3 Supervisor Virtual HSE
+            p Monitoreo de cumplimiento de protocolos de seguridad industrial y normas STPS en obra.
+          .card-footer-tech
+            .status-indicator-group: .status-dot-live: span MONITORING
+            i.bx.bx-right-arrow-alt.action-icon-arrow
+
+        //- [11] Supply Chain
+        .tech-card-living(onclick="activateModule('Supply', 'Cadena')")
+          .card-header-zone
+            .icon-box-living: i.bx.bx-package
+            .version-tag-tech LOGISTIC OPT
+          .card-body-zone
+            h3 Optimización de Suministro
+            p Cálculo de rutas críticas y tiempos de entrega para materiales estratégicos (Acero, Concreto).
+          .card-footer-tech
+            .status-indicator-group: .status-dot-live: span IDLE
+            i.bx.bx-right-arrow-alt.action-icon-arrow
+
+        //- [12] BIM/Revit Link (Nuevo para Arquitectura)
+        .tech-card-living(onclick="activateModule('BIM', 'Modelado')")
+          .card-header-zone
+            .icon-box-living: i.bx.bx-cube-alt
+            .version-tag-tech AUTODESK API
+          .card-body-zone
+            h3 Conector BIM/Revit
+            p Sincronización de metadatos de modelos 3D para extracción automática de volumetrías.
+          .card-footer-tech
+            .status-indicator-group: .status-dot-live: span BETA LINK
+            i.bx.bx-right-arrow-alt.action-icon-arrow
+
+      //- 2.4 MONITOR DEL SISTEMA FLUIDO
+      section.system-monitor-fluid
+        .monitor-logs-section
+          .section-title-tech
+            i.bx.bx-terminal
+            span REGISTRO DE OPERACIONES EN TIEMPO REAL
+          .logs-scroll-container#fluidLogs
+            //- Los logs se generan aquí
+
+        .monitor-metrics-section
+          .metric-fluid-group
+            label 
+              span CARGA DE SERVIDOR (CPU)
+              span#cpuVal 24%
+            .progress-track-fluid: .progress-fill-fluid.fluid-cpu#cpuFill(style="width: 24%")
+          
+          .metric-fluid-group
+            label 
+              span USO DE MEMORIA (RAM)
+              span#ramVal 6.1 GB
+            .progress-track-fluid: .progress-fill-fluid.fluid-ram#ramFill(style="width: 45%")
+          
+          .metric-fluid-group
+            label 
+              span FLUJO DE DATOS (API)
+              span#netVal 180 req/min
+            .progress-track-fluid: .progress-fill-fluid.fluid-net#netFill(style="width: 75%")
+
+  //- ========================================================================================
+  //- [SECCIÓN 3] MOTOR DE INTERACCIÓN Y SIMULACIÓN (JS AVANZADO)
+  //- ========================================================================================
+  script.
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      // --- 3.1 SECUENCIA DE INICIO PREMIUM ---
+      const authLayer = document.getElementById('cleanAuthLayer');
+      const authMsg = document.getElementById('authStatusMsg');
+      
+      const steps = [
+        { t: 800, msg: "Verificando credenciales de Socio Director..." },
+        { t: 1800, msg: "Conectando a Base de Datos de Ingeniería (PostgreSQL)..." },
+        { t: 2800, msg: "Cargando Modelos Neuronales de Arquitectura..." },
+        { t: 3800, msg: "Acceso Concedido. Bienvenido, Ing. Velasco." }
+      ];
+
+      steps.forEach(step => setTimeout(() => authMsg.innerText = step.msg, step.t));
+      
+      setTimeout(() => {
+        authLayer.style.opacity = '0';
+        authLayer.style.visibility = 'hidden';
+        initInteractiveParticles(); // Iniciar fondo interactivo
+      }, 4500);
+
+      // --- 3.2 FONDO DE PARTÍCULAS INTERACTIVO (MOUSE REACTIVE) ---
+      function initInteractiveParticles() {
+        const canvas = document.getElementById('interactiveNeuralNet');
+        const ctx = canvas.getContext('2d');
+        let w, h;
+        let particles = [];
+        let mouse = { x: null, y: null, radius: 150 };
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+
+        const resize = () => { 
+          w = canvas.width = window.innerWidth; 
+          h = canvas.height = window.innerHeight; 
+          init();
+        };
+        window.addEventListener('resize', resize);
+
+        class Particle {
+          constructor(x, y) {
+            this.x = x ? x : Math.random() * w;
+            this.y = y ? y : Math.random() * h;
+            this.size = Math.random() * 2 + 1;
+            this.baseX = this.x;
+            this.baseY = this.y;
+            this.density = (Math.random() * 30) + 1;
+            this.color = 'rgba(140, 198, 63, 0.3)'; // Verde INYMO sutil
+          }
+          draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.fillStyle = this.color;
+            ctx.fill();
+          }
+          update() {
+            let dx = mouse.x - this.x;
+            let dy = mouse.y - this.y;
+            let distance = Math.sqrt(dx*dx + dy*dy);
+            let forceDirectionX = dx / distance;
+            let forceDirectionY = dy / distance;
+            let maxDistance = mouse.radius;
+            let force = (maxDistance - distance) / maxDistance;
+            let directionX = forceDirectionX * force * this.density;
+            let directionY = forceDirectionY * force * this.density;
+
+            if (distance < mouse.radius) {
+              // Efecto de atracción suave
+              this.x += directionX * 0.5;
+              this.y += directionY * 0.5;
+              this.color = 'rgba(140, 198, 63, 0.8)'; // Se ilumina al acercarse
+            } else {
+              if (this.x !== this.baseX) {
+                  let dx = this.x - this.baseX;
+                  this.x -= dx/20;
+              }
+              if (this.y !== this.baseY) {
+                  let dy = this.y - this.baseY;
+                  this.y -= dy/20;
+              }
+              this.color = 'rgba(140, 198, 63, 0.3)';
+            }
+          }
+        }
+
+        function init() {
+            particles = [];
+            for (let i = 0; i < 100; i++) {
+                particles.push(new Particle());
+            }
+        }
+        init();
+
+        function animate() {
+            ctx.clearRect(0, 0, w, h);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                // Conexiones
+                for (let j = i; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(15, 23, 42, ${0.1 - distance/1000})`; // Conexiones grises sutiles
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                        ctx.closePath();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+      }
+
+      // --- 3.3 GENERADOR DE LOGS DESLIZANTES ---
+      const proLogs = [
+        { t: 'SYS', b: 'badge-sys', m: 'Sincronizando librerías de materiales (Acero/Concreto)...' },
+        { t: 'AI', b: 'badge-ai', m: 'Analizando tendencias de costos unitarios Q3...' },
+        { t: 'SEC', b: 'badge-sec', m: 'Verificando cumplimiento normativo STPS en Proyecto Alpha.' },
+        { t: 'SYS', b: 'badge-sys', m: 'Conexión establecida con servidor BIM de Autodesk.' },
+        { t: 'AI', b: 'badge-ai', m: 'Optimizando ruta crítica de suministro para Obra Civil.' },
+        { t: 'SYS', b: 'badge-sys', m: 'Respaldo automático de base de datos completado.' },
+        { t: 'AI', b: 'badge-ai', m: 'Generando reporte predictivo de riesgos operativos.' }
+      ];
+
+      setInterval(() => {
+        const container = document.getElementById('fluidLogs');
+        const item = proLogs[Math.floor(Math.random() * proLogs.length)];
+        const time = new Date().toLocaleTimeString([], { hour12: false });
+        
+        const row = document.createElement('div');
+        row.className = 'log-entry-row';
+        row.innerHTML = `
+          <span class="log-ts">[${time}]</span>
+          <span class="log-badge ${item.b}">${item.t}</span>
+          <span class="log-msg">${item.m}</span>
+        `;
+        
+        container.prepend(row);
+        if(container.children.length > 15) container.removeChild(container.lastChild);
+        
+        // Simular Latencia en vivo
+        document.getElementById('liveLatency').innerText = (Math.random() * 15 + 10).toFixed(0) + 'ms';
+      }, 3000);
+
+      // --- 3.4 SIMULACIÓN DE HARDWARE FLUIDA ---
+      setInterval(() => {
+        // CPU (Movimiento suave)
+        const cpu = Math.floor(Math.random() * 30) + 15;
+        document.getElementById('cpuFill').style.width = cpu + '%';
+        document.getElementById('cpuVal').innerText = cpu + '%';
+        
+        // RAM (Movimiento más lento)
+        const ram = (Math.random() * 3 + 5).toFixed(1);
+        document.getElementById('ramFill').style.width = (ram/16)*100 + '%';
+        document.getElementById('ramVal').innerText = ram + ' GB';
+
+        // NET (Variación media)
+        const net = Math.floor(Math.random() * 100) + 150;
+        document.getElementById('netFill').style.width = (net/300)*100 + '%';
+        document.getElementById('netVal').innerText = net + ' req/min';
+      }, 2500);
+
+    }); // End DOMContentLoaded
+
+    // --- 3.5 INTERACCIÓN DE MÓDULOS (SWEETALERT PREMIUM) ---
+    function activateModule(name, category) {
+      Swal.fire({
+        title: `<span style="font-family:var(--font-human); font-weight:800; letter-spacing:-1px;">INYMO NEURAL LINK</span>`,
+        html: `
+          <div class="text-start mt-4" style="font-family: var(--font-human);">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <div>
+                <h5 class="mb-0 fw-bold text-dark">${name.toUpperCase()}</h5>
+                <small class="text-muted" style="font-family: var(--font-tech);">${category.toUpperCase()} PROTOCOL</small>
+              </div>
+              <i class="bx bx-chip fs-2 text-primaryB"></i>
+            </div>
+            
+            <div class="progress" style="height: 8px; background-color: #e2e8f0; border-radius: 10px; overflow:hidden;">
+              <div id="premiumLoadBar" class="progress-bar" role="progressbar" style="width: 0%; background: linear-gradient(90deg, var(--energy-primary), var(--energy-data)); transition: width 0.2s ease;"></div>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-2" style="font-family: var(--font-tech); font-size: 0.85rem;">
+              <span class="text-muted" id="premiumLoadText">Inicializando...</span>
+              <span class="fw-bold text-primaryB" id="premiumLoadPercent">0%</span>
+            </div>
+          </div>
+        `,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        customClass: {
+          popup: 'rounded-4 border-0 shadow-lg',
+        },
+        didOpen: () => {
+          let p = 0;
+          const bar = document.getElementById('premiumLoadBar');
+          const txt = document.getElementById('premiumLoadText');
+          const per = document.getElementById('premiumLoadPercent');
+          
+          const interval = setInterval(() => {
+            p += Math.floor(Math.random() * 12);
+            if(p > 100) p = 100;
+            
+            bar.style.width = p + '%';
+            per.innerText = p + '%';
+            
+            if(p > 25) txt.innerText = "Cargando modelos de ingeniería...";
+            if(p > 60) txt.innerText = "Verificando permisos de usuario...";
+            if(p > 85) txt.innerText = "Finalizando conexión segura...";
+            
+            if(p === 100) {
+              clearInterval(interval);
+              setTimeout(() => {
+                Swal.close();
+                Swal.fire({
+                  icon: 'info',
+                  title: 'Módulo en Fase de Entrenamiento',
+                  html: `La herramienta <b>${name}</b> estará disponible para producción en la versión INYMO V.2.0.`,
+                  confirmButtonText: 'Entendido',
+                  confirmButtonColor: '#0f172a',
+                  customClass: { popup: 'rounded-4' }
+                });
+              }, 700);
+            }
+          }, 200);
+        }
+      });
+    }

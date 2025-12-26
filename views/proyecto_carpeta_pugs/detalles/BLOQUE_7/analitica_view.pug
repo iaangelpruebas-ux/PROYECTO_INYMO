@@ -1,0 +1,330 @@
+//- ==========================================================================================
+//- I N Y M O   S T R A T E G I C   I N T E L L I G E N C E   -   A M E F   V A N G U A R D
+//- ==========================================================================================
+//- Archivo: analitica_view.pug
+//- Versión: 8.0 Genius Layout (Horizontal Scoreboard)
+//- ==========================================================================================
+
+style.
+  :root {
+    --inymo-success: #10b981;
+    --inymo-danger: #ef4444;
+    --inymo-warning: #f59e0b;
+    --inymo-primary: #8cc63f;
+    --inymo-navy: #0f172a;
+    --inymo-border: #e2e8f0;
+    --inymo-bg-light: #f8fafc;
+    --inymo-text-muted: #64748b;
+  }
+
+  /* --- ANIMACIONES --- */
+  @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* --- WRAPPER PRINCIPAL --- */
+  .chart-sentinel-wrapper {
+    background: white;
+    border-radius: 35px;
+    padding: 40px;
+    border: 1px solid var(--inymo-border);
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.04);
+    animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    margin-bottom: 50px;
+  }
+
+  /* --- BARRA DE HERRAMIENTAS (SCOREBOARD) --- */
+  .genius-toolbar {
+    background: #f8fafc;
+    border: 1px solid var(--inymo-border);
+    border-radius: 25px;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 25px;
+  }
+
+  /* --- FILTROS --- */
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: white;
+    padding: 8px 15px;
+    border-radius: 50px;
+    border: 1px solid #e2e8f0;
+  }
+
+  /* --- WIDGET DESVIACIÓN HORIZONTAL --- */
+  .deviation-pill {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 5px 15px;
+    border-radius: 20px;
+    background: white;
+    border: 1px solid transparent; /* Se colorea dinámicamente */
+    transition: all 0.3s;
+  }
+  .deviation-pill:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  }
+  
+  .dev-value {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  /* --- CANVAS --- */
+  .canvas-container-main {
+    position: relative; height: 500px; width: 100%;
+    background: #ffffff; border-radius: 20px;
+  }
+  .canvas-container-secondary {
+    position: relative; height: 300px; width: 100%;
+  }
+
+  /* --- IA ANALYSIS BAR --- */
+  .ia-analysis-bar {
+    background: #fffbeb; 
+    border: 1px solid #fcd34d;
+    border-radius: 15px;
+    padding: 15px 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 25px;
+  }
+
+  /* --- MEDIA QUERIES --- */
+  @media (max-width: 992px) {
+    .genius-toolbar { flex-direction: column; align-items: stretch; }
+    .filter-group, .deviation-pill { justify-content: space-between; }
+  }
+
+//- ==========================================================================================
+//- [SECCIÓN 2] LAYOUT VISUAL
+//- ==========================================================================================
+.chart-sentinel-wrapper
+  
+  //- 2.1 DIAGNÓSTICO
+  #chart-error-zone.debug-alert-zone(style="display:none; padding:15px; background:#fee2e2; color:#991b1b; border-radius:12px; margin-bottom:20px;")
+    strong ⚠️ ALERTA:
+    span#error-message-text ...
+
+  //- 2.2 HEADER SIMPLE
+  .d-flex.align-items-center.gap-3.mb-4
+    h4.fw-bold.m-0(style="color: var(--inymo-navy); letter-spacing: -1px;") 
+      i.bx.bx-line-chart.text-success.me-2
+      | ANÁLISIS DE TENDENCIA
+    span.badge.rounded-pill.bg-dark.text-white.px-3.py-2.d-flex.align-items-center.gap-2
+      i.bx.bxs-magic-wand.text-warning
+      | Proyección Lineal V.85
+
+  //- 2.3 GENIUS TOOLBAR (FILTROS + DESVIACIÓN ARRIBA)
+  .genius-toolbar
+    
+    //- A. FILTROS (Izquierda)
+    .filter-group
+      .d-flex.align-items-center.gap-2
+        i.bx.bx-calendar.text-muted
+        input.form-control.form-control-sm.p-0(type="date" id="fecha_inicio_ia" style="border:none; background:transparent; font-weight: 600; width: 105px;")
+      .vr(style="height: 20px; color: #cbd5e1;")
+      .d-flex.align-items-center.gap-2
+        input.form-control.form-control-sm.p-0(type="date" id="fecha_fin_ia" style="border:none; background:transparent; font-weight: 600; width: 105px;")
+      
+      button.btn.btn-dark.rounded-circle.p-0.d-flex.align-items-center.justify-content-center(onclick="actualizarTendencia()" style="width: 32px; height: 32px;" title="Aplicar Filtro") 
+        i.bx.bx-refresh
+
+    //- B. WIDGET DESVIACIÓN (Derecha - Integrado)
+    - var cvRaw = (parseFloat(String(p.ev_real_f || '0').replace(/[^0-9.-]+/g,"")) || 0) - (parseFloat(String(p.ac_real_f || '0').replace(/[^0-9.-]+/g,"")) || 0)
+    - var isNegative = cvRaw < 0
+    - var absVal = Math.abs(cvRaw)
+    - var valStr = ''
+    if absVal >= 1000000
+       - valStr = '$' + (absVal / 1000000).toFixed(2) + 'M'
+    else if absVal >= 1000
+       - valStr = '$' + (absVal / 1000).toFixed(1) + 'K'
+    else
+       - valStr = '$' + absVal.toFixed(0)
+
+    //- Tarjeta Horizontal
+    .deviation-pill(style=isNegative ? "border-color: #fecaca; background: #fef2f2;" : "border-color: #bbf7d0; background: #f0fdf4;")
+      div.d-flex.align-items-center.gap-3
+        //- Icono
+        .bg-white.rounded-circle.d-flex.align-items-center.justify-content-center(style="width: 40px; height: 40px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);")
+          i.bx.bx-target-lock.fs-4(class=isNegative ? 'text-danger' : 'text-success')
+        
+        //- Textos
+        div
+          span.x-small.fw-bold.text-uppercase.d-block(style="color: #64748b; font-size: 0.7rem; letter-spacing: 0.5px;") DESVIACIÓN TOTAL
+          div.d-flex.align-items-center.gap-2
+            //- Valor Grande
+            span.dev-value(class=isNegative ? 'text-danger' : 'text-success')= (isNegative ? '-' : '+') + valStr
+            
+            //- Badge Estado
+            if isNegative
+              span.badge.bg-danger.text-white.rounded-pill.px-2 PÉRDIDA
+            else
+              span.badge.bg-success.text-white.rounded-pill.px-2 AHORRO
+
+  //- 2.4 GRÁFICA (FULL WIDTH)
+  .row
+    .col-12
+      .canvas-container-main
+        canvas#chartCurvaSVanguard
+
+  //- 2.5 ANÁLISIS IA (ABAJO)
+  .ia-analysis-bar
+    i.bx.bx-microchip.fs-3.text-warning.flex-shrink-0
+    div.flex-grow-1
+      strong.d-block.x-small.text-uppercase.text-warning.mb-1 ANÁLISIS INTELIGENTE
+      p.mb-0.small.lh-sm.text-dark
+        | El sistema ha detectado una varianza del 
+        strong(class=isNegative ? 'text-danger' : 'text-success')= ((cvRaw / (parseFloat(String(p.bac_real_f || '1').replace(/[^0-9.-]+/g,"")) || 1)) * 100).toFixed(1) + '%'
+        | . Se recomienda revisar los costos indirectos de la última semana y ajustar las proyecciones.
+
+  //- 2.6 EFICIENCIA (PIE DE PÁGINA)
+  .mt-5.pt-4.border-top
+    .d-flex.justify-content-between.align-items-center.mb-4
+      h5.fw-bold.m-0 #[i.bx.bx-pulse.text-primary.me-2] EFICIENCIA HISTÓRICA
+      .d-flex.gap-2
+        span.badge.rounded-pill.bg-primary SPI: Tiempo
+        span.badge.rounded-pill.bg-warning.text-dark CPI: Costo
+    
+    .canvas-container-secondary
+      canvas#chartEfficiencyVanguard
+
+//- ==========================================================================================
+//- [SECCIÓN 3] MOTOR JAVASCRIPT
+//- ==========================================================================================
+script.
+  document.addEventListener('DOMContentLoaded', () => {
+    // [FASE 1] VALIDACIÓN
+    if (typeof Chart === 'undefined') {
+      document.getElementById('chart-error-zone').style.display = 'block';
+      document.getElementById('error-message-text').innerText = "Falta librería Chart.js en Layout.";
+      return;
+    }
+
+    // [FASE 2] DATOS
+    const datosServer = !{JSON.stringify(p.graficos || {})};
+    
+    // [FASE 3] RENDER GRÁFICAS
+    try {
+      const ctxS = document.getElementById('chartCurvaSVanguard');
+      const ctxE = document.getElementById('chartEfficiencyVanguard');
+
+      if (!ctxS || !ctxE) throw new Error("Canvas no encontrado.");
+
+      // Gradiente
+      const ctx2d = ctxS.getContext('2d');
+      const gradientEV = ctx2d.createLinearGradient(0, 0, 0, 450);
+      gradientEV.addColorStop(0, 'rgba(140, 198, 63, 0.25)'); 
+      gradientEV.addColorStop(1, 'rgba(140, 198, 63, 0.0)'); 
+
+      // Opciones
+      const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
+        elements: { point: { radius: 3, hitRadius: 10 }, line: { tension: 0.35, borderWidth: 3 } },
+        plugins: {
+          legend: { position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 8, font: { family: "'Poppins', sans-serif", size: 11 } } },
+          tooltip: {
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            padding: 12, cornerRadius: 8,
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) label += ': ';
+                if (context.parsed.y !== null) label += new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(context.parsed.y);
+                return label;
+              }
+            }
+          }
+        }
+      };
+
+      // Chart S
+      window.mySChart = new Chart(ctxS, {
+        type: 'line',
+        data: {
+          labels: datosServer.labels || [], 
+          datasets: [
+            { label: 'PV (Planeado)', data: datosServer.pv || [], borderColor: '#94a3b8', borderDash: [6, 4], borderWidth: 2, fill: false },
+            { label: 'EV (Ganado)', data: datosServer.ev || [], borderColor: '#8cc63f', backgroundColor: gradientEV, fill: true },
+            { label: 'AC (Real)', data: datosServer.ac || [], borderColor: '#ef4444', borderWidth: 3, fill: false }
+          ]
+        },
+        options: {
+          ...commonOptions,
+          scales: { 
+            y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 }, callback: (val) => '$' + val.toLocaleString('es-MX') } },
+            x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+          }
+        }
+      });
+
+      // Chart E
+      window.myEChart = new Chart(ctxE, {
+        type: 'line',
+        data: {
+          labels: datosServer.labels || [],
+          datasets: [
+            { label: 'SPI', data: datosServer.spi || [], borderColor: '#3b82f6', borderWidth: 2, fill: false, tension: 0.2 },
+            { label: 'CPI', data: datosServer.cpi || [], borderColor: '#fbbf24', borderWidth: 2, fill: false, tension: 0.2 }
+          ]
+        },
+        options: {
+          ...commonOptions,
+          scales: { y: { min: 0, max: 2.0, grid: { borderDash: [5, 5] } } }
+        }
+      });
+
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  async function actualizarTendencia() {
+    const btn = event.currentTarget;
+    const original = btn.innerHTML;
+    btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
+    btn.disabled = true;
+    
+    const fInicio = document.getElementById('fecha_inicio_ia').value;
+    const fFin = document.getElementById('fecha_fin_ia').value;
+
+    try {
+      const response = await fetch(`/app/proyectos/#{p.id}/analitica/filtrar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fecha_inicio: fInicio, fecha_fin: fFin })
+      });
+      const data = await response.json();
+      
+      window.mySChart.data.labels = data.labels;
+      window.mySChart.data.datasets[0].data = data.pv;
+      window.mySChart.data.datasets[1].data = data.ev;
+      window.mySChart.data.datasets[2].data = data.ac;
+      window.mySChart.update();
+
+      window.myEChart.data.labels = data.labels;
+      window.myEChart.data.datasets[0].data = data.spi;
+      window.myEChart.data.datasets[1].data = data.cpi;
+      window.myEChart.update();
+
+    } catch (err) {
+      alert("Error al filtrar.");
+    } finally {
+      btn.innerHTML = original;
+      btn.disabled = false;
+    }
+  }

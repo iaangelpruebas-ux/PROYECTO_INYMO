@@ -49,6 +49,17 @@ router.get('/app/dashboard', verificarSesion, function(req, res) {
   res.render('app_dashboard');
 });
 
+
+// --- RUTA: CENTRO DE COMANDO IA (COPILOT) ---
+router.get('/app/copilot', verificarSesion, (req, res) => {
+    // La ruta del render debe coincidir con tu estructura de carpetas:
+    res.render('COPILOT/provisional/app_copilot_hub', { 
+        title: 'INYMO Neural Engine | Copilot',
+        usuario: req.session.nombreUsuario
+    });
+});
+
+
 /* L. VISTA DE CALENDARIO/EVENTOS (Timeline Unificado) */
 router.get('/app/eventos', verificarSesion, async function(req, res) {
   let client;

@@ -1,33 +1,43 @@
-//- ENCABEZADO DE ACCIONES DERECHO
-.d-flex.justify-content-between.align-items-center.mb-4
-  h3.fw-bold Análisis Estadístico y Tendencias
-  .btn-group
-    button.btn.btn-white.border.btn-sm #[i.bx.bx-export] Exportar PDF
-    button.btn.btn-dark.btn-sm #[i.bx.bx-fullscreen] Pantalla Completa
+//- BLOQUE: CURVA S (GRÁFICA GRANDE)
+.card.border-0.shadow-sm.rounded-4.p-4(style="background: white; border: 1px solid #e2e8f0 !important;")
+  .d-flex.justify-content-between.align-items-center.mb-4
+    h6.fw-bold.m-0 #[i.bx.bx-line-chart.text-success.me-2] ANÁLISIS DE TENDENCIA (CURVA S)
+    .d-flex.gap-2
+      input.form-control.form-control-sm(type="date" id="filtroS" style="width:130px;")
+      button.btn.btn-dark.btn-sm Filtrar
 
-//- ÁREA DE GRÁFICA MAESTRA (CURVA S)
-.card.border-0.shadow-sm.rounded-4.mb-4
-  .card-header.bg-white.p-4.border-0
-    h5.fw-bold.m-0: i.bx.bx-line-chart.me-2.text-success: | Curva S: Proyección vs Realidad
-  .card-body.p-4
-    div(style="height: 450px; width: 100%;")
-      canvas#chartCurvaS
+  div(style="height: 450px; width: 100%;")
+    canvas#chartCurvaS
 
-//- COMPARATIVA CPI/SPI
-.row
-  .col-md-12
-    .card.border-0.shadow-sm.rounded-4
-      .card-header.bg-white.p-4.border-0
-        h5.fw-bold.m-0: i.bx.bx-bar-chart-alt-2.me-2.text-primary: | Índice de Desempeño Histórico
-      .card-body.p-4
-        div(style="height: 300px; width: 100%;")
-          canvas#chartPerformance
+//- BLOQUE: EFICIENCIA HISTÓRICA
+.card.border-0.shadow-sm.rounded-4.p-4.mt-4(style="background: white; border: 1px solid #e2e8f0 !important;")
+  h6.fw-bold.mb-4 #[i.bx.bx-bar-chart-alt-2.text-primary.me-2] EFICIENCIA HISTÓRICA
+  div(style="height: 280px; width: 100%;")
+    canvas#chartPerformance
 
-//- SCRIPT DE ENSAMBLAJE (Para que las gráficas sepan dónde dibujarse)
+//- INICIALIZACIÓN DE GRÁFICAS (SCRIPTS)
 script.
   document.addEventListener('DOMContentLoaded', () => {
-    // Aquí pondrías la inicialización de Chart.js
-    // que ya tenías en tu código original, pero ahora
-    // apuntando a los ID de este nuevo PUG.
-    console.log("Analytics Engine Iniciado en modo Split-View 30/70");
+    // 1. Gráfica Curva S
+    new Chart(document.getElementById('chartCurvaS'), {
+      type: 'line',
+      data: {
+        labels: !{p.graficos.labels},
+        datasets: [
+          { label: 'PV (Planeado)', data: !{p.graficos.pv}, borderColor: '#94a3b8', borderDash: [5,5], tension: 0.4 },
+          { label: 'EV (Ganado)', data: !{p.graficos.ev}, borderColor: '#10b981', fill: true, backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.4 },
+          { label: 'AC (Real)', data: !{p.graficos.ac}, borderColor: '#dc2626', tension: 0.4 }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // 2. Gráfica Donut (Sidebar)
+    new Chart(document.getElementById('chartDonut'), {
+      type: 'doughnut',
+      data: {
+        datasets: [{ data: [#{p.progreso}, #{100 - p.progreso}], backgroundColor: ['#10b981', '#f1f5f9'], borderWidth: 0 }]
+      },
+      options: { cutout: '80%', plugins: { legend: { display: false } } }
+    });
   });

@@ -1,5 +1,4 @@
-//- views/proyecto_carpeta_pugs/detalles/app_detalle_finanzas.pug
-
+//- Estilos de los Tiles de Finanzas (Se mantienen tus estilos premium)
 style.
     .finance-link-container {
         text-decoration: none !important;
@@ -67,44 +66,44 @@ style.
         line-height: 1.2;
     }
 
-    /* Bordes laterales */
+    /* Bordes laterales de colores */
     .border-bac { border-left: 6px solid #334155; }
     .border-pv { border-left: 6px solid #2563eb; }
     .border-ac { border-left: 6px solid #64748b; }
-    .border-ac.overbudget { border-left-color: #dc2626; }
+    .border-ac.overbudget { border-left-color: #dc2626 !important; }
     .border-ev { border-left: 6px solid #8cc63f; }
 
-//- ENVOLVENTE GLOBAL PARA CLIC
+//- ENVOLVENTE GLOBAL HACIA EL DESGLOSE
 a.finance-link-container(href=`/app/proyectos/${p.id}/presupuesto/distribucion` title="Ver desglose detallado de presupuesto")
     .finance-grid-clean
-        //- 1. Presupuesto (BAC)
+        //- 1. Presupuesto (BAC) - Usamos p.kpi.bac_f del servidor
         .metric-box.border-bac
             span.metric-tag 
                 i.bx.bx-wallet
                 | Presupuesto (BAC)
-            span.metric-amount #{p.bac_f}
+            span.metric-amount #{p.kpi ? p.kpi.bac_f : '$0.00'}
             span.metric-footer Inversión base planificada.
 
-        //- 2. Valor Planeado (PV)
+        //- 2. Valor Planeado (PV) - Usamos p.kpi.pv_f del servidor
         .metric-box.border-pv
             span.metric-tag 
                 i.bx.bx-line-chart
                 | Valor Planeado (PV)
-            span.metric-amount(style="color: #2563eb;") #{p.pv_f}
+            span.metric-amount(style="color: #2563eb;") #{p.kpi ? p.kpi.pv_f : '$0.00'}
             span.metric-footer Monto total de la venta proyectada.
 
-        //- 3. Costo Real (AC)
-        .metric-box.border-ac(class=p.isOverBudget ? 'overbudget' : '')
+        //- 3. Costo Real (AC) - Alerta visual si se supera el presupuesto
+        .metric-box.border-ac(class=(p.isOverBudget ? 'overbudget' : ''))
             span.metric-tag 
                 i.bx.bx-receipt
                 | Costo Real (AC)
-            span.metric-amount(class=p.isOverBudget ? 'text-danger' : '') #{p.ac_f}
+            span.metric-amount(class=(p.isOverBudget ? 'text-danger' : '')) #{p.kpi ? p.kpi.ac_f : '$0.00'}
             span.metric-footer Gastos acumulados a la fecha.
 
-        //- 4. Valor Ganado (EV)
+        //- 4. Valor Ganado (EV) - Utilidad o avance financiero real
         .metric-box.border-ev
             span.metric-tag 
                 i.bx.bx-trophy
                 | Valor Ganado (EV)
-            span.metric-amount(style="color: #8cc63f;") #{p.ev_f}
+            span.metric-amount(style="color: #8cc63f;") #{p.kpi ? p.kpi.ev_f : '$0.00'}
             span.metric-footer Utilidad real basada en rendimiento.
